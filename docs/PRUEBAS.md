@@ -17,7 +17,7 @@ qué resultado. No se anotan resultados de pruebas que no se hayan ejecutado.
 | --- | --- | --- |
 | PHP 8.3 (`php`) | **No instalado** (no está en `PATH`, ni en XAMPP, Laragon, WAMP ni `Program Files`) | No se pudo ejecutar `php -l` ni el servidor embebido |
 | MySQL / MariaDB (`mysql`, `mariadb`) | **No instalados** | No se pudo importar el esquema ni ejecutar consultas reales |
-| Git | No hay repositorio local en el directorio del proyecto | No se ejecutaron comandos de Git |
+| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit inicial) | El envío del código no constituye una prueba funcional |
 | Node.js | No instalado (no se necesita) | — |
 | Verificación estática propia | Disponible: `tools/verificar_estatico.ps1` | Se ejecutó sobre los 80 archivos PHP del proyecto |
 

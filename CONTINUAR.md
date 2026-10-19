@@ -15,7 +15,7 @@ de alquileres y aplicación instalable). **Pendiente de pruebas en servidor.**
 | --- | --- |
 | Proyecto | Sistema integral de gestión del Club Social Deportivo Unidad Vecinal N.º 3 |
 | Carpeta local | Directorio raíz del proyecto |
-| Repositorio | <https://github.com/bgrados/csduv3> |
+| Repositorio | <https://github.com/bgrados/csduv3> (público, rama `main`) |
 | Hosting previsto | BanaHosting · Bana-Professional-Deluxe-SSD |
 | URL prevista | El subdominio HTTPS que se defina en el hosting |
 | PHP | 8.3 |

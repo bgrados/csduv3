@@ -42,8 +42,7 @@ existan: si faltan, la construcción **falla** en vez de generar un entorno roto
 ## 3. Cómo se usará (más adelante)
 
 ### Opción A — GitHub Codespaces
-1. El código debe estar en un repositorio de GitHub (**no se ha publicado nada**
-   y no se hará sin autorización expresa).
+1. El código ya está publicado en <https://github.com/bgrados/csduv3> (rama `main`).
 2. *Code → Codespaces → Create codespace* sobre la rama correspondiente.
 3. Codespaces construye el contenedor y ejecuta `setup.sh` automáticamente
    (`postCreateCommand`).
