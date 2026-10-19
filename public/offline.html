@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#1f3b5c">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Sin conexión · CSDUV3</title>
+    <style>
+        :root {
+            --color-primary: #1f3b5c;
+            --color-bg: #f4f6f9;
+            --color-text: #1f2937;
+            --color-text-soft: #5b6675;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 1.5rem;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            line-height: 1.55;
+        }
+
+        .box {
+            background: #fff;
+            border: 1px solid #dde3ea;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+            padding: 2rem;
+            max-width: 460px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 .6rem;
+            font-size: 1.3rem;
+            color: var(--color-primary);
+        }
+
+        p { margin: 0 0 .8rem; color: var(--color-text-soft); }
+
+        .btn {
+            display: inline-block;
+            margin-top: .6rem;
+            padding: .55rem 1.1rem;
+            border-radius: 6px;
+            background: var(--color-primary);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .nota {
+            margin-top: 1.2rem;
+            font-size: .8rem;
+            color: #8a94a3;
+        }
+    </style>
+</head>
+<body>
+<main class="box">
+    <h1>Sin conexión</h1>
+    <p>
+        No pudimos comunicarnos con el servidor del club. Revise su conexión a internet
+        e inténtelo nuevamente.
+    </p>
+    <p>
+        Las solicitudes de alquiler y cualquier dato privado siempre se consultan en el
+        servidor, por lo que no se muestran sin conexión.
+    </p>
+    <a class="btn" href="./">Reintentar</a>
+    <p class="nota">CSDUV3 · Sistema de gestión institucional</p>
+</main>
+</body>
+</html>

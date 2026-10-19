@@ -1,0 +1,40 @@
+{
+  "name": "CSDUV3 · PHP 8.3 + MariaDB (pruebas aisladas)",
+
+  // La imagen se define en .devcontainer/Dockerfile (PHP 8.3 + Apache + MariaDB).
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // El contenedor trabaja como root: es desechable y así se evitan problemas
+  // de sudo/permisos (Apache escribe en storage/ como www-data y el desarrollo
+  // como root). NO se sobrescribe el montaje del espacio de trabajo: Codespaces
+  // monta el proyecto en /workspaces/<repositorio> y setup.sh deduce la ruta
+  // real por sí solo.
+  "remoteUser": "root",
+
+  // Único puerto expuesto: la web. MariaDB NO se expone.
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "CSDUV3 (Apache 8.3 + MariaDB)",
+      "onAutoForward": "notify",
+      "visibility": "private"
+    }
+  },
+
+  // setup.sh es idempotente: prepara el entorno al crear el contenedor y lo
+  // repara (arranca MariaDB) en cada inicio posterior.
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/setup.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-mysql"
+      ]
+    }
+  }
+}

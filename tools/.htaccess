@@ -1,0 +1,16 @@
+# ============================================================================
+#  CSDUV3 - Reglas para la carpeta de herramientas
+# ----------------------------------------------------------------------------
+#  Esta carpeta NO debe ser accesible desde el navegador en ningún caso.
+#  Contiene scripts de apoyo para el desarrollador y el procedimiento temporal
+#  de creación del primer administrador.
+# ============================================================================
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

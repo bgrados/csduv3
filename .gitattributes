@@ -1,0 +1,13 @@
+# ============================================================================
+#  CSDUV3 - Normalizacion de finales de linea
+# ----------------------------------------------------------------------------
+#  El repositorio guarda los archivos de texto con finales de linea LF.
+#  Los archivos del contenedor de pruebas (bash, Docker, Apache) se fuerzan a
+#  LF tambien en el disco: bash falla con "command not found" si recibe CRLF.
+# ============================================================================
+
+* text=auto
+
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.conf      text eol=lf

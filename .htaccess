@@ -1,0 +1,20 @@
+# ============================================================================
+#  CSDUV3 - Protección de la raíz del proyecto
+# ----------------------------------------------------------------------------
+#  Este archivo deniega todo acceso directo a la raíz del proyecto.
+#  Es correcto cuando el DocumentRoot del subdominio apunta a /public.
+#
+#  Si el hosting NO permite cambiar el DocumentRoot, revise
+#  docs/DESPLIEGUE_BANAHOSTING.md (Modelo B) antes de continuar.
+# ============================================================================
+
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

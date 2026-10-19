@@ -1,0 +1,61 @@
+# ============================================================================
+#  CSDUV3 - Reglas de Apache para la carpeta pública
+# ============================================================================
+
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Si la aplicación se instala en un subdirectorio, ajuste esta base
+    # (por ejemplo: RewriteBase /csduv3/).
+    RewriteBase /
+
+    # Redirige a HTTPS cuando el hosting lo permite.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    # No reescribir archivos ni carpetas existentes (CSS, JS, imágenes).
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Todo lo demás pasa por el front controller.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Protege archivos que no deben servirse nunca.
+<FilesMatch "^\.|\.(env|ini|log|sql|md|json|lock|bak|old|sh|yml|yaml)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Cabeceras de seguridad (solo si el módulo está disponible).
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ============================================================================
+#  Aplicación instalable (PWA)
+# ============================================================================
+
+# Tipo MIME correcto para el manifiesto de la aplicación.
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+# El service worker debe poder controlar todo el sitio y no debe quedar
+# almacenado en caché por el navegador ni por intermediarios.
+<Files "sw.js">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Service-Worker-Allowed "/"
+    </IfModule>
+</Files>

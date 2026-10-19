@@ -1,0 +1,74 @@
+# ============================================================================
+#  CSDUV3 - Archivos excluidos del control de versiones
+# ============================================================================
+
+# --- Configuración de entorno (nunca versionar secretos) ---
+# Se excluye cualquier archivo .env, incluidos los que estén en subcarpetas.
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
+# Ruta de la aplicación para despliegues en hosting compartido (generada en el servidor)
+public/.app_path.php
+
+# --- Material criptográfico y credenciales locales ---
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+.htpasswd
+id_rsa*
+id_ed25519*
+
+# --- Copias de seguridad y archivos temporales ---
+*.bak
+*.old
+*.orig
+*.tmp
+*.temp
+*~
+error_log
+*.sql.gz
+*.sql.zip
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# --- Almacenamiento privado ---
+# Se ignora el contenido, pero se conservan los .gitkeep.
+# Nota: storage/.htaccess SÍ se versiona, porque protege la carpeta en el servidor.
+storage/logs/*
+!storage/logs/.gitkeep
+storage/uploads/*
+!storage/uploads/.gitkeep
+storage/backups/*
+!storage/backups/.gitkeep
+storage/cache/*
+!storage/cache/.gitkeep
+
+# --- Sistema operativo / editores ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# --- Configuración local de editores ---
+.vscode/
+.idea/
+.history/
+*.code-workspace
+
+# --- Registros ---
+*.log
+
+# --- Herramientas locales ---
+.vercel
+/vendor/
+node_modules/

@@ -1,0 +1,59 @@
+{
+    "name": "CSDUV3 · Portal y gestión del club",
+    "short_name": "CSDUV3",
+    "description": "Portal público del club para consultar ambientes, tarifas y disponibilidad, y enviar solicitudes de alquiler.",
+    "lang": "es-PE",
+    "dir": "ltr",
+    "start_url": ".",
+    "scope": ".",
+    "id": "csduv3-portal",
+    "display": "standalone",
+    "display_override": ["standalone", "minimal-ui", "browser"],
+    "orientation": "any",
+    "background_color": "#f4f6f9",
+    "theme_color": "#1f3b5c",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Ambientes y tarifas",
+            "short_name": "Ambientes",
+            "url": "alquiler"
+        },
+        {
+            "name": "Consultar disponibilidad",
+            "short_name": "Disponibilidad",
+            "url": "alquiler/disponibilidad"
+        },
+        {
+            "name": "Solicitar alquiler",
+            "short_name": "Solicitar",
+            "url": "alquiler/solicitud"
+        }
+    ]
+}
