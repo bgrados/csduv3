@@ -937,8 +937,7 @@ CREATE TABLE IF NOT EXISTS `csduv3_encuentros` (
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT `fk_encuentros_usuario`
         FOREIGN KEY (`registrado_por`) REFERENCES `csduv3_usuarios` (`id`)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT `chk_encuentros_equipos` CHECK (`equipo_local_id` <> `equipo_visitante_id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Encuentros programados y sus resultados';
 
