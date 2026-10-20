@@ -11,6 +11,9 @@ declare(strict_types=1);
  | no se han aplicado. Cada migración se registra en la tabla
  | `csduv3_migraciones` para no ejecutarla dos veces.
  |
+ | Usa la misma lógica que el botón «Actualizar la base de datos» del panel
+ | (App\Core\Migraciones), para que ambas formas de actualizar coincidan.
+ |
  | Uso (solo desde la Terminal / SSH, nunca desde el navegador):
  |     php tools/migrar.php
  |     php tools/migrar.php --estado
@@ -39,6 +42,9 @@ require $appPath . '/app/Core/Autoloader.php';
 
 date_default_timezone_set((string) \App\Core\Config::get('app.timezone', 'America/Lima'));
 
+use App\Core\Database;
+use App\Core\Migraciones;
+
 /**
  * Escribe una línea en la salida estándar.
  */
@@ -53,230 +59,60 @@ function abortar(string $mensaje): never
     exit(1);
 }
 
-/**
- * Divide un archivo SQL en sentencias ejecutables de forma individual.
- *
- * Respeta las comillas simples, dobles y las de identificadores, así como
- * los comentarios de línea (`--`) y de bloque.
- *
- * @return array<int, string>
- */
-function dividirEnSentencias(string $sql): array
-{
-    $sentencias = [];
-    $actual = '';
-    $longitud = strlen($sql);
-    $i = 0;
-
-    while ($i < $longitud) {
-        $caracter = $sql[$i];
-        $siguiente = $i + 1 < $longitud ? $sql[$i + 1] : '';
-
-        // Comentario de línea: se descarta hasta el fin de línea.
-        if ($caracter === '-' && $siguiente === '-') {
-            while ($i < $longitud && $sql[$i] !== "\n") {
-                $i++;
-            }
-
-            $actual .= "\n";
-            continue;
-        }
-
-        // Comentario de bloque: se descarta por completo.
-        if ($caracter === '/' && $siguiente === '*') {
-            $fin = strpos($sql, '*/', $i + 2);
-            $i = $fin === false ? $longitud : $fin + 2;
-            $actual .= ' ';
-            continue;
-        }
-
-        // Cadenas: se copian tal cual hasta el cierre.
-        if ($caracter === "'" || $caracter === '"' || $caracter === '`') {
-            $comilla = $caracter;
-            $actual .= $caracter;
-            $i++;
-
-            while ($i < $longitud) {
-                $actual .= $sql[$i];
-
-                if ($sql[$i] === '\\' && $i + 1 < $longitud) {
-                    $actual .= $sql[$i + 1];
-                    $i += 2;
-                    continue;
-                }
-
-                if ($sql[$i] === $comilla) {
-                    $i++;
-                    break;
-                }
-
-                $i++;
-            }
-
-            continue;
-        }
-
-        if ($caracter === ';') {
-            $sentencia = trim($actual);
-
-            if ($sentencia !== '') {
-                $sentencias[] = $sentencia;
-            }
-
-            $actual = '';
-            $i++;
-            continue;
-        }
-
-        $actual .= $caracter;
-        $i++;
-    }
-
-    $sentencia = trim($actual);
-
-    if ($sentencia !== '') {
-        $sentencias[] = $sentencia;
-    }
-
-    return $sentencias;
-}
-
-/**
- * Indica si una sentencia modifica destructivamente la base de datos.
- */
-function esDestructiva(string $sentencia): bool
-{
-    return preg_match('/\b(drop\s+(table|database)|truncate\s+table|delete\s+from)\b/i', $sentencia) === 1;
-}
-
 $opciones = array_slice($argv, 1);
 $mostrarEstado = in_array('--estado', $opciones, true);
 $permitirDestructivo = in_array('--permitir-destructivo', $opciones, true);
 
-if (!\App\Core\Database::isAvailable()) {
+if (!Database::isAvailable()) {
     abortar(
         'no se pudo conectar a la base de datos. Revise el archivo .env y que el servidor de '
         . 'base de datos esté disponible.'
     );
 }
 
-$pdo = \App\Core\Database::connection();
-$prefijo = (string) \App\Core\Config::get('database.prefix', 'csduv3_');
-$tablaMigraciones = $prefijo . 'migraciones';
+Informar();
+Informar('CSDUV3 · Migraciones');
+Informar('====================');
+Informar();
 
-$pdo->exec(sprintf(
-    'CREATE TABLE IF NOT EXISTS `%s` (
-        `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        `nombre_archivo` VARCHAR(255) NOT NULL,
-        `fecha_aplicacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (`id`),
-        UNIQUE KEY `uq_migraciones_nombre` (`nombre_archivo`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
-    $tablaMigraciones
-));
+$aplicadas = Migraciones::aplicadas();
+$pendientes = Migraciones::pendientes();
 
-$directorio = $appPath . '/database/migrations';
-
-if (!is_dir($directorio)) {
-    abortar('no se encontró el directorio database/migrations.');
-}
-
-$archivos = glob($directorio . '/*.sql') ?: [];
-sort($archivos);
-
-$consulta = $pdo->prepare(sprintf('SELECT `id` FROM `%s` WHERE `nombre_archivo` = :archivo', $tablaMigraciones));
-$registro = $pdo->prepare(sprintf('INSERT INTO `%s` (`nombre_archivo`) VALUES (:archivo)', $tablaMigraciones));
-
-$aplicadas = 0;
-$pendientes = 0;
-
-informar();
-informar('CSDUV3 · Migraciones');
-informar('====================');
-informar();
-
-foreach ($archivos as $archivo) {
-    $nombre = basename($archivo);
-    $consulta->execute(['archivo' => $nombre]);
-    $yaAplicada = $consulta->fetchColumn() !== false;
-
-    if ($yaAplicada) {
-        if ($mostrarEstado) {
-            informar(sprintf('  [aplicada]  %s', $nombre));
-        }
-
-        continue;
-    }
-
-    $pendientes++;
-
-    if ($mostrarEstado) {
-        informar(sprintf('  [pendiente] %s', $nombre));
-        continue;
-    }
-
-    $sentencias = dividirEnSentencias((string) file_get_contents($archivo));
-
-    if ($sentencias === []) {
-        informar(sprintf('  -> %s: el archivo no contiene sentencias. Se omite.', $nombre));
-        continue;
-    }
-
-    $destructiva = false;
-
-    foreach ($sentencias as $sentencia) {
-        if (esDestructiva($sentencia)) {
-            $destructiva = true;
-            break;
-        }
-    }
-
-    if ($destructiva && !$permitirDestructivo) {
-        abortar(sprintf(
-            'la migración %s contiene sentencias destructivas (DROP, TRUNCATE o DELETE). '
-            . 'Revísela y, si el cambio es intencional, ejecútela con --permitir-destructivo.',
-            $nombre
-        ));
-    }
-
-    informar(sprintf('Aplicando %s ...', $nombre));
-
-    foreach ($sentencias as $sentencia) {
-        try {
-            $pdo->exec($sentencia);
-        } catch (PDOException $exception) {
-            abortar(sprintf('error al aplicar %s: %s', $nombre, $exception->getMessage()));
-        }
-    }
-
-    $registro->execute(['archivo' => $nombre]);
-    informar(sprintf('  -> Éxito (%d sentencias).', count($sentencias)));
-    $aplicadas++;
-}
-
-informar();
+Informar('Migraciones aplicadas : ' . ($aplicadas === [] ? '(ninguna)' : implode(', ', $aplicadas)));
+Informar('Migraciones pendientes: ' . ($pendientes === [] ? 'ninguna' : implode(', ', $pendientes)));
+Informar();
 
 if ($mostrarEstado) {
-    informar(sprintf('Archivos: %d · pendientes: %d', count($archivos), $pendientes));
+    exit($pendientes === [] ? 0 : 1);
+}
+
+if ($pendientes === []) {
+    Informar('No hay migraciones pendientes. La base de datos está actualizada.');
     exit(0);
+}
+
+foreach ($pendientes as $pendiente) {
+    Informar('Aplicando ' . $pendiente . ' ...');
+}
+
+$resultado = Migraciones::aplicar($permitirDestructivo);
+
+foreach ($resultado['aplicadas'] as $aplicada) {
+    Informar('  -> ' . $aplicada . ': Éxito.');
+}
+
+if ($resultado['errores'] !== []) {
+    foreach ($resultado['errores'] as $error) {
+        fwrite(STDERR, '  ERROR: ' . $error . PHP_EOL);
+    }
+
+    abortar('no se pudieron aplicar todas las migraciones. Revise los mensajes anteriores.');
 }
 
 // Comprobacion de tablas: deja constancia de si el sistema tiene todo lo que
 // necesita. Es la misma verificacion que usa tools/verificar_migraciones.php.
-$tablasCriticas = ['fotos', 'negocios', 'usuarios', 'socios', 'instalaciones', 'reservas'];
-$faltantes = [];
-
-foreach ($tablasCriticas as $tabla) {
-    $existe = (int) $pdo->query(sprintf(
-        "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = '%s%s'",
-        $prefijo,
-        $tabla
-    ))->fetchColumn();
-
-    if ($existe === 0) {
-        $faltantes[] = $prefijo . $tabla;
-    }
-}
+$faltantes = Migraciones::tablasFaltantes();
+$columnasFaltantes = Migraciones::columnasFaltantes();
 
 if ($faltantes !== []) {
     Informar('ADVERTENCIA: siguen sin existir estas tablas: ' . implode(', ', $faltantes));
@@ -285,11 +121,9 @@ if ($faltantes !== []) {
     Informar('Comprobacion de tablas: todo en orden.');
 }
 
-Informar();
-
-if ($aplicadas === 0) {
-    informar('No hay migraciones pendientes. La base de datos está actualizada.');
-    exit(0);
+if ($columnasFaltantes !== []) {
+    Informar('ADVERTENCIA: siguen sin existir estas columnas: ' . implode(', ', $columnasFaltantes));
 }
 
-informar(sprintf('Se aplicaron %d migración(es).', $aplicadas));
+Informar();
+Informar(sprintf('Se aplicaron %d migración(es).', count($resultado['aplicadas'])));

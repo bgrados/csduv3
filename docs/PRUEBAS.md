@@ -1100,7 +1100,11 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | CF-10 | Subir una foto de 4000×3000 | Queda en WebP, con un ancho máximo de 2000 px y un peso menor que el original |
 | CF-11 | Guardar el correo de avisos en «Notificaciones por correo» | Queda guardado en `csduv3_configuracion` con la clave `correo_notificaciones` |
 | CF-12 | Pulsar «Guardar y enviar un correo de prueba» | Llega un correo con el estilo del club; si el servidor no acepta el correo, se avisa con un mensaje claro y no se rompe nada |
-| CF-13 | Confirmar una reserva desde el portal o desde el panel | Se envía el aviso al club con el código, ambiente, fecha, horario, solicitante, precio, adelanto y pagado; si el solicitante dejó su correo, también recibe la confirmación |
+| CF-13 | Confirmar una reserva desde el portal o desde el panel |
+| MB-01 | Entrar al panel con una migración pendiente | Aparece un aviso en todas las páginas del panel con un enlace a «Actualizar la base de datos» |
+| MB-02 | Aplicar las actualizaciones desde `/migraciones` | Se aplican, se registra el historial y el aviso desaparece |
+| MB-03 | Publicar una noticia con video después de actualizar la base | El video se guarda y aparece en la portada |
+| MB-04 | Correr `php8.3 tools/migrar.php` en el Terminal | Aplica lo pendiente y muestra un resumen (misma lógica que el panel) | Se envía el aviso al club con el código, ambiente, fecha, horario, solicitante, precio, adelanto y pagado; si el solicitante dejó su correo, también recibe la confirmación |
 
 ### 13.5 Noticias y portada
 

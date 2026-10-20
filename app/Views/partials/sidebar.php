@@ -150,6 +150,11 @@ $enlaces[] = [
                         <?= Icons::render('administracion', 'icon', 20) ?><span>Configuración</span>
                     </a>
                 </li>
+                <li>
+                    <a class="sidebar__link<?= is_current('/migraciones') ? ' is-active' : '' ?>" href="<?= e(url('/migraciones')) ?>"<?= is_current('/migraciones') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('refrescar', 'icon', 20) ?><span>Actualizar la base de datos</span>
+                    </a>
+                </li>
             <?php endif; ?>
             <?php if (can('auditoria.ver')): ?>
                 <li>

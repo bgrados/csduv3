@@ -19,6 +19,17 @@ $debeCambiarPassword = $usuarioActual !== null && (int) ($usuarioActual['debe_ca
 $rutaActual = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
 $rutaActual = is_string($rutaActual) ? $rutaActual : '/';
 $enPerfil = str_contains($rutaActual, '/perfil');
+
+// Si quedan actualizaciones de la base de datos, se avisa en todo el panel.
+$migracionesPendientes = [];
+
+if (\App\Core\Database::isAvailable() && \App\Core\Auth::can('configuracion.gestionar')) {
+    try {
+        $migracionesPendientes = \App\Core\Migraciones::pendientes();
+    } catch (\Throwable) {
+        $migracionesPendientes = [];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -53,6 +64,17 @@ $enPerfil = str_contains($rutaActual, '/perfil');
 
         <main id="contenido" class="content" tabindex="-1">
             <?php require __DIR__ . '/../partials/flash.php'; ?>
+
+            <?php if ($migracionesPendientes !== []): ?>
+                <div class="alert alert--warning" role="status">
+                    <p>
+                        <strong>Falta actualizar la base de datos</strong>
+                        (<?= e((string) count($migracionesPendientes)) ?> actualización(es) pendiente(s)).
+                        Algunas funciones pueden no guardar la información hasta que se apliquen.
+                        <a href="<?= e(url('/migraciones')) ?>">Actualizar ahora</a>.
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <?php if ($debeCambiarPassword && !$enPerfil): ?>
                 <div class="alert alert--warning" role="status">

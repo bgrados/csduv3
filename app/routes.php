@@ -16,6 +16,7 @@ use App\Controllers\EleccionesController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
 use App\Controllers\MarcaController;
+use App\Controllers\MigracionesController;
 use App\Controllers\NegociosController;
 use App\Controllers\NoticiasController;
 use App\Controllers\PortalAlquilerController;
@@ -615,6 +616,18 @@ $router->post('/configuracion/marca/{tipo}', [ConfiguracionController::class, 's
 ]);
 
 $router->post('/configuracion/marca/{tipo}/restaurar', [ConfiguracionController::class, 'restaurarMarca'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('configuracion.gestionar'),
+]);
+
+// --- Actualización de la base de datos --------------------------------------
+
+$router->get('/migraciones', [MigracionesController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('configuracion.gestionar'),
+]);
+
+$router->post('/migraciones/aplicar', [MigracionesController::class, 'aplicar'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('configuracion.gestionar'),
 ]);
