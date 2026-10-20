@@ -86,6 +86,7 @@ final class ReservasController
             'tarifas'       => $this->tarifasPorInstalacion($instalaciones),
             'estados'       => Reserva::ESTADOS_EDITABLES,
             'porcentajeAdelanto' => $this->porcentajeAdelanto(),
+            'medios'        => MedioPago::activos(),
         ]);
     }
 
@@ -120,7 +121,7 @@ final class ReservasController
                 'hora_fin'              => (string) $limpio['hora_fin'],
                 'precio_acordado'       => (float) $limpio['precio_acordado'],
                 'monto_adelanto'        => (float) $limpio['monto_adelanto'],
-                'estado'                => (string) $limpio['estado'],
+                'medio_pago_id'         => (int) ($limpio['medio_pago_id'] ?? 0),                'estado'                => (string) $limpio['estado'],
                 'condiciones'           => (string) ($limpio['condiciones'] ?? ''),
                 'observaciones'         => (string) ($limpio['observaciones'] ?? ''),
                 'registrado_por'        => (int) Auth::id(),
@@ -174,11 +175,12 @@ final class ReservasController
         $reserva = $this->obtener((int) $id);
 
         View::display('reservas/ver', [
-            'titulo'     => 'Reserva ' . (string) $reserva['codigo'],
-            'reserva'    => $reserva,
-            'pagos'      => ReservaPago::listarPorReserva((int) $reserva['id']),
-            'medios'     => MedioPago::activos(),
-            'estados'    => Reserva::ESTADOS,
+            'titulo'        => 'Reserva ' . (string) $reserva['codigo'],
+            'reserva'       => $reserva,
+            'pagos'         => ReservaPago::listarPorReserva((int) $reserva['id']),
+            'medios'        => MedioPago::activos(),
+            'estados'       => Reserva::ESTADOS,
+            'ingresoEnCaja' => Reserva::tieneIngresoEnCaja((string) $reserva['codigo']),
         ]);
     }
 
@@ -206,6 +208,7 @@ final class ReservasController
             'tarifas'       => $this->tarifasPorInstalacion($instalaciones),
             'estados'       => Reserva::ESTADOS_EDITABLES,
             'porcentajeAdelanto' => $this->porcentajeAdelanto(),
+            'medios'        => MedioPago::activos(),
         ]);
     }
 
@@ -470,6 +473,7 @@ final class ReservasController
             'tarifas'       => $this->tarifasPorInstalacion(Instalacion::activas()),
             'estados'       => Reserva::ESTADOS_EDITABLES,
             'porcentajeAdelanto' => $this->porcentajeAdelanto(),
+            'medios'        => MedioPago::activos(),
         ]);
     }
 
@@ -516,6 +520,7 @@ final class ReservasController
             'hora_inicio',
             'hora_fin',
             'precio_acordado',
+            'medio_pago_id',
             'monto_adelanto',
             'estado',
             'condiciones',
@@ -543,6 +548,7 @@ final class ReservasController
             'hora_inicio'           => 'required|regex:/^\d{2}:\d{2}$/',
             'hora_fin'              => 'required|regex:/^\d{2}:\d{2}$/',
             'precio_acordado'       => 'required|decimal:2',
+            'medio_pago_id'         => 'nullable|integer|exists:medios_pago,id',
             'monto_adelanto'        => 'required|decimal:2',
             'estado'                => 'required|in:pendiente,confirmada,finalizada',
             'condiciones'           => 'nullable|string|max:2000',

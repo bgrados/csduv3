@@ -224,7 +224,7 @@ final class Reserva extends Model
                 self::normalizarHora((string) $datos['hora_fin'])
             );
 
-            return self::insertar([
+            $registro = self::insertar([
                 'codigo'                => (string) $datos['codigo'],
                 'instalacion_id'        => (int) $datos['instalacion_id'],
                 'tarifa_id'             => self::enteroANulo($datos['tarifa_id'] ?? null),
@@ -245,6 +245,20 @@ final class Reserva extends Model
                 'observaciones'         => self::vacioANulo($datos['observaciones'] ?? null),
                 'registrado_por'        => self::enteroANulo($datos['registrado_por'] ?? null),
             ]);
+
+            $id = (int) $registro;
+
+            // El alquiler se refleja en caja desde el momento en que se confirma.
+            if ((string) ($datos['estado'] ?? 'pendiente') === 'confirmada') {
+                self::registrarIngresoEnCaja(
+                    $id,
+                    self::enteroANulo($datos['registrado_por'] ?? null),
+                    self::enteroANulo($datos['medio_pago_id'] ?? null),
+                    (string) $datos['fecha_evento']
+                );
+            }
+
+            return $id;
         });
     }
 
@@ -330,6 +344,9 @@ final class Reserva extends Model
                 ]
             );
 
+            // La reserva cancelada no puede seguir contando como ingreso.
+            self::revertirIngresoEnCaja($id, $usuarioId);
+
             return;
         }
 
@@ -337,6 +354,10 @@ final class Reserva extends Model
             sprintf('UPDATE `%s` SET `estado` = :estado WHERE `id` = :id', self::table()),
             ['estado' => $estado, 'id' => $id]
         );
+
+        if ($estado === 'confirmada') {
+            self::registrarIngresoEnCaja($id, $usuarioId);
+        }
     }
 
     /**
@@ -389,21 +410,27 @@ final class Reserva extends Model
                 );
             }
 
-            $movimientoId = Movimiento::crear([
-                'tipo'          => 'ingreso',
-                'fecha'         => (string) $datos['fecha'],
-                'concepto'      => 'Alquiler ' . (string) $reserva['instalacion_nombre']
-                    . ($tipo === 'devolucion' ? ' (devolución)' : ' (' . $tipo . ')')
-                    . ' · ' . (string) $reserva['codigo'],
-                'monto'         => number_format($monto, 2, '.', ''),
-                'categoria_id'  => CategoriaMovimiento::idPorNombre('Alquileres', 'ingreso'),
-                'medio_pago_id' => self::enteroANulo($datos['medio_pago_id'] ?? null),
-                'periodo_id'    => self::periodoDe((string) $datos['fecha']),
-                'socio_id'      => self::enteroANulo($datos['socio_id'] ?? null),
-                'referencia'    => (string) $reserva['codigo'],
-                'observaciones' => (string) ($datos['observaciones'] ?? ''),
-                'responsable_id' => $usuarioId,
-            ]);
+            $movimientoId = self::movimientoIngresoId((string) $reserva['codigo']);
+
+            if ($movimientoId === 0) {
+                // Si la reserva todavía no tiene ingreso en caja, se registra
+                // ahora con el importe cobrado. Una devolución es un egreso.
+                $movimientoId = (int) Movimiento::crear([
+                    'tipo'           => $tipo === 'devolucion' ? 'egreso' : 'ingreso',
+                    'fecha'          => (string) $datos['fecha'],
+                    'concepto'       => 'Alquiler ' . (string) $reserva['instalacion_nombre']
+                        . ($tipo === 'devolucion' ? ' (devolución)' : ' (' . $tipo . ')')
+                        . ' · ' . (string) $reserva['codigo'],
+                    'monto'          => number_format($monto, 2, '.', ''),
+                    'categoria_id'   => CategoriaMovimiento::idPorNombre('Alquileres', 'ingreso'),
+                    'medio_pago_id'  => self::enteroANulo($datos['medio_pago_id'] ?? null),
+                    'periodo_id'     => self::periodoDe((string) $datos['fecha']),
+                    'socio_id'       => self::enteroANulo($datos['socio_id'] ?? null),
+                    'referencia'     => (string) $reserva['codigo'],
+                    'observaciones'  => (string) ($datos['observaciones'] ?? ''),
+                    'responsable_id' => $usuarioId,
+                ]);
+            }
 
             $pagoId = ReservaPago::crear([
                 'reserva_id'     => $reservaId,
@@ -428,6 +455,160 @@ final class Reserva extends Model
 
             return $pagoId;
         });
+    }
+
+    /**
+     * Registra el ingreso de la reserva en la caja del club.
+     *
+     * Se hace una sola vez por reserva: si ya existe un movimiento con el
+     * código de la reserva, no se vuelve a crear (así el alquiler no se
+     * cuenta dos veces en caja).
+     */
+    public static function registrarIngresoEnCaja(
+        int $reservaId,
+        ?int $usuarioId = null,
+        ?int $medioPagoId = null,
+        ?string $fecha = null
+    ): bool {
+        $sql = sprintf(
+            'SELECT r.`id`, r.`codigo`, r.`precio_acordado`, r.`estado`,
+                    i.`nombre` AS instalacion_nombre
+             FROM `%s` r
+             LEFT JOIN `%s` i ON i.`id` = r.`instalacion_id`
+             WHERE r.`id` = :id
+             LIMIT 1',
+            self::table(),
+            Instalacion::table()
+        );
+
+        $statement = self::db()->prepare($sql);
+        $statement->execute(['id' => $reservaId]);
+        $reserva = $statement->fetch();
+
+        if (!is_array($reserva)) {
+            return false;
+        }
+
+        $precio = (float) $reserva['precio_acordado'];
+
+        if ($precio <= 0 || self::tieneIngresoEnCaja((string) $reserva['codigo'])) {
+            return false;
+        }
+
+        $fecha = $fecha !== null && $fecha !== '' ? $fecha : date('Y-m-d');
+
+        Movimiento::crear([
+            'tipo'           => 'ingreso',
+            'fecha'          => $fecha,
+            'concepto'       => 'Alquiler ' . (string) $reserva['instalacion_nombre']
+                . ' · ' . (string) $reserva['codigo'],
+            'monto'          => number_format($precio, 2, '.', ''),
+            'categoria_id'   => CategoriaMovimiento::idPorNombre('Alquileres', 'ingreso'),
+            'medio_pago_id'  => self::enteroANulo($medioPagoId),
+            'periodo_id'     => self::periodoDe($fecha),
+            'referencia'     => (string) $reserva['codigo'],
+            'observaciones'  => 'Ingreso por reserva confirmada. El cobro se anota en la ficha de la reserva.',
+            'responsable_id' => $usuarioId,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Anula el ingreso de caja de una reserva cancelada.
+     *
+     * No se borra el movimiento original: se registra un egreso de reversa
+     * para que la caja no sume un alquiler que ya no existe.
+     */
+    public static function revertirIngresoEnCaja(int $reservaId, ?int $usuarioId = null): bool
+    {
+        $sql = sprintf(
+            'SELECT r.`codigo`, r.`precio_acordado`, i.`nombre` AS instalacion_nombre
+             FROM `%s` r
+             LEFT JOIN `%s` i ON i.`id` = r.`instalacion_id`
+             WHERE r.`id` = :id
+             LIMIT 1',
+            self::table(),
+            Instalacion::table()
+        );
+
+        $statement = self::db()->prepare($sql);
+        $statement->execute(['id' => $reservaId]);
+        $reserva = $statement->fetch();
+
+        if (!is_array($reserva)) {
+            return false;
+        }
+
+        $precio = (float) $reserva['precio_acordado'];
+
+        if ($precio <= 0 || !self::tieneIngresoEnCaja((string) $reserva['codigo'])) {
+            return false;
+        }
+
+        if (self::tieneReversaEnCaja((string) $reserva['codigo'])) {
+            return false;
+        }
+
+        Movimiento::crear([
+            'tipo'           => 'egreso',
+            'fecha'          => date('Y-m-d'),
+            'concepto'       => 'Anulación de reserva ' . (string) $reserva['instalacion_nombre']
+                . ' · ' . (string) $reserva['codigo'],
+            'monto'          => number_format($precio, 2, '.', ''),
+            'categoria_id'   => CategoriaMovimiento::idPorNombre('Alquileres', 'ingreso'),
+            'medio_pago_id'  => null,
+            'periodo_id'     => self::periodoDe(date('Y-m-d')),
+            'referencia'     => (string) $reserva['codigo'],
+            'observaciones'  => 'Reversa del ingreso por la cancelación de la reserva.',
+            'responsable_id' => $usuarioId,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * ¿La reserva ya tiene su ingreso anotado en caja?
+     */
+    public static function tieneIngresoEnCaja(string $codigo): bool
+    {
+        return (int) self::scalar(
+            sprintf(
+                'SELECT COUNT(*) FROM `%s` WHERE `referencia` = :referencia AND `tipo` = \'ingreso\'',
+                Movimiento::table()
+            ),
+            ['referencia' => $codigo]
+        ) > 0;
+    }
+
+    /**
+     * ¿La reserva ya tiene la reversa de caja por cancelación?
+     */
+    public static function tieneReversaEnCaja(string $codigo): bool
+    {
+        return (int) self::scalar(
+            sprintf(
+                'SELECT COUNT(*) FROM `%s` WHERE `referencia` = :referencia AND `tipo` = \'egreso\'',
+                Movimiento::table()
+            ),
+            ['referencia' => $codigo]
+        ) > 0;
+    }
+
+    /**
+     * Identificador del movimiento de ingreso de la reserva (0 si no hay).
+     */
+    public static function movimientoIngresoId(string $codigo): int
+    {
+        $valor = self::scalar(
+            sprintf(
+                'SELECT `id` FROM `%s` WHERE `referencia` = :referencia AND `tipo` = \'ingreso\' ORDER BY `id` DESC LIMIT 1',
+                Movimiento::table()
+            ),
+            ['referencia' => $codigo]
+        );
+
+        return $valor === false || $valor === null ? 0 : (int) $valor;
     }
 
     /**

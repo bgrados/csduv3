@@ -92,6 +92,27 @@ $claseEstado = static function (string $valor): string {
         <p class="card__value"><?= e(dinero((string) $saldo)) ?></p>
         <p class="card__hint">Pagado: <?= e(dinero((string) $pagado)) ?></p>
     </div>
+
+    <div class="card card--stat">
+        <p class="card__label">Ingreso en caja</p>
+        <p class="card__value" style="font-size:1.1rem;">
+            <?php if ($ingresoEnCaja): ?>
+                <span class="badge badge--ok">Registrado</span>
+            <?php else: ?>
+                <span class="badge badge--soft">Pendiente</span>
+            <?php endif; ?>
+        </p>
+        <p class="card__hint">Al confirmar, el alquiler se anota como ingreso en caja.</p>
+    </div>
+</div>
+
+<div class="alert alert--warning" role="note">
+    <p>
+        El alquiler se refleja en la caja del club por el precio acordado en cuanto la
+        reserva se confirma. Los cobros que se registran aquí <strong>no</strong> vuelven a
+        anotarse en caja, para no contarlo dos veces; si la reserva se cancela, caja
+        recibe la reversa del ingreso.
+    </p>
 </div>
 
 <?php if ($cancelada && !empty($reserva['motivo_cancelacion'])): ?>

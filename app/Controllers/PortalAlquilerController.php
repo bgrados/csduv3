@@ -515,6 +515,7 @@ final class PortalAlquilerController
                 'hora_fin'              => $horaFin,
                 'precio_acordado'       => $precio,
                 'monto_adelanto'        => $adelanto,
+                'medio_pago_id'         => (int) ($limpio['medio_pago_id'] ?? 0),
                 'estado'                => 'confirmada',
                 'condiciones'           => 'Reserva confirmada desde el portal publico. '
                     . 'El saldo se abona en sede o por el medio indicado.',

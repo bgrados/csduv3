@@ -166,6 +166,19 @@ foreach ($tarifas as $instalacionId => $lista) {
                     <?php endforeach; ?>
                 </select>
             </div>
+
+            <div class="field">
+                <label for="medio_pago_id">Medio de pago</label>
+                <select id="medio_pago_id" name="medio_pago_id">
+                    <option value="">Sin especificar</option>
+                    <?php foreach (($medios ?? []) as $medio): ?>
+                        <option value="<?= e((string) $medio['id']) ?>" <?= $valor('medio_pago_id') === (string) $medio['id'] ? 'selected' : '' ?>>
+                            <?= e((string) $medio['nombre']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="field__hint">Se anota en el ingreso de caja del alquiler.</p>
+            </div>
         </div>
     </fieldset>
 
