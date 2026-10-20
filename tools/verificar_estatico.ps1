@@ -412,7 +412,9 @@ foreach ($modelo in Get-ChildItem -Path (Join-Path $raiz 'app') -Filter '*.php' 
     $texto = [System.IO.File]::ReadAllText($modelo.FullName)
     $relativo = $modelo.FullName.Substring($raiz.Length + 1)
 
-    $consultas = [regex]::Matches($texto, "'((?:SELECT|INSERT INTO|UPDATE|DELETE FROM)[\s\S]*?)'", 'IgnoreCase')
+    # Cadenas que empiezan por una palabra clave de SQL. Se admiten las
+    # comillas escapadas (\') que pueden aparecer dentro de la consulta.
+    $consultas = [regex]::Matches($texto, "'((?:SELECT|INSERT INTO|UPDATE|DELETE FROM)(?:\\.|[^'\\])*)'", 'IgnoreCase')
 
     foreach ($consulta in $consultas) {
         $marcadores = [regex]::Matches($consulta.Groups[1].Value, ':([a-z_][a-z0-9_]*)', 'IgnoreCase')

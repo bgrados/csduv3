@@ -96,13 +96,19 @@ final class Reserva extends Model
                AND `estado` IN (\'pendiente\', \'confirmada\')
                AND (
                    `fecha_evento` = :fecha
-                   OR (`hora_fin` <= `hora_inicio` AND DATE_ADD(`fecha_evento`, INTERVAL 1 DAY) = :fecha)
+                   OR (`hora_fin` <= `hora_inicio` AND DATE_ADD(`fecha_evento`, INTERVAL 1 DAY) = :fecha_siguiente)
                )
              ORDER BY `fecha_evento` ASC, `hora_inicio` ASC',
             self::table()
         );
 
-        return self::fetchAll($sql, ['instalacion_id' => $instalacionId, 'fecha' => $fecha]);
+        $siguiente = date('Y-m-d', strtotime($fecha . ' +1 day'));
+
+        return self::fetchAll($sql, [
+            'instalacion_id'  => $instalacionId,
+            'fecha'           => $fecha,
+            'fecha_siguiente' => $siguiente,
+        ]);
     }
 
     /**
