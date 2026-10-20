@@ -13,6 +13,7 @@ use App\Core\Response;
 use App\Core\Session;
 use App\Core\Uploads;
 use App\Core\Validator;
+use App\Core\Video;
 use App\Core\View;
 use App\Models\Foto;
 use RuntimeException;
@@ -76,6 +77,10 @@ final class NoticiasController
 
         $archivo = $this->recibirImagen($request, $errores);
 
+        if ($archivo === null && trim((string) ($limpio['video_url'] ?? '')) === '') {
+            $errores[] = 'Seleccione una imagen o indique el enlace de un video.';
+        }
+
         if ($errores !== []) {
             remember_old_input($datos);
             Session::flash('errores', $errores);
@@ -88,19 +93,21 @@ final class NoticiasController
                 'resumen'         => (string) ($limpio['resumen'] ?? ''),
                 'descripcion'     => (string) ($limpio['descripcion'] ?? ''),
                 'categoria'       => (string) $limpio['categoria'],
-                'archivo'         => (string) $archivo['ruta'],
-                'nombre_original' => (string) $archivo['nombre_original'],
-                'tipo_mime'       => (string) $archivo['tipo_mime'],
-                'tamano_bytes'    => (int) $archivo['tamano'],
+                'archivo'         => (string) ($archivo['ruta'] ?? ''),
+                'nombre_original' => (string) ($archivo['nombre_original'] ?? ''),
+                'tipo_mime'       => (string) ($archivo['tipo_mime'] ?? ''),
+                'tamano_bytes'    => (int) ($archivo['tamano'] ?? 0),
                 'fecha_foto'      => (string) ($limpio['fecha_foto'] ?? ''),
                 'visible'         => (int) ($limpio['visible'] ?? 1),
                 'destacado'       => (int) ($limpio['destacado'] ?? 0),
+                'video_url'       => (string) ($limpio['video_url'] ?? ''),
+                'video_tipo'      => (string) ($limpio['video_tipo'] ?? ''),
                 'orden'           => (int) ($limpio['orden'] ?? 1),
                 'subido_por'      => (int) Auth::id(),
             ]);
         } catch (Throwable $exception) {
             Logger::error('Error al registrar una foto', ['error' => $exception->getMessage()]);
-            Uploads::borrar((string) $archivo['ruta'], 'fotos/');
+            Uploads::borrar((string) ($archivo['ruta'] ?? ''), 'fotos/');
             remember_old_input($datos);
             Session::flash('error', 'No se pudo registrar la noticia.');
             Response::redirect(url('/noticias/nuevo'));
@@ -168,6 +175,8 @@ final class NoticiasController
             'fecha_foto'      => (string) ($limpio['fecha_foto'] ?? ''),
             'visible'         => (int) ($limpio['visible'] ?? 1),
             'destacado'       => (int) ($limpio['destacado'] ?? 0),
+            'video_url'       => (string) ($limpio['video_url'] ?? ''),
+            'video_tipo'      => (string) ($limpio['video_tipo'] ?? ''),
             'orden'           => (int) ($limpio['orden'] ?? 1),
         ]);
 
@@ -250,7 +259,7 @@ final class NoticiasController
      */
     private function datosFormulario(Request $request): array
     {
-        $datos = $request->only(['titulo', 'resumen', 'descripcion', 'categoria', 'fecha_foto', 'orden']);
+        $datos = $request->only(['titulo', 'resumen', 'descripcion', 'categoria', 'fecha_foto', 'orden', 'video_url']);
 
         $datos['visible'] = $request->boolean('visible') ? '1' : '0';
         $datos['destacado'] = $request->boolean('destacado') ? '1' : '0';
@@ -273,6 +282,7 @@ final class NoticiasController
             'orden'       => 'nullable|integer|min:1|max:999',
             'visible'     => 'required|in:0,1',
             'destacado'   => 'required|in:0,1',
+            'video_url'   => 'nullable|string|max:255',
         ], [
             'titulo'      => 'titular',
             'resumen'     => 'entradilla',
@@ -282,12 +292,33 @@ final class NoticiasController
             'orden'       => 'orden',
             'visible'     => 'visibilidad',
             'destacado'   => 'noticia de portada',
+            'video_url'   => 'enlace del video',
         ]);
 
         $errores = array_values($validador->errors());
         $limpio = $validador->validated();
 
+        // El video tiene que ser un enlace de YouTube o de Facebook.
+        $video = trim((string) ($limpio['video_url'] ?? ''));
+
+        if ($video !== '' && !Video::esValido($video)) {
+            $errores[] = 'El enlace del video debe ser de YouTube o de Facebook (video o reel).';
+            $limpio['video_url'] = '';
+        }
+
+        $limpio['video_tipo'] = $video === '' ? null : self::tipoVideo($video);
+
         return [$limpio, $errores];
+    }
+
+    /**
+     * Plataforma del video: youtube o facebook.
+     */
+    private static function tipoVideo(string $url): ?string
+    {
+        $datos = Video::detectar($url);
+
+        return $datos === null ? null : (string) $datos['tipo'];
     }
 
     /**
@@ -299,7 +330,7 @@ final class NoticiasController
         $archivo = $request->file('archivo');
 
         if ($archivo === null || (int) ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
-            $errores[] = 'Seleccione una imagen.';
+            // La imagen es opcional: puede ser solo un video.
             return null;
         }
 

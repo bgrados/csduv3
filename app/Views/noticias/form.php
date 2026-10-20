@@ -64,13 +64,37 @@ $accion = $esEdicion ? url('/noticias/' . (string) $foto['id']) : url('/noticias
         <legend>La foto</legend>
 
         <div class="field">
-            <label for="archivo">Imagen <span class="req">*</span></label>
-            <input type="file" id="archivo" name="archivo" accept="image/jpeg,image/png,image/webp,image/gif" required>
+            <label for="archivo">Imagen</label>
+            <input type="file" id="archivo" name="archivo" accept="image/jpeg,image/png,image/webp,image/gif">
             <p class="field__hint">
                 Se convierte a WebP y se reduce a 2000 px de ancho.
                 <?php if ($esEdicion && !empty($foto['archivo'])): ?>
                     <br>Si no sube una imagen nueva, se conserva la actual.
                 <?php endif; ?>
+                <br>La imagen es opcional si la noticia lleva un video.
+            </p>
+        </div>
+    </fieldset>
+
+    <fieldset class="form__group">
+        <legend>El video (opcional)</legend>
+
+        <div class="field">
+            <label for="video_url">Enlace del video</label>
+            <input
+                type="url"
+                id="video_url"
+                name="video_url"
+                maxlength="255"
+                value="<?= e($valor('video_url')) ?>"
+                placeholder="https://www.youtube.com/watch?v=…"
+            >
+            <p class="field__hint">
+                Pegue el enlace de un video de <strong>YouTube</strong> o de
+                <strong>Facebook</strong> (video, reel o publicación). La
+                portada y la galería mostrarán el reproductor del club.
+                <br>Ejemplos: <code>youtube.com/watch?v=…</code>,
+                <code>youtu.be/…</code>, <code>facebook.com/…/videos/…</code>.
             </p>
         </div>
     </fieldset>

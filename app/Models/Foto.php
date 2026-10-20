@@ -173,6 +173,8 @@ final class Foto extends Model
             'fecha_foto'      => self::vacioANulo($datos['fecha_foto'] ?? null),
             'visible'         => (int) ($datos['visible'] ?? 1) === 1 ? 1 : 0,
             'destacado'       => (int) ($datos['destacado'] ?? 0) === 1 ? 1 : 0,
+            'video_url'       => self::vacioANulo($datos['video_url'] ?? null),
+            'video_tipo'      => self::vacioANulo($datos['video_tipo'] ?? null),
             'orden'           => (int) ($datos['orden'] ?? 1),
             'subido_por'      => self::enteroANulo($datos['subido_por'] ?? null),
         ]);
@@ -197,6 +199,8 @@ final class Foto extends Model
                      `fecha_foto` = :fecha_foto,
                      `visible` = :visible,
                      `destacado` = :destacado,
+                     `video_url` = :video_url,
+                     `video_tipo` = :video_tipo,
                      `orden` = :orden
                  WHERE `id` = :id',
                 self::table()
@@ -213,10 +217,33 @@ final class Foto extends Model
                 'fecha_foto'      => self::vacioANulo($datos['fecha_foto'] ?? null),
                 'visible'         => (int) ($datos['visible'] ?? 1) === 1 ? 1 : 0,
                 'destacado'       => (int) ($datos['destacado'] ?? 0) === 1 ? 1 : 0,
+                'video_url'       => self::vacioANulo($datos['video_url'] ?? null),
+                'video_tipo'      => self::vacioANulo($datos['video_tipo'] ?? null),
                 'orden'           => (int) ($datos['orden'] ?? 1),
                 'id'              => $id,
             ]
         );
+    }
+
+    /**
+     * Noticias publicadas que tienen video (para la portada).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function listarVideos(int $limite = 4): array
+    {
+        $limite = max(1, min(12, $limite));
+
+        $sql = sprintf(
+            'SELECT * FROM `%s`
+             WHERE `visible` = 1 AND `video_url` IS NOT NULL AND `video_url` <> \'\'
+             ORDER BY `fecha_foto` DESC, `id` DESC
+             LIMIT %d',
+            self::table(),
+            $limite
+        );
+
+        return self::fetchAll($sql);
     }
 
     public static function cambiarVisible(int $id, bool $visible): void

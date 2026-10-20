@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\Icons;
+use App\Core\Video;
 
 /**
  * Portada del portal con formato de revista.
@@ -15,6 +16,7 @@ use App\Core\Icons;
  * @var array<int, array<string, mixed>> $negocios
  * @var array<int, array<string, mixed>> $eventos
  * @var array<int, array<string, mixed>> $partidos
+ * @var array<int, array<string, mixed>> $videos
  * @var bool $contenidoEjemplo
  */
 
@@ -47,6 +49,10 @@ $galeria = is_array($galeria ?? null) ? $galeria : [];
 $negocios = is_array($negocios ?? null) ? $negocios : [];
 $eventos = is_array($eventos ?? null) ? $eventos : [];
 $partidos = is_array($partidos ?? null) ? $partidos : [];
+$videos = is_array($videos ?? null) ? array_values(array_filter(
+    $videos,
+    static fn (array $video): bool => Video::embed((string) ($video['video_url'] ?? '')) !== ''
+)) : [];
 $visibles = is_array($instalaciones ?? null) ? array_slice($instalaciones, 0, 6) : [];
 
 $imagenNegocio = static function (array $negocio): string {
@@ -139,9 +145,16 @@ $categoriasNegocio = [
 
             <?php if ($portada !== null || $imagenPortada !== ''): ?>
                 <article class="portada">
-                    <a class="portada__imagen" href="<?= e(url('/galeria')) ?>">
-                        <img src="<?= e($imagenPortada) ?>" alt="<?= e($titularPortada) ?>">
-                    </a>
+                    <?php $videoPortada = Video::embed((string) ($portada['video_url'] ?? '')); ?>
+                    <?php if ($videoPortada !== ''): ?>
+                        <div class="portada__imagen portada__imagen--video">
+                            <?= Video::render((string) $portada['video_url'], (string) ($portada['titulo'] ?? ''), 'video video--portada') ?>
+                        </div>
+                    <?php else: ?>
+                        <a class="portada__imagen" href="<?= e(url('/galeria')) ?>">
+                            <img src="<?= e($imagenPortada) ?>" alt="<?= e($titularPortada) ?>">
+                        </a>
+                    <?php endif; ?>
                     <div class="portada__texto">
                         <p class="portada__kicker">
                             <?php if ($portada !== null): ?>
@@ -185,11 +198,21 @@ $categoriasNegocio = [
                         <div class="carrusel__pista" data-carrusel-pista>
                             <?php foreach ($destacados as $noticia): ?>
                                 <article class="carrusel__tarjeta">
-                                    <a class="carrusel__imagen" href="<?= e(url('/galeria')) ?>">
-                                        <img src="<?= e($imagen($noticia)) ?>" alt="<?= e((string) $noticia['titulo']) ?>" loading="lazy">
-                                    </a>
+                                    <?php $videoNoticia = Video::embed((string) ($noticia['video_url'] ?? '')); ?>
+                                    <?php if ($videoNoticia !== ''): ?>
+                                        <div class="carrusel__imagen carrusel__imagen--video">
+                                            <?= Video::render((string) $noticia['video_url'], (string) ($noticia['titulo'] ?? ''), 'video video--carrusel') ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <a class="carrusel__imagen" href="<?= e(url('/galeria')) ?>">
+                                            <img src="<?= e($imagen($noticia)) ?>" alt="<?= e((string) $noticia['titulo']) ?>" loading="lazy">
+                                        </a>
+                                    <?php endif; ?>
                                     <p class="carrusel__kicker">
                                         <?= e(\App\Models\Foto::CATEGORIAS[(string) $noticia['categoria']] ?? (string) $noticia['categoria']) ?>
+                                        <?php if ($videoNoticia !== ''): ?>
+                                            <span class="badge badge--soft">Video</span>
+                                        <?php endif; ?>
                                     </p>
                                     <h3 class="carrusel__titulo"><?= e((string) $noticia['titulo']) ?></h3>
                                     <?php if (!empty($noticia['resumen'])): ?>
@@ -206,6 +229,33 @@ $categoriasNegocio = [
                             <button type="button" class="carrusel__boton" data-carrusel-prev aria-label="Anterior">&larr;</button>
                             <button type="button" class="carrusel__boton" data-carrusel-next aria-label="Siguiente">&rarr;</button>
                         </div>
+                    </div>
+                </section>
+            <?php endif; ?>
+
+            <?php if ($videos !== []): ?>
+                <section class="revista__seccion">
+                    <div class="revista__seccion-cabecera">
+                        <h2 class="revista__seccion-titulo">Videos del club</h2>
+                        <a class="revista__seccion-enlace" href="<?= e(url('/galeria')) ?>">Ver todo &rarr;</a>
+                    </div>
+
+                    <div class="videos">
+                        <?php foreach ($videos as $video): ?>
+                            <article class="videos__item">
+                                <?= Video::render((string) $video['video_url'], (string) ($video['titulo'] ?? ''), 'video video--seccion') ?>
+                                <h3 class="videos__titulo"><?= e((string) $video['titulo']) ?></h3>
+                                <p class="videos__pie">
+                                    <?= e(Video::plataforma((string) ($video['video_url'] ?? ''))) ?>
+                                    <?php if (!empty($video['fecha_foto'])): ?>
+                                        · <?= e(fecha_legible((string) $video['fecha_foto'])) ?>
+                                    <?php endif; ?>
+                                </p>
+                                <?php if (!empty($video['resumen'])): ?>
+                                    <p class="videos__resumen"><?= e((string) $video['resumen']) ?></p>
+                                <?php endif; ?>
+                            </article>
+                        <?php endforeach; ?>
                     </div>
                 </section>
             <?php endif; ?>

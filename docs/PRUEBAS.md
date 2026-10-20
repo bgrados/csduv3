@@ -1026,7 +1026,11 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | GA-03 | Subir un archivo que no es imagen (`.pdf`) | Se rechaza con «El archivo debe ser una imagen (JPG, PNG o WEBP).» |
 | GA-04 | Publicar y ocultar una foto | El botón cambia a «Publicada» u «Oculta»; solo las publicadas aparecen en `/galeria` y en la portada |
 | GA-05 | Abrir `/galeria` sin sesión | 200 con la galería pública; la foto destacada ocupa el bloque principal y las demás en la retícula |
-| GA-06 | Eliminar una foto | Se elimina el registro y el archivo del disco |
+| GA-06 | Eliminar una foto |
+| GA-07 | Publicar una noticia con un video de YouTube (sin subir foto) | Se guarda y el video aparece con su reproductor en la portada y en la galería |
+| GA-08 | Publicar una noticia con un video de Facebook (video o reel) | Se guarda y se reproduce en la portada |
+| GA-09 | Pegar un enlace que no es de YouTube ni de Facebook | Se avisa «El enlace del video debe ser de YouTube o de Facebook» y no se guarda |
+| GA-10 | Editar una noticia sin subir una imagen nueva | Se guarda y se conserva la imagen anterior (antes pedía una imagen) | Se elimina el registro y el archivo del disco |
 
 ### 13.3 Directorio de negocios
 
@@ -1046,9 +1050,10 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | EN-1 | Barra de navegación de la portada | Enlaces a Inicio, Ambientes, Disponibilidad, Solicitar, Torneos, Galería, Negocios y «Portal UV3» |
 | EN-2 | Enlace «Portal UV3» | Abre `https://uv3-platform.vercel.app/` en una pestaña nueva (`target="_blank"`) |
 | EN-3 | Pie de página | Incluye Galería del club, Negocios de la unidad y el portal de la Unidad Vecinal |
-| EN-4 | Redes sociales del club en el pie | Cada red configurada aparece en un recuadro con su logo y su color de marca (Facebook, Instagram, YouTube, TikTok, X y WhatsApp); las redes sin enlace no aparecen |
-| EN-5 | Configurar el enlace de Instagram en `/configuracion` | Se guarda y el recuadro de Instagram aparece en el pie; si el enlace no empieza por `http://` o `https://` se avisa y no se guarda |
-| EN-6 | Configurar un enlace de red con `javascript:` | Se rechaza con el aviso de que el enlace debe empezar por `http://` o `https://` |
+| EN-4 | Redes sociales del club en el pie | El pie del portal muestra el **contenido de la página de Facebook** del club (sus publicaciones) y, debajo, los iconos de las demás redes; el panel del administrador **no** muestra redes |
+| EN-7 | Configurar el enlace de Instagram en `/configuracion` | Se guarda y el icono de Instagram aparece en el pie; si el enlace no empieza por `http://` o `https://` se avisa y no se guarda |
+| EN-8 | Configurar un enlace de red con `javascript:` | Se rechaza con el aviso de que el enlace debe empezar por `http://` o `https://` |
+| RV-8 | Publicar una noticia con video y abrir la portada | Aparece la sección «Videos del club» con el reproductor y la noticia con video se muestra en el carrusel |
 
 ### 13.5 La portada con formato de revista
 

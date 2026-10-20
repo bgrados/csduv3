@@ -75,6 +75,7 @@ final class HomeController
         $negocios = $this->cargar(fn (): array => Negocio::listarVisibles(), 'negocios');
         $eventos = $this->cargar(fn (): array => Actividad::proximasPublicas(5), 'eventos');
         $partidos = $this->cargar(fn (): array => Encuentro::proximos(4), 'agenda deportiva');
+        $videos = $this->cargar(fn (): array => Foto::listarVideos(4), 'videos');
 
         $conEjemplo = true;
 
@@ -118,6 +119,7 @@ final class HomeController
             'negociosCarrusel' => $negociosCarrusel,
             'eventos'        => $eventos,
             'partidos'       => $partidos,
+            'videos'         => $videos,
             'contenidoEjemplo' => $conEjemplo,
         ], 'layouts/publico');
     }

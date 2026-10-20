@@ -125,6 +125,11 @@ los módulos **Ambientes y tarifas** (`/ambientes`) y **Deportes y torneos**
 - Se agregó la tabla `csduv3_solicitudes_alquiler` (tabla n.º 40) a `01_esquema.sql`.
 - Migración aditiva para instalaciones de la Fase 1:
   `database/migrations/0001_solicitudes_alquiler.sql`.
+- Migración `0005_horarios_que_cruzan_medianoche.sql`: elimina la restricción
+  `chk_reservas_horario` para permitir alquileres de madrugada (19:00 a 03:00).
+- Migración `0006_videos_en_noticias.sql`: agrega `video_url` y `video_tipo` a
+  `csduv3_fotos`, para que una noticia pueda llevar un video de YouTube o de
+  Facebook en lugar de una foto.
 
 ### 2.3 Fase 3 — Socios (corte 1)
 

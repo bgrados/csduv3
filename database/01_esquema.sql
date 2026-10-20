@@ -1060,6 +1060,8 @@ CREATE TABLE IF NOT EXISTS `csduv3_fotos` (
     `fecha_foto`      DATE NULL,
     `visible`         TINYINT(1) NOT NULL DEFAULT 1,
     `destacado`       TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = aparece como noticia en la portada',
+    `video_url`       VARCHAR(255) NULL COMMENT 'Enlace al video de la noticia (YouTube o Facebook)',
+    `video_tipo`      VARCHAR(20) NULL COMMENT 'youtube o facebook',
     `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
     `subido_por`      BIGINT UNSIGNED NULL,
     `created_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

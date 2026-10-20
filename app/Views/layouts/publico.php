@@ -143,8 +143,6 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <a href="<?= e(url('/galeria')) ?>">Galería del club</a>
             <a href="<?= e(url('/negocios')) ?>">Negocios de la unidad</a>
             <a href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">Portal de la Unidad Vecinal</a>
-            <?php $tituloRedes = 'Síguenos en redes'; ?>
-            <?php require __DIR__ . '/../partials/redes.php'; ?>
         </div>
 
         <div class="site-footer__club">
@@ -170,6 +168,11 @@ $aria = static function (string $prefijo) use ($esActiva): string {
                     </span>
                 </p>
             <?php endif; ?>
+        </div>
+
+        <div class="site-footer__redes">
+            <?php $tituloRedes = 'Facebook del club'; ?>
+            <?php require __DIR__ . '/../partials/redes.php'; ?>
         </div>
     </div>
 </footer>

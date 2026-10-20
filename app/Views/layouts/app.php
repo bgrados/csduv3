@@ -72,8 +72,6 @@ $enPerfil = str_contains($rutaActual, '/perfil');
                 Sistema de gestión institucional ·
                 <?= e($siglasClub) ?>
             </p>
-            <?php $tituloRedes = ''; ?>
-            <?php require __DIR__ . '/../partials/redes.php'; ?>
             <p class="footer__meta">
                 PHP <?= e(PHP_VERSION) ?> · zona horaria <?= e(date_default_timezone_get()) ?> ·
                 <?= e(date('d/m/Y H:i')) ?>

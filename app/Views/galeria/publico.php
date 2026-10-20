@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\Icons;
+use App\Core\Video;
 
 /**
  * Galería pública: «El club en imágenes».
@@ -69,9 +70,16 @@ foreach ($fotos as $foto) {
 <?php else: ?>
     <?php if ($destacada !== null): ?>
         <article class="periodico__portada">
-            <a class="periodico__portada-imagen" href="<?= e(url('/galeria/imagen/' . (string) $destacada['id'])) ?>">
-                <img src="<?= e(url('/galeria/imagen/' . (string) $destacada['id'])) ?>" alt="<?= e((string) $destacada['titulo']) ?>">
-            </a>
+            <?php $videoDestacada = Video::embed((string) ($destacada['video_url'] ?? '')); ?>
+            <?php if ($videoDestacada !== ''): ?>
+                <div class="periodico__portada-imagen periodico__portada-imagen--video">
+                    <?= Video::render((string) $destacada['video_url'], (string) $destacada['titulo'], 'video video--portada') ?>
+                </div>
+            <?php else: ?>
+                <a class="periodico__portada-imagen" href="<?= e(url('/galeria/imagen/' . (string) $destacada['id'])) ?>">
+                    <img src="<?= e(url('/galeria/imagen/' . (string) $destacada['id'])) ?>" alt="<?= e((string) $destacada['titulo']) ?>">
+                </a>
+            <?php endif; ?>
             <div class="periodico__portada-texto">
                 <p class="periodico__kicker">
                     <?= e($categorias[(string) $destacada['categoria']] ?? (string) $destacada['categoria']) ?>
@@ -93,9 +101,16 @@ foreach ($fotos as $foto) {
         <div class="galeria galeria--publica">
             <?php foreach ($resto as $foto): ?>
                 <article class="galeria__item">
-                    <a class="galeria__imagen" href="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>">
-                        <img src="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>" alt="<?= e((string) $foto['titulo']) ?>" loading="lazy">
-                    </a>
+                    <?php $videoItem = Video::embed((string) ($foto['video_url'] ?? '')); ?>
+                    <?php if ($videoItem !== ''): ?>
+                        <div class="galeria__imagen galeria__imagen--video">
+                            <?= Video::render((string) $foto['video_url'], (string) $foto['titulo'], 'video video--galeria') ?>
+                        </div>
+                    <?php else: ?>
+                        <a class="galeria__imagen" href="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>">
+                            <img src="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>" alt="<?= e((string) $foto['titulo']) ?>" loading="lazy">
+                        </a>
+                    <?php endif; ?>
                     <h3 class="galeria__titulo"><?= e((string) $foto['titulo']) ?></h3>
                     <p class="galeria__pie">
                         <?= e($categorias[(string) $foto['categoria']] ?? (string) $foto['categoria']) ?>
