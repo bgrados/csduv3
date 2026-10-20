@@ -586,6 +586,11 @@ $router->post('/fotos/{id}/estado', [GaleriaController::class, 'estado'], [
     PermissionMiddleware::requiere('documentos.gestionar'),
 ]);
 
+$router->post('/fotos/{id}/destacar', [GaleriaController::class, 'destacar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
 $router->post('/fotos/{id}/eliminar', [GaleriaController::class, 'eliminar'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('documentos.gestionar'),

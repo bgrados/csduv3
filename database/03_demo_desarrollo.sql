@@ -17,6 +17,20 @@
 
 SET NAMES utf8mb4;
 
+-- ---------------------------------------------------------------------------
+--  Noticias de ejemplo y negocios de demostración
+-- ---------------------------------------------------------------------------
+--  Estas filas necesitan las imágenes, por eso se instalan con el procedimiento
+--  completo, que además copia los archivos a storage/uploads:
+--
+--      php tools/instalar_demo_fotos.php
+--
+--  Para retirarlas:
+--
+--      php tools/instalar_demo_fotos.php --quitar
+--
+--  Los titulares y nombres empiezan por DEMO- y no pertenecen al club.
+
 
 -- ---------------------------------------------------------------------------
 --  Categorías de socio (ficticias)

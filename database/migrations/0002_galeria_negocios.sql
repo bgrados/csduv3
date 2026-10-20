@@ -36,7 +36,8 @@ SET NAMES utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `csduv3_fotos` (
     `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `titulo`          VARCHAR(180) NOT NULL,
+    `titulo`          VARCHAR(180) NOT NULL COMMENT 'Titular de la noticia',
+    `resumen`         VARCHAR(300) NULL COMMENT 'Entradilla de la noticia',
     `descripcion`     VARCHAR(500) NULL,
     `categoria`       VARCHAR(40) NOT NULL DEFAULT 'evento'
                       COMMENT 'reunion, campeonato, directiva, socios, evento, instalacion',
@@ -46,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `csduv3_fotos` (
     `tamano_bytes`    INT UNSIGNED NULL,
     `fecha_foto`      DATE NULL,
     `visible`         TINYINT(1) NOT NULL DEFAULT 1,
+    `destacado`       TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = aparece como noticia en la portada',
     `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
     `subido_por`      BIGINT UNSIGNED NULL,
     `created_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `csduv3_fotos` (
         FOREIGN KEY (`subido_por`) REFERENCES `csduv3_usuarios` (`id`)
         ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Galería institucional: reuniones, campeonatos, junta directiva y socios';
+  COMMENT='Galería institucional y noticias del club';
 
 CREATE TABLE IF NOT EXISTS `csduv3_negocios` (
     `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

@@ -84,6 +84,7 @@ final class GaleriaController
         try {
             $id = Foto::crear([
                 'titulo'          => (string) $limpio['titulo'],
+                'resumen'         => (string) ($limpio['resumen'] ?? ''),
                 'descripcion'     => (string) ($limpio['descripcion'] ?? ''),
                 'categoria'       => (string) $limpio['categoria'],
                 'archivo'         => (string) $archivo['ruta'],
@@ -92,6 +93,7 @@ final class GaleriaController
                 'tamano_bytes'    => (int) $archivo['tamano'],
                 'fecha_foto'      => (string) ($limpio['fecha_foto'] ?? ''),
                 'visible'         => (int) ($limpio['visible'] ?? 1),
+                'destacado'       => (int) ($limpio['destacado'] ?? 0),
                 'orden'           => (int) ($limpio['orden'] ?? 1),
                 'subido_por'      => (int) Auth::id(),
             ]);
@@ -149,6 +151,7 @@ final class GaleriaController
 
         Foto::actualizar($fotoId, [
             'titulo'          => (string) $limpio['titulo'],
+            'resumen'         => (string) ($limpio['resumen'] ?? ''),
             'descripcion'     => (string) ($limpio['descripcion'] ?? ''),
             'categoria'       => (string) $limpio['categoria'],
             'archivo'         => $archivo === null ? $rutaAnterior : (string) $archivo['ruta'],
@@ -163,6 +166,7 @@ final class GaleriaController
                 : (int) $archivo['tamano'],
             'fecha_foto'      => (string) ($limpio['fecha_foto'] ?? ''),
             'visible'         => (int) ($limpio['visible'] ?? 1),
+            'destacado'       => (int) ($limpio['destacado'] ?? 0),
             'orden'           => (int) ($limpio['orden'] ?? 1),
         ]);
 
@@ -194,6 +198,37 @@ final class GaleriaController
         Response::redirect(url('/fotos'));
     }
 
+    public function destacar(Request $request, string $id): void
+    {
+        if (!$this->baseDisponible()) {
+            return;
+        }
+
+        $foto = $this->obtener((int) $id);
+        $destacado = (int) $foto['destacado'] === 1;
+
+        self::cambiarDestacado((int) $foto['id'], !$destacado);
+
+        Session::flash(
+            'exito',
+            $destacado
+                ? 'La noticia dejó de aparecer en la portada.'
+                : 'La noticia ya aparece en la portada.'
+        );
+        Response::redirect(url('/fotos'));
+    }
+
+    /**
+     * Marca o desmarca una foto como noticia de portada.
+     */
+    public static function cambiarDestacado(int $id, bool $destacado): void
+    {
+        self::run(
+            sprintf('UPDATE `%s` SET `destacado` = :destacado WHERE `id` = :id', self::table()),
+            ['destacado' => $destacado ? 1 : 0, 'id' => $id]
+        );
+    }
+
     public function eliminar(Request $request, string $id): void
     {
         if (!$this->baseDisponible()) {
@@ -221,9 +256,10 @@ final class GaleriaController
      */
     private function datosFormulario(Request $request): array
     {
-        $datos = $request->only(['titulo', 'descripcion', 'categoria', 'fecha_foto', 'orden']);
+        $datos = $request->only(['titulo', 'resumen', 'descripcion', 'categoria', 'fecha_foto', 'orden']);
 
         $datos['visible'] = $request->boolean('visible') ? '1' : '0';
+        $datos['destacado'] = $request->boolean('destacado') ? '1' : '0';
 
         return $datos;
     }
@@ -236,18 +272,22 @@ final class GaleriaController
     {
         $validador = Validator::make($datos, [
             'titulo'      => 'required|string|min:3|max:180',
+            'resumen'     => 'nullable|string|max:300',
             'descripcion' => 'nullable|string|max:500',
             'categoria'   => 'required|in:reunion,campeonato,directiva,socios,evento,instalacion',
             'fecha_foto'  => 'nullable|date',
             'orden'       => 'nullable|integer|min:1|max:999',
             'visible'     => 'required|in:0,1',
+            'destacado'   => 'required|in:0,1',
         ], [
-            'titulo'      => 'título',
+            'titulo'      => 'titular',
+            'resumen'     => 'entradilla',
             'descripcion' => 'pie de foto',
             'categoria'   => 'categoría',
             'fecha_foto'  => 'fecha de la foto',
             'orden'       => 'orden',
             'visible'     => 'visibilidad',
+            'destacado'   => 'noticia de portada',
         ]);
 
         $errores = array_values($validador->errors());

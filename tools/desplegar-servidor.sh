@@ -58,5 +58,18 @@ git pull origin main >> "$LOG_FILE" 2>&1
 
 echo "Running migrations..." >> "$LOG_FILE"
 php tools/migrar.php >> "$LOG_FILE" 2>&1
+MIGRATION_STATUS=$?
+echo "Migration exit code: $MIGRATION_STATUS" >> "$LOG_FILE"
+
+# Comprobación de que las tablas de los módulos nuevos existen. Si faltan, la
+# aplicación los muestra como no disponibles hasta aplicar la migración.
+for TABLE in fotos negocios; do
+    TABLE_COUNT="$(MYSQL_PWD="$DB_PASS" mysql -N -B -u "$DB_USER" "$DB_NAME" \
+        -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'csduv3_${TABLE}';" 2>>"$LOG_FILE")"
+    echo "Table csduv3_${TABLE}: ${TABLE_COUNT:-0}" >> "$LOG_FILE"
+    if [ "${TABLE_COUNT:-0}" = "0" ]; then
+        echo "WARNING: falta la tabla csduv3_${TABLE}. Ejecute: php tools/migrar.php" >> "$LOG_FILE"
+    fi
+done
 
 echo "Deploy finished: $(date)" >> "$LOG_FILE"

@@ -43,7 +43,7 @@ final class Foto extends Model
         $sql = sprintf(
             'SELECT * FROM `%s`
              WHERE %s
-             ORDER BY `fecha_foto` DESC, `id` DESC
+             ORDER BY `destacado` DESC, `fecha_foto` DESC, `id` DESC
              LIMIT %d',
             self::table(),
             implode(' AND ', $condiciones),
@@ -51,6 +51,27 @@ final class Foto extends Model
         );
 
         return self::fetchAll($sql, $params);
+    }
+
+    /**
+     * Noticias destacadas: las que aparecen en la portada.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function listarPortada(int $limite = 5): array
+    {
+        $limite = max(1, min(24, $limite));
+
+        $sql = sprintf(
+            'SELECT * FROM `%s`
+             WHERE `visible` = 1 AND `destacado` = 1
+             ORDER BY `fecha_foto` DESC, `id` DESC
+             LIMIT %d',
+            self::table(),
+            $limite
+        );
+
+        return self::fetchAll($sql);
     }
 
     /**
@@ -95,6 +116,7 @@ final class Foto extends Model
     {
         return self::insertar([
             'titulo'          => (string) $datos['titulo'],
+            'resumen'         => self::vacioANulo($datos['resumen'] ?? null),
             'descripcion'     => self::vacioANulo($datos['descripcion'] ?? null),
             'categoria'       => (string) $datos['categoria'],
             'archivo'         => self::vacioANulo($datos['archivo'] ?? null),
@@ -103,6 +125,7 @@ final class Foto extends Model
             'tamano_bytes'    => self::enteroANulo($datos['tamano_bytes'] ?? null),
             'fecha_foto'      => self::vacioANulo($datos['fecha_foto'] ?? null),
             'visible'         => (int) ($datos['visible'] ?? 1) === 1 ? 1 : 0,
+            'destacado'       => (int) ($datos['destacado'] ?? 0) === 1 ? 1 : 0,
             'orden'           => (int) ($datos['orden'] ?? 1),
             'subido_por'      => self::enteroANulo($datos['subido_por'] ?? null),
         ]);
@@ -117,6 +140,7 @@ final class Foto extends Model
             sprintf(
                 'UPDATE `%s`
                  SET `titulo` = :titulo,
+                     `resumen` = :resumen,
                      `descripcion` = :descripcion,
                      `categoria` = :categoria,
                      `archivo` = :archivo,
@@ -125,12 +149,14 @@ final class Foto extends Model
                      `tamano_bytes` = :tamano_bytes,
                      `fecha_foto` = :fecha_foto,
                      `visible` = :visible,
+                     `destacado` = :destacado,
                      `orden` = :orden
                  WHERE `id` = :id',
                 self::table()
             ),
             [
                 'titulo'          => (string) $datos['titulo'],
+                'resumen'         => self::vacioANulo($datos['resumen'] ?? null),
                 'descripcion'     => self::vacioANulo($datos['descripcion'] ?? null),
                 'categoria'       => (string) $datos['categoria'],
                 'archivo'         => self::vacioANulo($datos['archivo'] ?? null),
@@ -139,6 +165,7 @@ final class Foto extends Model
                 'tamano_bytes'    => self::enteroANulo($datos['tamano_bytes'] ?? null),
                 'fecha_foto'      => self::vacioANulo($datos['fecha_foto'] ?? null),
                 'visible'         => (int) ($datos['visible'] ?? 1) === 1 ? 1 : 0,
+                'destacado'       => (int) ($datos['destacado'] ?? 0) === 1 ? 1 : 0,
                 'orden'           => (int) ($datos['orden'] ?? 1),
                 'id'              => $id,
             ]

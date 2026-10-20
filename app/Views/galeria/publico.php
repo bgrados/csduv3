@@ -80,7 +80,9 @@ foreach ($fotos as $foto) {
                     <?php endif; ?>
                 </p>
                 <h2><?= e((string) $destacada['titulo']) ?></h2>
-                <?php if (!empty($destacada['descripcion'])): ?>
+                <?php if (!empty($destacada['resumen'])): ?>
+                    <p><?= e((string) $destacada['resumen']) ?></p>
+                <?php elseif (!empty($destacada['descripcion'])): ?>
                     <p><?= e((string) $destacada['descripcion']) ?></p>
                 <?php endif; ?>
             </div>
@@ -101,7 +103,9 @@ foreach ($fotos as $foto) {
                             · <?= e(fecha_legible((string) $foto['fecha_foto'])) ?>
                         <?php endif; ?>
                     </p>
-                    <?php if (!empty($foto['descripcion'])): ?>
+                    <?php if (!empty($foto['resumen'])): ?>
+                        <p class="galeria__descripcion"><?= e((string) $foto['resumen']) ?></p>
+                    <?php elseif (!empty($foto['descripcion'])): ?>
                         <p class="galeria__descripcion"><?= e((string) $foto['descripcion']) ?></p>
                     <?php endif; ?>
                 </article>

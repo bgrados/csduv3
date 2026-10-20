@@ -139,12 +139,15 @@ $accion = $esEdicion ? url('/negocios/' . (string) $negocio['id']) : url('/negoc
             </div>
 
             <div class="field">
-                <label for="destacado">Destacado</label>
+                <label for="destacado">Aparece en la portada</label>
                 <select id="destacado" name="destacado">
-                    <option value="0" <?= $destacado ? '' : 'selected' ?>>No</option>
-                    <option value="1" <?= $destacado ? 'selected' : '' ?>>Sí</option>
+                    <option value="0" <?= $destacado ? '' : 'selected' ?>>No (solo en el directorio)</option>
+                    <option value="1" <?= $destacado ? 'selected' : '' ?>>Sí (tarjeta en la portada)</option>
                 </select>
-                <p class="field__hint">Los destacados aparecen primero en la portada.</p>
+                <p class="field__hint">
+                    Los negocios de la portada se muestran en la página principal; todos
+                    los visibles están en el directorio <code>/negocios</code>.
+                </p>
             </div>
         </div>
     </fieldset>

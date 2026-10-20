@@ -93,6 +93,9 @@ $tamano = static function (?int $bytes): string {
                     <?php endif; ?>
                     · <?= e($tamano((int) $foto['tamano_bytes'])) ?>
                 </p>
+                <?php if (!empty($foto['resumen'])): ?>
+                    <p class="galeria__descripcion"><?= e((string) $foto['resumen']) ?></p>
+                <?php endif; ?>
                 <?php if (!empty($foto['descripcion'])): ?>
                     <p class="galeria__descripcion"><?= e((string) $foto['descripcion']) ?></p>
                 <?php endif; ?>
@@ -101,9 +104,18 @@ $tamano = static function (?int $bytes): string {
                     <span class="badge <?= (int) $foto['visible'] === 1 ? 'badge--ok' : 'badge--soft' ?>">
                         <?= (int) $foto['visible'] === 1 ? 'Publicada' : 'Oculta' ?>
                     </span>
+                    <span class="badge <?= (int) ($foto['destacado'] ?? 0) === 1 ? 'badge--info' : 'badge--soft' ?>">
+                        <?= (int) ($foto['destacado'] ?? 0) === 1 ? 'En portada' : 'Solo galería' ?>
+                    </span>
 
                     <?php if ($puedeGestionar): ?>
                         <a class="btn btn--ghost btn--sm" href="<?= e(url('/fotos/' . (string) $foto['id'] . '/editar')) ?>">Editar</a>
+                        <form method="post" action="<?= e(url('/fotos/' . (string) $foto['id'] . '/destacar')) ?>">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="btn btn--ghost btn--sm">
+                                <?= (int) ($foto['destacado'] ?? 0) === 1 ? 'Quitar de portada' : 'Poner en portada' ?>
+                            </button>
+                        </form>
                         <form method="post" action="<?= e(url('/fotos/' . (string) $foto['id'] . '/estado')) ?>">
                             <?= csrf_field() ?>
                             <input type="hidden" name="accion" value="<?= (int) $foto['visible'] === 1 ? 'ocultar' : 'publicar' ?>">

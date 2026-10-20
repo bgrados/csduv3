@@ -43,7 +43,7 @@ final class HomeController
         // no existen (migración pendiente) la portada sigue funcionando.
         if ($dbDisponible) {
             try {
-                $fotos = Foto::listarVisibles(7);
+                $fotos = Foto::listarPortada(5);
             } catch (\Throwable $exception) {
                 Logger::warning('No se pudo cargar la galería de la portada', ['error' => $exception->getMessage()]);
             }

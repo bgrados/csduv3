@@ -88,7 +88,7 @@ $puedeGestionar = can('documentos.gestionar');
                                 <br><span class="muted"><?= e((string) $negocio['descripcion']) ?></span>
                             <?php endif; ?>
                             <?php if ((int) $negocio['destacado'] === 1): ?>
-                                <br><span class="badge badge--info">Destacado</span>
+                                <br><span class="badge badge--info">En portada</span>
                             <?php endif; ?>
                         </td>
                         <td><?= e($categorias[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?></td>

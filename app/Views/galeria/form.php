@@ -33,6 +33,11 @@ $visible = $visiblePrevio !== null
     ? (string) $visiblePrevio === '1'
     : ($esEdicion ? (int) $foto['visible'] === 1 : true);
 
+$destacadoPrevio = old('destacado', null);
+$destacado = $destacadoPrevio !== null
+    ? (string) $destacadoPrevio === '1'
+    : ($esEdicion ? (int) ($foto['destacado'] ?? 0) === 1 : false);
+
 $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
 ?>
 
@@ -75,7 +80,7 @@ $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
 
         <div class="form-grid">
             <div class="field">
-                <label for="titulo">Título <span class="req">*</span></label>
+                <label for="titulo">Titular <span class="req">*</span></label>
                 <input type="text" id="titulo" name="titulo" required maxlength="180" value="<?= e($valor('titulo')) ?>" placeholder="Asamblea general de socios">
             </div>
 
@@ -107,6 +112,20 @@ $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
                     <option value="0" <?= $visible ? '' : 'selected' ?>>No</option>
                 </select>
             </div>
+
+            <div class="field">
+                <label for="destacado">Noticia de portada</label>
+                <select id="destacado" name="destacado">
+                    <option value="0" <?= $destacado ? '' : 'selected' ?>>No (solo en la galería)</option>
+                    <option value="1" <?= $destacado ? 'selected' : '' ?>>Sí (titular en la portada)</option>
+                </select>
+                <p class="field__hint">Solo las noticias de portada aparecen en el bloque de noticias del portal.</p>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="resumen">Entradilla</label>
+            <textarea id="resumen" name="resumen" rows="2" maxlength="300" placeholder="Una o dos frases que acompañen al titular"><?= e($valor('resumen')) ?></textarea>
         </div>
 
         <div class="field">

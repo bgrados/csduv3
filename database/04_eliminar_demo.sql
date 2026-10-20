@@ -11,6 +11,14 @@
 
 SET NAMES utf8mb4;
 
+-- Noticias de ejemplo y negocios de demostración (instalados con
+-- `php tools/instalar_demo_fotos.php`).
+DELETE FROM `csduv3_fotos`
+WHERE `titulo` LIKE 'DEMO-%';
+
+DELETE FROM `csduv3_negocios`
+WHERE `nombre` LIKE 'DEMO-%';
+
 -- Orden inverso al de creación para respetar las claves foráneas.
 
 DELETE FROM `csduv3_actividades`

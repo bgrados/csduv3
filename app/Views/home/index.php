@@ -100,13 +100,13 @@ $visibles = array_slice($instalaciones, 0, 6);
     </p>
 <?php endif; ?>
 
-<h2 class="section-title">El club en imágenes</h2>
+<h2 class="section-title">Noticias del club</h2>
 
 <?php if ($fotos === []): ?>
     <div class="card">
         <p class="muted">
-            El club está preparando su galería con las fotos de las reuniones, los
-            campeonatos y la junta directiva.
+            El club está preparando sus noticias: las reuniones, los campeonatos y la
+            actividad de la junta directiva.
         </p>
         <p>
             <a class="btn btn--ghost btn--sm" href="<?= e(url('/galeria')) ?>">Ver la galería</a>
@@ -129,7 +129,9 @@ $visibles = array_slice($instalaciones, 0, 6);
                     <?php endif; ?>
                 </p>
                 <h3><?= e((string) $fotoPrincipal['titulo']) ?></h3>
-                <?php if (!empty($fotoPrincipal['descripcion'])): ?>
+                <?php if (!empty($fotoPrincipal['resumen'])): ?>
+                    <p><?= e((string) $fotoPrincipal['resumen']) ?></p>
+                <?php elseif (!empty($fotoPrincipal['descripcion'])): ?>
                     <p><?= e((string) $fotoPrincipal['descripcion']) ?></p>
                 <?php endif; ?>
             </div>
@@ -162,7 +164,14 @@ $visibles = array_slice($instalaciones, 0, 6);
 
 <h2 class="section-title">Negocios de la unidad</h2>
 
-<?php if ($negocios === []): ?>
+<?php
+$negociosPortada = array_values(array_filter(
+    $negocios,
+    static fn (array $negocio): bool => (int) ($negocio['destacado'] ?? 0) === 1
+));
+?>
+
+<?php if ($negociosPortada === []): ?>
     <div class="card">
         <p class="muted">
             El club está preparando el directorio de comercios y servicios de la
@@ -171,7 +180,7 @@ $visibles = array_slice($instalaciones, 0, 6);
     </div>
 <?php else: ?>
     <div class="cards cards--3">
-        <?php foreach (array_slice($negocios, 0, 6) as $negocio): ?>
+        <?php foreach (array_slice($negociosPortada, 0, 6) as $negocio): ?>
             <article class="card negocio">
                 <?php if (!empty($negocio['archivo'])): ?>
                     <img class="negocio__logo" src="<?= e(url('/negocios/imagen/' . (string) $negocio['id'])) ?>" alt="<?= e((string) $negocio['nombre']) ?>" loading="lazy">
