@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#1f3b5c">
+    <meta name="theme-color" content="#063B22">
+    <meta name="color-scheme" content="light">
     <meta name="robots" content="noindex, nofollow">
     <title>Sin conexión · CSDUV3</title>
     <style>
         :root {
-            --color-primary: #1f3b5c;
-            --color-bg: #f4f6f9;
-            --color-text: #1f2937;
-            --color-text-soft: #5b6675;
+            --brand-yellow: #FEFE08;
+            --brand-green: #009F39;
+            --brand-green-dark: #007A2C;
+            --brand-green-deep: #063B22;
+            --color-bg: #F5F7F2;
+            --color-text: #18251B;
+            --color-text-soft: #56665A;
+            --color-border: #DBE5DC;
         }
 
         * { box-sizing: border-box; }
@@ -19,10 +24,14 @@
         body {
             margin: 0;
             min-height: 100vh;
+            min-height: 100dvh;
             display: grid;
             place-items: center;
             padding: 1.5rem;
-            background: var(--color-bg);
+            background:
+                radial-gradient(circle at 15% 15%, rgba(254, 254, 8, .22), transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(0, 159, 57, .12), transparent 45%),
+                var(--color-bg);
             color: var(--color-text);
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
             line-height: 1.55;
@@ -30,19 +39,29 @@
 
         .box {
             background: #fff;
-            border: 1px solid #dde3ea;
-            border-radius: 14px;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
-            padding: 2rem;
-            max-width: 460px;
+            border: 1px solid var(--color-border);
+            border-top: 5px solid var(--brand-yellow);
+            border-radius: 18px;
+            box-shadow: 0 20px 48px rgba(6, 59, 34, .16);
+            padding: 2.2rem;
+            max-width: 470px;
             width: 100%;
             text-align: center;
         }
 
+        .logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 13px;
+            object-fit: cover;
+            box-shadow: 0 0 0 1px rgba(0, 159, 57, .25);
+            margin-bottom: .5rem;
+        }
+
         h1 {
             margin: 0 0 .6rem;
-            font-size: 1.3rem;
-            color: var(--color-primary);
+            font-size: 1.35rem;
+            color: var(--brand-green-deep);
         }
 
         p { margin: 0 0 .8rem; color: var(--color-text-soft); }
@@ -50,23 +69,27 @@
         .btn {
             display: inline-block;
             margin-top: .6rem;
-            padding: .55rem 1.1rem;
-            border-radius: 6px;
-            background: var(--color-primary);
+            padding: .58rem 1.15rem;
+            border-radius: 10px;
+            background: var(--brand-green-dark);
             color: #fff;
             text-decoration: none;
             font-weight: 600;
+            transition: background 160ms ease;
         }
+
+        .btn:hover { background: #006324; }
 
         .nota {
             margin-top: 1.2rem;
             font-size: .8rem;
-            color: #8a94a3;
+            color: #7D8C80;
         }
     </style>
 </head>
 <body>
 <main class="box">
+    <img class="logo" src="./assets/img/logo.jpg" alt="" width="64" height="64">
     <h1>Sin conexión</h1>
     <p>
         No pudimos comunicarnos con el servidor del club. Revise su conexión a internet

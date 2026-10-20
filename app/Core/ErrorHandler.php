@@ -111,11 +111,11 @@ final class ErrorHandler
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{$safeTitle} - CSDUV3</title>
 <style>
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f4f6f9;color:#1f2937;margin:0;padding:2rem;display:flex;justify-content:center}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;max-width:820px;width:100%;padding:2rem;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-h1{margin:0 0 .5rem;font-size:1.35rem}
-p{margin:.25rem 0 0;color:#4b5563;line-height:1.55}
-pre{margin-top:1.25rem;background:#0f172a;color:#e2e8f0;padding:1rem;border-radius:8px;overflow:auto;font-size:.8rem;white-space:pre-wrap}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f5f7f2;color:#18251b;margin:0;padding:2rem;display:flex;justify-content:center}
+.card{background:#fff;border:1px solid #dbe5dc;border-top:5px solid #fefe08;border-radius:18px;max-width:820px;width:100%;padding:2rem;box-shadow:0 20px 48px rgba(6,59,34,.16)}
+h1{margin:0 0 .5rem;font-size:1.35rem;color:#063b22}
+p{margin:.25rem 0 0;color:#56665a;line-height:1.55}
+pre{margin-top:1.25rem;background:#063b22;color:#e3f0e6;padding:1rem;border-radius:8px;overflow:auto;font-size:.8rem;white-space:pre-wrap}
 </style>
 </head>
 <body>

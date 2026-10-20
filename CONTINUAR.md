@@ -1,12 +1,16 @@
 # CONTINUAR — Estado del proyecto CSDUV3
 
-Última actualización: **Fase 3, corte 1 (padrón de socios) implementado**. La Fase 2
-y este corte están **pendientes de pruebas en servidor.**
+Última actualización: **identidad visual UV3 aplicada** sobre la Fase 2 y el
+corte 1 de socios. La Fase 2 y el corte siguen **pendientes de pruebas en
+servidor**; el rediseño tiene **revisión visual preliminar con capturas headless**
+y está pendiente de confirmación en navegador real y dispositivos.
 
 > El código de la Fase 2 y del corte 1 de socios está escrito y revisado de forma
 > estática, pero **no se ha ejecutado**: este equipo no tiene PHP 8.3 ni MariaDB.
 > Ninguna de las dos fases debe darse por terminada hasta ejecutar
-> [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor.
+> [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor. El rediseño se verificó de
+> forma estática y con capturas headless a 390, 768 y 1440 px; falta comprobarlo
+> en la aplicación real, en un navegador y en dispositivos físicos.
 
 ---
 
@@ -85,7 +89,7 @@ y este corte están **pendientes de pruebas en servidor.**
 | `public/manifest.webmanifest` | Instalación en Android, iPhone y escritorio |
 | `public/sw.js` | Service worker: caché **solo** de estáticos públicos |
 | `public/offline.html` | Página mostrada sin conexión |
-| `public/icons/*.png` | Iconos (provisionales) generados con `tools/generar_iconos.ps1` |
+| `public/icons/*.png` | Iconos UV3 de la PWA generados con `tools/generar_iconos.ps1` |
 
 **Herramientas** (`tools/`)
 
@@ -142,13 +146,54 @@ y este corte están **pendientes de pruebas en servidor.**
 - La auditoría registra códigos y nombres de categoría, **no** documentos ni otros
   datos personales.
 
+### 2.4 Identidad visual UV3
+
+Se aplicó la paleta del logotipo institucional `logo.jpg` (amarillo `#FEFE08`,
+verde `#009F39`) a todas las pantallas existentes. La propuesta completa está en
+[docs/DISENO.md](docs/DISENO.md).
+
+| Área | Cambio |
+| --- | --- |
+| Paleta | Variables `:root` con marca, neutros y colores semánticos; contrastes WCAG |
+| Navegación | Menú lateral verde profundo, enlace activo amarillo, logo real y `aria-current` |
+| Barra superior | Fondo translúcido, línea amarilla y perfil compacto en móvil |
+| Componentes | Tarjetas, botones, tablas, badges, alertas, formularios y paginación |
+| Portal | Hero verde con acento amarillo, cabecera y pie institucionales |
+| Acceso y errores | Tarjeta de acceso y páginas 403/404/419/500 con la nueva identidad |
+| PWA | `theme_color`, `background_color`, iconos y página sin conexión actualizados |
+| Responsive | Menú deslizante, tablas con scroll, botones a ancho completo y áreas seguras |
+| Accesibilidad | Foco visible, `prefers-reduced-motion` y contrastes revisados |
+
+**Archivos principales**
+
+| Archivo | Función |
+| --- | --- |
+| `public/assets/css/app.css` | Paleta, componentes y reglas responsive |
+| `public/assets/img/logo.jpg` | Logotipo institucional usado por la aplicación |
+| `public/assets/img/logo.svg` | Respaldo vectorial con la misma paleta |
+| `public/assets/img/favicon.svg` | Favicon UV3 |
+| `public/icons/*.png` | Iconos PWA regenerados |
+| `tools/generar_iconos.ps1` | Generador de iconos con la paleta UV3 |
+| `public/manifest.webmanifest` | Colores de la aplicación instalable |
+| `public/offline.html` | Página sin conexión |
+| `app/Views/partials/topbar.php` | Perfil compacto para móvil |
+| `app/Views/partials/sidebar.php` | Enlace activo accesible |
+| `docs/DISENO.md` | Paleta, combinaciones, componentes y mantenimiento |
+
+**Alcance:** se aplicó el diseño a **todas las pantallas que ya existen** (portal,
+acceso, panel, socios, solicitudes, usuarios, roles, auditoría, diagnóstico y
+errores). **No se implementaron módulos de negocio nuevos**: junta directiva,
+elecciones y los módulos de las fases 4 a 7 siguen deshabilitados.
+
 ---
 
 ## 3. Pruebas realizadas
 
 Ejecutadas como **verificación estática** (ver [docs/PRUEBAS.md](docs/PRUEBAS.md)):
 
-- `tools/verificar_estatico.ps1`: **86 archivos PHP, 0 hallazgos**.
+- `tools/verificar_estatico.ps1`: **87 archivos PHP revisados**; los 2 hallazgos
+  corresponden únicamente a `tools/migrar.php` (script de servidor, fuera del
+  alcance y no modificado). Excluyendo ese archivo: **86 archivos, 0 hallazgos**.
 - Cruce de métodos de modelos y núcleo citados por los controladores: correcto.
 - Lista de tablas del diagnóstico (40) coincide con el esquema: correcto.
 - 40 tablas definidas, sin nombres duplicados y sin `DROP`: correcto.
@@ -158,12 +203,16 @@ Ejecutadas como **verificación estática** (ver [docs/PRUEBAS.md](docs/PRUEBAS.
   declaran antes de `/socios/{id}`; cada operación exige su permiso en el servidor.
 - Revisión manual de las consultas nuevas: todas usan parámetros vinculados y los
   valores `LIMIT`/`OFFSET` se acotan antes de interpolarse.
+- Revisión visual con Edge headless sobre una vista estática de referencia (panel
+  y portal) a 390, 768 y 1440 px: sin desbordamiento horizontal de página; la
+  tabla conserva su scroll interno; el menú público se reorganiza en móvil. **No
+  sustituye** la revisión de la aplicación real.
 
 **No ejecutadas:** sintaxis con `php -l`, carga de la aplicación, conexión a
-MariaDB, autenticación, permisos, portal público, PWA y módulo de socios, porque
-**PHP y MariaDB no están instalados en este equipo**. No se declaran resultados
-que no se hayan obtenido. La verificación estática **no** es equivalente a
-`php -l`.
+MariaDB, autenticación, permisos, portal público, PWA, módulo de socios y
+revisión en navegador real/dispositivos físicos, porque **PHP y MariaDB no están
+instalados en este equipo**. No se declaran resultados que no se hayan obtenido.
+La verificación estática **no** es equivalente a `php -l`.
 
 ---
 
@@ -176,15 +225,19 @@ que no se hayan obtenido. La verificación estática **no** es equivalente a
 3. Importar `database/01_esquema.sql` y `database/02_datos_iniciales.sql`
    (y la migración si ya existía la Fase 1).
 4. Ejecutar `php tools/crear_admin.php` y luego **eliminarlo**.
-5. Ejecutar las secciones 4 a 7 de [docs/PRUEBAS.md](docs/PRUEBAS.md).
+5. Ejecutar las secciones 5 a 8 de [docs/PRUEBAS.md](docs/PRUEBAS.md).
 6. Probar el corte 1 de socios: alta con código sugerido, rechazo de códigos y
    documentos duplicados, búsqueda y filtros, ficha, edición, baja con historial
    y gestión de categorías.
+7. Revisar el diseño en un navegador real: móvil (360–430 px), tablet
+   (768–1024 px) y escritorio (1280 px o más), además de la instalación PWA.
 
 ### 4.2 Decisiones pendientes del club
 
-- **Identidad visual oficial**: logotipo y colores. Los actuales son provisionales
-  y **no** representan al club.
+- **Identidad visual oficial**: se aplicó el logotipo `logo.jpg` y su paleta
+  (amarillo y verde). Falta que el club confirme la versión oficial y, si es
+  posible, entregue el archivo en alta resolución para impresión y formatos
+  grandes.
 - **Ambientes y tarifas de alquiler**: el portal no los inventa; se cargan en la
   base de datos.
 - **Categorías de socio y cuotas**: no se precargan.
@@ -208,11 +261,15 @@ que no se hayan obtenido. La verificación estática **no** es equivalente a
 
 ## 5. Siguiente paso recomendado
 
-El corte 1 de socios ya está implementado. Antes de continuar:
+El corte 1 de socios ya está implementado y el rediseño visual está aplicado.
+Antes de continuar:
 
-1. Ejecutar en un servidor con PHP 8.3 y MariaDB las pruebas pendientes de la
+1. Revisar el rediseño en la aplicación real, en un navegador (móvil, tablet y
+   escritorio), y ajustar lo que se detecte. Las capturas headless a 390, 768 y
+   1440 px ya se revisaron.
+2. Ejecutar en un servidor con PHP 8.3 y MariaDB las pruebas pendientes de la
    Fase 2 y del corte 1 de socios.
-2. Corregir lo que aparezca en esas pruebas.
+3. Corregir lo que aparezca en esas pruebas.
 
 Después, continuar con el **corte 2 de socios** (exportación CSV, documentos
 adjuntos y fotografía) o con la **junta directiva**, según la prioridad del club.
@@ -236,5 +293,7 @@ adjuntos y fotografía) o con la **junta directiva**, según la prioridad del cl
   votación electrónica certificada.
 - El módulo de caja es un registro financiero administrativo, no contabilidad
   tributaria completa.
-- **No se han publicado cambios.** El repositorio y el despliegue se actualizarán
-  únicamente con autorización expresa.
+- El corte 1 de socios se publicó en `main` (commit `c54b7e3`) con autorización
+  expresa. El rediseño visual de esta iteración **no se ha publicado**: queda en
+  local, con revisión headless preliminar, pendiente de confirmación en la
+  aplicación real y de autorización para subirlo.

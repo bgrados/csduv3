@@ -21,7 +21,7 @@ $rol = (string) ($usuarioActual['rol_nombre'] ?? 'Sin rol asignado');
     </button>
 
     <div class="topbar__title">
-        <h1><?= e($titulo ?? 'Panel') ?></h1>
+        <h1 title="<?= e($titulo ?? 'Panel') ?>"><?= e($titulo ?? 'Panel') ?></h1>
     </div>
 
     <div class="topbar__user">
@@ -31,7 +31,10 @@ $rol = (string) ($usuarioActual['rol_nombre'] ?? 'Sin rol asignado');
             <small><?= e($rol) ?></small>
         </span>
 
-        <a class="btn btn--ghost btn--sm" href="<?= e(url('/perfil')) ?>">Mi perfil</a>
+        <a class="btn btn--ghost btn--sm topbar__profile" href="<?= e(url('/perfil')) ?>" aria-label="Mi perfil" title="Mi perfil">
+            <?= Icons::render('usuario', 'icon', 18) ?>
+            <span class="topbar__profile-text">Mi perfil</span>
+        </a>
 
         <form method="post" action="<?= e(url('/salir')) ?>" class="inline-form">
             <?= csrf_field() ?>

@@ -189,8 +189,10 @@ código fuente.
 - `public/offline.html` es la página de respaldo cuando no hay conexión.
 - `public/assets/js/app.js` registra el service worker y gestiona el aviso de
   instalación, además del menú lateral en móvil.
-- Los iconos PNG de `public/icons/` se generan con `tools/generar_iconos.ps1` y se
-  reemplazarán por los institucionales cuando el club entregue su identidad.
+- Los iconos PNG de `public/icons/` se generan con `tools/generar_iconos.ps1` usando
+  la paleta UV3 (amarillo `#FEFE08` y verde `#009F39`). El logotipo usado por la
+  aplicación es `public/assets/img/logo.jpg`; conviene que el club entregue una
+  versión oficial en alta resolución para impresión y formatos grandes.
 
 Detalle en [PWA.md](PWA.md).
 
@@ -200,7 +202,9 @@ Detalle en [PWA.md](PWA.md).
 
 - HTML5, CSS3 y JavaScript sin bibliotecas externas.
 - Estilos centralizados en `public/assets/css/app.css`, con variables CSS en
-  `:root` para adaptar la identidad institucional cuando el club la proporcione.
+  `:root` que implementan la identidad UV3 (amarillo `#FEFE08` y verde `#009F39`).
+  La paleta, las combinaciones y los componentes se documentan en
+  [DISENO.md](DISENO.md).
 - Iconos SVG en línea desde `App\Core\Icons`.
 - Diseño adaptable: escritorio, tableta y móvil.
 - Accesibilidad: enlace «saltar al contenido», `aria-*` en menú y controles,

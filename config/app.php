@@ -21,7 +21,7 @@ return [
 
     // Identidad visual institucional. El logotipo queda configurable desde la
     // tabla csduv3_configuracion; aquí solo se define la ruta pública por defecto.
-    'logo'       => 'assets/img/logo.svg',
+    'logo'       => 'assets/img/logo.jpg',
     'favicon'    => 'assets/img/favicon.svg',
 
     // Formatos de presentación (no afectan el almacenamiento en base de datos).

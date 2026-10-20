@@ -1,16 +1,13 @@
 # ============================================================================
-#  CSDUV3 - Generador de iconos de la aplicación instalable (PWA)
+#  CSDUV3 - Generador de iconos de la aplicacion instalable (PWA)
 # ----------------------------------------------------------------------------
-#  Script de apoyo para el desarrollador. Genera los archivos PNG que espera
-#  public/manifest.webmanifest a partir del color institucional provisional.
+#  Genera los PNG que espera public/manifest.webmanifest usando los colores
+#  del logotipo institucional: amarillo #FEFE08 y verde #009F39.
 #
 #  Uso (Windows, PowerShell):
 #      powershell -NoProfile -ExecutionPolicy Bypass -File tools/generar_iconos.ps1
 #
-#  Cuando el club entregue su identidad oficial, reemplace los PNG generados
-#  por los iconos institucionales definitivos.
-#
-#  Este script NO se ejecuta en el servidor: solo sirve para preparar archivos.
+#  Este script NO se ejecuta en el servidor: solo prepara archivos.
 # ============================================================================
 
 Add-Type -AssemblyName System.Drawing
@@ -24,8 +21,9 @@ if (-not (Test-Path $destino)) {
     New-Item -ItemType Directory -Path $destino | Out-Null
 }
 
-$colorFondo = [System.Drawing.ColorTranslator]::FromHtml('#1f3b5c')
-$colorTexto = [System.Drawing.Color]::White
+$colorFondo = [System.Drawing.ColorTranslator]::FromHtml('#FEFE08')
+$colorTexto = [System.Drawing.ColorTranslator]::FromHtml('#007A2C')
+$colorBorde = [System.Drawing.ColorTranslator]::FromHtml('#009F39')
 
 function Nueva-Fuente([int]$tamano) {
     $fuentes = @('Segoe UI', 'Arial', 'Verdana')
@@ -45,17 +43,20 @@ function Crear-Icono {
     param(
         [int]$Tamano,
         [string]$Ruta,
-        [bool]$Maskable = $false
+        [bool]$Maskable = $false,
+        [bool]$FondoCompleto = $false
     )
 
     $bitmap = New-Object System.Drawing.Bitmap($Tamano, $Tamano)
     $grafico = [System.Drawing.Graphics]::FromImage($bitmap)
     $grafico.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
     $grafico.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
+    $grafico.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
 
-    # Fondo: para iconos normales se redondean las esquinas; para los
-    # maskable se cubre todo el cuadro (la plataforma recorta la forma).
-    if ($Maskable) {
+    # Fondo: los iconos normales llevan esquinas redondeadas y un borde verde.
+    # Los maskable y el icono de Apple cubren todo el cuadro para evitar
+    # esquinas transparentes cuando la plataforma aplica su propia máscara.
+    if ($Maskable -or $FondoCompleto) {
         $grafico.Clear($colorFondo)
     } else {
         $grafico.Clear([System.Drawing.Color]::Transparent)
@@ -73,25 +74,38 @@ function Crear-Icono {
         $pincelFondo = New-Object System.Drawing.SolidBrush($colorFondo)
         $grafico.FillPath($pincelFondo, $rutaEsquinas)
         $pincelFondo.Dispose()
+
+        $grosor = [Math]::Max(2, [int]($Tamano * 0.012))
+        $lapiz = New-Object System.Drawing.Pen($colorBorde, $grosor)
+        $grafico.DrawPath($lapiz, $rutaEsquinas)
+        $lapiz.Dispose()
         $rutaEsquinas.Dispose()
     }
 
-    # Proporción del texto: en maskable se reduce para respetar la zona segura.
-    $proporcion = if ($Maskable) { 0.13 } else { 0.165 }
-    $fuente = Nueva-Fuente ([int]($Tamano * $proporcion))
+    # Monograma UV3 y siglas, dentro de la zona segura de los iconos maskable.
+    $proporcionPrincipal = if ($Maskable) { 0.16 } else { 0.19 }
+    $proporcionSecundaria = if ($Maskable) { 0.042 } else { 0.05 }
+
+    $fuentePrincipal = Nueva-Fuente ([int]($Tamano * $proporcionPrincipal))
+    $fuenteSecundaria = Nueva-Fuente ([int]($Tamano * $proporcionSecundaria))
     $pincelTexto = New-Object System.Drawing.SolidBrush($colorTexto)
 
     $formato = New-Object System.Drawing.StringFormat
     $formato.Alignment = [System.Drawing.StringAlignment]::Center
     $formato.LineAlignment = [System.Drawing.StringAlignment]::Center
 
-    $area = New-Object System.Drawing.RectangleF(0, 0, $Tamano, $Tamano)
-    $grafico.DrawString('CSDUV3', $fuente, $pincelTexto, $area, $formato)
+    $areaPrincipal = New-Object System.Drawing.RectangleF(0, - ($Tamano * 0.06), $Tamano, $Tamano)
+    $areaSecundaria = New-Object System.Drawing.RectangleF(0, ($Tamano * 0.17), $Tamano, $Tamano)
+
+    $grafico.DrawString('UV3', $fuentePrincipal, $pincelTexto, $areaPrincipal, $formato)
+    $grafico.DrawString('CSDUV3', $fuenteSecundaria, $pincelTexto, $areaSecundaria, $formato)
 
     $bitmap.Save($Ruta, [System.Drawing.Imaging.ImageFormat]::Png)
 
     $pincelTexto.Dispose()
-    $fuente.Dispose()
+    $formato.Dispose()
+    $fuentePrincipal.Dispose()
+    $fuenteSecundaria.Dispose()
     $grafico.Dispose()
     $bitmap.Dispose()
 }
@@ -100,6 +114,6 @@ Crear-Icono -Tamano 192 -Ruta (Join-Path $destino 'icon-192.png')
 Crear-Icono -Tamano 512 -Ruta (Join-Path $destino 'icon-512.png')
 Crear-Icono -Tamano 192 -Ruta (Join-Path $destino 'icon-maskable-192.png') -Maskable $true
 Crear-Icono -Tamano 512 -Ruta (Join-Path $destino 'icon-maskable-512.png') -Maskable $true
-Crear-Icono -Tamano 180 -Ruta (Join-Path $destino 'apple-touch-icon-180.png')
+Crear-Icono -Tamano 180 -Ruta (Join-Path $destino 'apple-touch-icon-180.png') -FondoCompleto $true
 
-Write-Host "Iconos generados en $destino"
+Write-Host "Iconos UV3 generados en $destino"

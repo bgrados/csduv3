@@ -17,11 +17,11 @@ para guardar datos privados.
 | `public/icons/icon-maskable-192.png`, `icon-maskable-512.png` | Iconos adaptables (Android recorta la forma) |
 | `public/icons/apple-touch-icon-180.png` | Icono para iPhone/iPad |
 | `public/assets/js/app.js` | Registro del service worker y aviso de instalación |
-| `tools/generar_iconos.ps1` | Genera los PNG provisionales (uso del desarrollador) |
+| `tools/generar_iconos.ps1` | Genera los PNG con la identidad UV3 (uso del desarrollador) |
 
-Los iconos son **provisionales**: muestran las siglas sobre el color institucional
-neutro. Se reemplazarán por los iconos oficiales cuando el club entregue su
-identidad visual.
+Los iconos usan el amarillo y el verde del logotipo institucional: monograma
+**UV3** sobre fondo amarillo. Se regeneran con el script y se reemplazarán por
+los iconos definitivos si el club entrega una versión oficial en alta resolución.
 
 ---
 

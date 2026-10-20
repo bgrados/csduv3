@@ -136,9 +136,10 @@ Detalle completo en [docs/INSTALACION.md](docs/INSTALACION.md) y
 
 ## Advertencias
 
-- El logotipo, los colores institucionales y los **iconos de la aplicación
-  instalable** son **provisionales** hasta que el club proporcione su identidad
-  oficial.
+- La identidad visual se aplicó a partir de `logo.jpg`: amarillo `#FEFE08` y
+  verde `#009F39`. La paleta, los componentes y las reglas responsive están en
+  [docs/DISENO.md](docs/DISENO.md). Conviene que el club entregue el logotipo
+  oficial en alta resolución para impresión y formatos grandes.
 - La Fase 2 está **implementada pero no probada en un servidor** con PHP 8.3 y
   MariaDB. Hasta ejecutar [docs/PRUEBAS.md](docs/PRUEBAS.md) no debe darse por
   terminada.

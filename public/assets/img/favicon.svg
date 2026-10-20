@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Icono provisional. Reemplazar por el oficial cuando el club lo proporcione. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-    <rect width="32" height="32" rx="7" fill="#1f3b5c"/>
+<!-- Icono UV3: amarillo institucional con monograma verde. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="UV3">
+    <rect width="32" height="32" rx="7" fill="#FEFE08"/>
+    <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="6.25" fill="none" stroke="#009F39" stroke-width="1.5"/>
     <text x="16" y="21" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif"
-          font-size="11" font-weight="700" fill="#ffffff">UV3</text>
+          font-size="11" font-weight="700" fill="#007A2C" letter-spacing="-0.3">UV3</text>
 </svg>

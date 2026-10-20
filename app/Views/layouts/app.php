@@ -24,7 +24,7 @@ $enPerfil = str_contains($rutaActual, '/perfil');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#1f3b5c">
+    <meta name="theme-color" content="#063B22">
     <meta name="robots" content="noindex, nofollow">
     <title><?= e($tituloPagina) ?></title>
     <link rel="icon" href="<?= e(asset((string) config('app.favicon'))) ?>" type="image/svg+xml">

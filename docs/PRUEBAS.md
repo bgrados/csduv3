@@ -22,9 +22,9 @@ qué resultado. No se anotan resultados de pruebas que no se hayan ejecutado.
 | --- | --- | --- |
 | PHP 8.3 (`php`) | **No instalado** (no está en `PATH`, ni en XAMPP, Laragon, WAMP ni `Program Files`) | No se pudo ejecutar `php -l` ni el servidor embebido |
 | MySQL / MariaDB (`mysql`, `mariadb`) | **No instalados** | No se pudo importar el esquema ni ejecutar consultas reales |
-| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit inicial) | El envío del código no constituye una prueba funcional |
-| Node.js | No instalado (no se necesita) | — |
-| Verificación estática propia | Disponible: `tools/verificar_estatico.ps1` | Se ejecutó sobre los 80 archivos PHP de la Fase 2 y los 86 del árbol con el Corte 1 de Socios |
+| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit `c54b7e3`) | El envío del código no constituye una prueba funcional |
+| Node.js | Instalado (v24), usado solo para capturas headless de revisión | No es dependencia de la aplicación ni del servidor |
+| Verificación estática propia | Disponible: `tools/verificar_estatico.ps1` | Se ejecutó sobre los 80 archivos PHP de la Fase 2 y, tras el Corte 1 de Socios y el rediseño, sobre 86 archivos (excluyendo el script de servidor `tools/migrar.php`) |
 
 > **Importante:** mientras PHP no esté instalado, las pruebas de ejecución quedan
 > pendientes. La solución recomendada es instalar PHP 8.3 en el equipo (o usar
@@ -60,9 +60,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/verificar_estatico.ps1
 | Archivos PHP revisados | 80 |
 | Hallazgos | 0 |
 
-> La última ejecución, sobre el árbol con el Corte 1 de Socios, revisó **86
-> archivos PHP con 0 hallazgos** (registrado en la sección 9). Sigue sin sustituir
-> a `php -l`.
+> La última ejecución, sobre el árbol con el Corte 1 de Socios y el rediseño UV3,
+> revisó **86 archivos PHP con 0 hallazgos** al excluir `tools/migrar.php`, un
+> script de servidor que tiene 2 hallazgos preexistentes (no empieza con `<?php`
+> y no declara `strict_types`) y que no se modifica por estar fuera del alcance de
+> la aplicación. Sigue sin sustituir a `php -l`.
 
 Además se ejecutaron estas comprobaciones de texto:
 
@@ -568,7 +570,8 @@ WHERE descripcion LIKE '%99999901%'
 | Fase 1 | P1 a P10 | Correcto | Pruebas estáticas sobre el código generado |
 | Fase 2 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 80 archivos PHP, 0 hallazgos |
 | Fase 2 | E1 a E4 | Correcto | Cruce de métodos, tablas y búsqueda de credenciales |
-| Corte 1 de Socios | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos; no sustituye a `php -l` |
+| Corte 1 de Socios | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos (excluye `tools/migrar.php`); no sustituye a `php -l` |
+| Rediseño UV3 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos; CSS con 281/281 llaves; capturas headless de referencia a 390, 768 y 1440 px; sin pruebas en navegador real ni dispositivos |
 | Pendiente | Secciones 5 a 8 (incluye PS-01 a PS-35) | — | Requiere PHP 8.3 y MariaDB; las pruebas de socios requieren una base de datos de pruebas |
 
 ---
@@ -587,3 +590,9 @@ usa `SELECT ... FOR UPDATE`**. El reenvío secuencial se rechaza, pero dos enví
 realmente simultáneos desde sesiones distintas podrían insertar dos filas en
 `csduv3_socios_bajas` (véanse PS-29 y PS-30). La corrección requiere bloquear la
 fila del socio y reverificar su estado antes de insertar.
+
+La identidad visual UV3 se revisó de forma estática (hoja de estilos y
+plantillas) y con capturas headless de una vista de referencia a 390, 768 y
+1440 px. **No se validó en un navegador real ni en dispositivos físicos**; esa
+revisión queda pendiente y debe hacerse sobre un servidor de pruebas, nunca
+sobre producción.

@@ -19,14 +19,28 @@ $usuarioActual = auth();
 $rutaActual = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
 $rutaActual = is_string($rutaActual) && $rutaActual !== '' ? $rutaActual : '/';
 
-$activa = static function (string $prefijo) use ($rutaActual): string {
+$prefijosNav = ['/alquiler/disponibilidad', '/alquiler/solicitud', '/alquiler'];
+$rutaActiva = $rutaActual === '/' ? '/' : null;
+
+foreach ($prefijosNav as $prefijo) {
+    if ($rutaActual === $prefijo || str_starts_with($rutaActual, $prefijo . '/')) {
+        $rutaActiva = $prefijo;
+        break;
+    }
+}
+
+$esActiva = static function (string $prefijo) use ($rutaActiva): bool {
     $prefijo = '/' . trim($prefijo, '/');
 
-    if ($prefijo === '/') {
-        return $rutaActual === '/' ? ' is-active' : '';
-    }
+    return $prefijo === $rutaActiva;
+};
 
-    return str_starts_with($rutaActual, $prefijo) ? ' is-active' : '';
+$activa = static function (string $prefijo) use ($esActiva): string {
+    return $esActiva($prefijo) ? ' is-active' : '';
+};
+
+$aria = static function (string $prefijo) use ($esActiva): string {
+    return $esActiva($prefijo) ? ' aria-current="page"' : '';
 };
 ?>
 <!DOCTYPE html>
@@ -34,7 +48,7 @@ $activa = static function (string $prefijo) use ($rutaActual): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#1f3b5c">
+    <meta name="theme-color" content="#063B22">
     <meta name="description" content="Portal público del <?= e($nombreClub) ?>: consulta de ambientes, tarifas, disponibilidad y solicitudes de alquiler.">
     <title><?= e($tituloPagina) ?></title>
     <link rel="icon" href="<?= e(asset((string) config('app.favicon'))) ?>" type="image/svg+xml">
@@ -57,7 +71,7 @@ $activa = static function (string $prefijo) use ($rutaActual): string {
 <header class="site-header">
     <div class="site-header__inner">
         <a class="site-brand" href="<?= e(url('/')) ?>">
-            <img src="<?= e(asset((string) config('app.logo'))) ?>" alt="" width="40" height="40">
+            <img src="<?= e(asset((string) config('app.logo'))) ?>" alt="" width="44" height="44">
             <span class="site-brand__text">
                 <strong><?= e((string) config('app.short_name')) ?></strong>
                 <small><?= e($nombreClub) ?></small>
@@ -65,10 +79,10 @@ $activa = static function (string $prefijo) use ($rutaActual): string {
         </a>
 
         <nav class="site-nav" aria-label="Navegación del portal">
-            <a class="site-nav__link<?= $activa('/') ?>" href="<?= e(url('/')) ?>">Inicio</a>
-            <a class="site-nav__link<?= $activa('/alquiler') ?>" href="<?= e(url('/alquiler')) ?>">Ambientes</a>
-            <a class="site-nav__link<?= $activa('/alquiler/disponibilidad') ?>" href="<?= e(url('/alquiler/disponibilidad')) ?>">Disponibilidad</a>
-            <a class="site-nav__link<?= $activa('/alquiler/solicitud') ?>" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar</a>
+            <a class="site-nav__link<?= $activa('/') ?>" href="<?= e(url('/')) ?>"<?= $aria('/') ?>>Inicio</a>
+            <a class="site-nav__link<?= $activa('/alquiler') ?>" href="<?= e(url('/alquiler')) ?>"<?= $aria('/alquiler') ?>>Ambientes</a>
+            <a class="site-nav__link<?= $activa('/alquiler/disponibilidad') ?>" href="<?= e(url('/alquiler/disponibilidad')) ?>"<?= $aria('/alquiler/disponibilidad') ?>>Disponibilidad</a>
+            <a class="site-nav__link<?= $activa('/alquiler/solicitud') ?>" href="<?= e(url('/alquiler/solicitud')) ?>"<?= $aria('/alquiler/solicitud') ?>>Solicitar</a>
 
             <?php if ($usuarioActual === null): ?>
                 <a class="btn btn--ghost btn--sm site-nav__cta" href="<?= e(url('/ingresar')) ?>">Ingresar</a>

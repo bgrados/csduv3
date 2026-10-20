@@ -19,7 +19,7 @@
 
 'use strict';
 
-var CACHE = 'csduv3-publica-v1';
+var CACHE = 'csduv3-publica-v2';
 
 /* Rutas del panel administrativo que nunca se cachean. */
 var RUTAS_PRIVADAS = [
@@ -73,6 +73,7 @@ var RECURSOS = [
     './offline.html',
     './assets/css/app.css',
     './assets/js/app.js',
+    './assets/img/logo.jpg',
     './assets/img/logo.svg',
     './assets/img/favicon.svg',
     './manifest.webmanifest'

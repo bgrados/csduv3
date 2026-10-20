@@ -36,7 +36,7 @@ INSERT IGNORE INTO `csduv3_configuracion` (`clave`, `valor`, `tipo`, `grupo`, `d
     ('moneda',             'PEN',                                       'texto',  'finanzas',   'Moneda de los importes'),
     ('simbolo_moneda',     'S/',                                        'texto',  'finanzas',   'Símbolo usado al mostrar importes'),
     ('formato_fecha',      'd/m/Y',                                     'texto',  'general',    'Formato de fecha de la interfaz'),
-    ('logo',               'assets/img/logo.svg',                       'archivo','identidad',  'Logotipo institucional (pendiente de reemplazo por el archivo oficial)'),
+    ('logo',               'assets/img/logo.jpg',                       'archivo','identidad',  'Logotipo institucional UV3'),
     ('direccion',          '',                                          'texto',  'contacto',   'Dirección de la sede (completar)'),
     ('telefono',           '',                                          'texto',  'contacto',   'Teléfono institucional (completar)'),
     ('email_institucional','',                                          'texto',  'contacto',   'Correo institucional (completar)'),

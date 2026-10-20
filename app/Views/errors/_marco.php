@@ -25,7 +25,7 @@ $logo = url((string) config('app.logo'));
 </head>
 <body class="error-page">
 <main class="error-box">
-    <img class="error-box__logo" src="<?= e($logo) ?>" alt="" width="56" height="56">
+    <img class="error-box__logo" src="<?= e($logo) ?>" alt="" width="64" height="64">
     <p class="error-box__code">Error <?= e((string) $codigo) ?></p>
     <h1><?= e($tituloError) ?></h1>
     <p><?= e($mensajeError) ?></p>
