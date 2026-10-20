@@ -429,6 +429,30 @@ El precio sale de la tarifa vigente del ambiente (activa y dentro de su
 vigencia). El adelanto es el `porcentaje_adelanto` de la configuración
 (50 % por defecto) y solo aplica si el ambiente tiene «requiere adelanto».
 
+### 2.11 Configuración del club e imágenes en WebP
+
+**Panel → Configuración** (permiso `configuracion.gestionar`):
+
+| Sección | Parámetros |
+| --- | --- |
+| Identidad | Nombre del club, siglas, lema, descripción breve, años de mandato |
+| Contacto | Teléfono, WhatsApp, correo, dirección, Facebook e Instagram |
+| Portada | Titular y bajada editables, y si se muestra el contenido de ejemplo |
+| Alquileres y avisos | Porcentaje de adelanto, días mínimos de anticipación, aviso de mantenimiento |
+| Marca | Logotipo, favicon y foto de portada (subida y restauración de la original) |
+
+Los valores se guardan en `csduv3_configuracion` y **sustituyen de inmediato** a
+los del archivo de configuración: el portal público y el panel muestran el
+nombre, las siglas, el logo y el favicon que el club defina. La marca se sirve
+por la ruta pública `/marca/{tipo}` (con caché) y nunca se expone como
+archivo estático.
+
+**WebP**: `App\Core\Uploads` convierte **toda imagen subida** a WebP y la
+reduce a 2000 px de ancho. Si la conversión no ahorra peso, se conserva el
+original (nunca sube de tamaño). Medido con una foto de teléfono de 4000×3000:
+de 2,26 MB a **267 KB (−88 %)**. Si el servidor no tiene GD con WebP, el
+sistema sigue funcionando con el archivo original.
+
 ---
 
 ## 3. Pruebas realizadas

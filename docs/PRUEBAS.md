@@ -1063,6 +1063,21 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | RB-11 | Abrir `/alquiler/reserva-confirmada` sin haber reservado | Muestra el estado vacío, sin datos de ninguna reserva |
 | RB-12 | Comprobar la página de confirmación | Muestra el código, el ambiente, la fecha, el horario, los importes y los próximos pasos; **no** muestra datos de otras reservas |
 
+### 13.7 Configuración del club
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| CF-01 | `GET /configuracion` con `configuracion.gestionar` | 200; formulario de identidad, contacto, portada, alquileres y marca |
+| CF-02 | `GET /configuracion` sin el permiso | 403 y el enlace no aparece en el menú |
+| CF-03 | Guardar el nombre, las siglas, el teléfono y el correo | Se guardan en `csduv3_configuracion`; el portal y el panel muestran el nombre y las siglas nuevos |
+| CF-04 | Guardar un correo con formato inválido o un enlace sin `http://` | Se rechaza con el mensaje correspondiente y no se guarda |
+| CF-05 | Subir un logo en PNG | Se convierte a WebP, se guarda en `storage/uploads/marca` y aparece en la cabecera del portal |
+| CF-06 | Subir una imagen que no es una imagen | Se rechaza con el mensaje de tipo no permitido |
+| CF-07 | Restaurar la marca original | Vuelve la imagen de la aplicación y se borra la subida anterior |
+| CF-08 | Abrir `/marca/logo` y `/marca/favicon` | 200 con la imagen y su tipo de contenido correcto |
+| CF-09 | Activar el aviso de mantenimiento | El portal público muestra el aviso arriba del todo |
+| CF-10 | Subir una foto de 4000×3000 | Queda en WebP, con un ancho máximo de 2000 px y un peso menor que el original |
+
 ---
 
 ## 14. Registro de resultados
@@ -1081,7 +1096,7 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | Reservas, galería y negocios | `php -l` + verificación estática + enrutamiento y render | Correcto | 153 archivos de `app/` sin errores de sintaxis; 160 archivos PHP con 0 hallazgos; 30 rutas nuevas comprobadas; 13 vistas renderizadas sin advertencias; migración `0002` revisada |
 | Despliegue de reservas, galería y negocios (`522a985`) | Verificación HTTP | Correcto | `/galeria` 200, `/negocios` 200, `/reservas`, `/fotos` y `/directorio` 302 a `/ingresar`; la portada muestra «El club en imágenes», «Negocios de la unidad» y el enlace al portal UV3; 0 errores PHP en las páginas públicas |
 | Portada con formato de revista (`b46ded1`) | Verificación HTTP + capturas headless | Correcto | La portada muestra masthead, portada con titular, dos carruseles, columna con próximos eventos y agenda deportiva; 6 fotos de ejemplo con insignia «Ejemplo»; 0 errores PHP; en 390 px `scrollWidth` = `innerWidth` (sin desbordamiento) y el bloque se apila en una columna |
-| Pendiente | Secciones 5 a 13 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09, RS-01 a RS-11, GA-01 a GA-06, NE-01 a NE-06, EN-1 a EN-3, RV-1 a RV-7, RB-01 a RB-12) | - | Requiere **MariaDB** y una sesion de administrador; las pruebas de escritura requieren una base de datos de pruebas |
+| Pendiente | Secciones 5 a 13 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09, RS-01 a RS-11, GA-01 a GA-06, NE-01 a NE-06, EN-1 a EN-3, RV-1 a RV-7, RB-01 a RB-12, CF-01 a CF-10) | - | Requiere **MariaDB** y una sesion de administrador; las pruebas de escritura requieren una base de datos de pruebas |
 | Pendiente | Rotación de la contraseña de la base de datos | — | Sigue expuesta en el historial público de Git: rotar en cPanel y actualizar `.env` |
 
 ---
