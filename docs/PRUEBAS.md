@@ -22,7 +22,7 @@ qué resultado. No se anotan resultados de pruebas que no se hayan ejecutado.
 | --- | --- | --- |
 | PHP 8.3 (`php`) | **No instalado** (no está en `PATH`, ni en XAMPP, Laragon, WAMP ni `Program Files`) | No se pudo ejecutar `php -l` ni el servidor embebido |
 | MySQL / MariaDB (`mysql`, `mariadb`) | **No instalados** | No se pudo importar el esquema ni ejecutar consultas reales |
-| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit `c54b7e3`) | El envío del código no constituye una prueba funcional |
+| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit `c76def6`) | El envío del código no constituye una prueba funcional |
 | Node.js | Instalado (v24), usado solo para capturas headless de revisión | No es dependencia de la aplicación ni del servidor |
 | Verificación estática propia | Disponible: `tools/verificar_estatico.ps1` | Se ejecutó sobre los 80 archivos PHP de la Fase 2 y, tras el Corte 1 de Socios y el rediseño, sobre 86 archivos (excluyendo el script de servidor `tools/migrar.php`) |
 

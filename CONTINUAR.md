@@ -10,7 +10,9 @@ y está pendiente de confirmación en navegador real y dispositivos.
 > Ninguna de las dos fases debe darse por terminada hasta ejecutar
 > [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor. El rediseño se verificó de
 > forma estática y con capturas headless a 390, 768 y 1440 px; falta comprobarlo
-> en la aplicación real, en un navegador y en dispositivos físicos.
+> en la aplicación real, en un navegador y en dispositivos físicos. El código ya
+> está en GitHub (`main`, commit `c76def6`), pero **falta subirlo al hosting**:
+> el despliegue es manual (cPanel/FTP), no automático.
 
 ---
 
@@ -293,7 +295,10 @@ adjuntos y fotografía) o con la **junta directiva**, según la prioridad del cl
   votación electrónica certificada.
 - El módulo de caja es un registro financiero administrativo, no contabilidad
   tributaria completa.
-- El corte 1 de socios se publicó en `main` (commit `c54b7e3`) con autorización
-  expresa. El rediseño visual de esta iteración **no se ha publicado**: queda en
-  local, con revisión headless preliminar, pendiente de confirmación en la
-  aplicación real y de autorización para subirlo.
+- El corte 1 de socios se publicó en `main` (commit `c54b7e3`) y el rediseño
+  visual se publicó en GitHub en el commit `c76def6`, ambos con autorización
+  expresa. **El rediseño todavía no está desplegado en el hosting**: la
+  producción sigue sirviendo la versión anterior. El proyecto no tiene CI/CD;
+  el despliegue es manual por cPanel/FTP (ver
+  [docs/DESPLIEGUE_BANAHOSTING.md](docs/DESPLIEGUE_BANAHOSTING.md), sección 11).
+  Falta subir los archivos y validar en la aplicación real.
