@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @var bool  $dbDisponible
  * @var array<int, array<string, mixed>> $instalaciones
  * @var array<string, string> $configuracion
+ * @var array<int, array<string, mixed>> $fotos
+ * @var array<int, array<string, mixed>> $negocios
  */
 
 $telefono = trim((string) ($configuracion['telefono'] ?? ''));
@@ -25,13 +27,18 @@ $visibles = array_slice($instalaciones, 0, 6);
         <h1><?= e((string) config('app.name')) ?></h1>
         <p class="hero__lead">
             Consulte los ambientes disponibles, las tarifas publicadas por el club, la
-            disponibilidad por fecha y los torneos en curso. Envíe su solicitud de alquiler
-            desde el teléfono, sin necesidad de crear una cuenta.
+            disponibilidad por fecha, los torneos en curso y la galería de fotos del
+            club. Envíe su solicitud de alquiler desde el teléfono, sin necesidad de
+            crear una cuenta.
         </p>
         <div class="hero__actions">
             <a class="btn btn--primary" href="<?= e(url('/alquiler')) ?>">Ver ambientes y tarifas</a>
             <a class="btn btn--ghost" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
             <a class="btn btn--ghost" href="<?= e(url('/torneos')) ?>">Ver torneos</a>
+            <a class="btn btn--ghost" href="<?= e(url('/galeria')) ?>">Galería del club</a>
+            <a class="btn btn--ghost" href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">
+                Portal de la Unidad Vecinal
+            </a>
         </div>
     </div>
 </section>
@@ -90,6 +97,123 @@ $visibles = array_slice($instalaciones, 0, 6);
 
     <p class="section-actions">
         <a class="btn btn--ghost btn--sm" href="<?= e(url('/alquiler')) ?>">Ver todos los ambientes</a>
+    </p>
+<?php endif; ?>
+
+<h2 class="section-title">El club en imágenes</h2>
+
+<?php if ($fotos === []): ?>
+    <div class="card">
+        <p class="muted">
+            El club está preparando su galería con las fotos de las reuniones, los
+            campeonatos y la junta directiva.
+        </p>
+        <p>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('/galeria')) ?>">Ver la galería</a>
+        </p>
+    </div>
+<?php else: ?>
+    <?php
+    $fotoPrincipal = array_shift($fotos);
+    ?>
+    <div class="periodico">
+        <article class="periodico__portada">
+            <a class="periodico__portada-imagen" href="<?= e(url('/galeria/imagen/' . (string) $fotoPrincipal['id'])) ?>">
+                <img src="<?= e(url('/galeria/imagen/' . (string) $fotoPrincipal['id'])) ?>" alt="<?= e((string) $fotoPrincipal['titulo']) ?>">
+            </a>
+            <div class="periodico__portada-texto">
+                <p class="periodico__kicker">
+                    <?= e(\App\Models\Foto::CATEGORIAS[(string) $fotoPrincipal['categoria']] ?? (string) $fotoPrincipal['categoria']) ?>
+                    <?php if (!empty($fotoPrincipal['fecha_foto'])): ?>
+                        · <?= e(fecha_legible((string) $fotoPrincipal['fecha_foto'])) ?>
+                    <?php endif; ?>
+                </p>
+                <h3><?= e((string) $fotoPrincipal['titulo']) ?></h3>
+                <?php if (!empty($fotoPrincipal['descripcion'])): ?>
+                    <p><?= e((string) $fotoPrincipal['descripcion']) ?></p>
+                <?php endif; ?>
+            </div>
+        </article>
+
+        <?php if ($fotos !== []): ?>
+            <div class="periodico__notas">
+                <?php foreach (array_slice($fotos, 0, 4) as $foto): ?>
+                    <a class="periodico__nota" href="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>">
+                        <img src="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>" alt="<?= e((string) $foto['titulo']) ?>" loading="lazy">
+                        <span>
+                            <strong><?= e((string) $foto['titulo']) ?></strong>
+                            <small>
+                                <?= e(\App\Models\Foto::CATEGORIAS[(string) $foto['categoria']] ?? (string) $foto['categoria']) ?>
+                                <?php if (!empty($foto['fecha_foto'])): ?>
+                                    · <?= e(fecha_legible((string) $foto['fecha_foto'])) ?>
+                                <?php endif; ?>
+                            </small>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <p class="section-actions">
+        <a class="btn btn--ghost btn--sm" href="<?= e(url('/galeria')) ?>">Ver todas las fotos</a>
+    </p>
+<?php endif; ?>
+
+<h2 class="section-title">Negocios de la unidad</h2>
+
+<?php if ($negocios === []): ?>
+    <div class="card">
+        <p class="muted">
+            El club está preparando el directorio de comercios y servicios de la
+            unidad vecinal. Mientras tanto, puede comunicarse con la institución.
+        </p>
+    </div>
+<?php else: ?>
+    <div class="cards cards--3">
+        <?php foreach (array_slice($negocios, 0, 6) as $negocio): ?>
+            <article class="card negocio">
+                <?php if (!empty($negocio['archivo'])): ?>
+                    <img class="negocio__logo" src="<?= e(url('/negocios/imagen/' . (string) $negocio['id'])) ?>" alt="<?= e((string) $negocio['nombre']) ?>" loading="lazy">
+                <?php endif; ?>
+
+                <p class="card__label">
+                    <?= e(\App\Models\Negocio::CATEGORIAS[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?>
+                </p>
+                <h3 class="negocio__nombre"><?= e((string) $negocio['nombre']) ?></h3>
+
+                <?php if (!empty($negocio['descripcion'])): ?>
+                    <p class="negocio__descripcion"><?= e((string) $negocio['descripcion']) ?></p>
+                <?php endif; ?>
+
+                <ul class="facts">
+                    <?php if (!empty($negocio['telefono'])): ?>
+                        <li>
+                            <span>Teléfono</span>
+                            <strong><a href="tel:<?= e(preg_replace('/[^0-9+]/', '', (string) $negocio['telefono'])) ?>"><?= e((string) $negocio['telefono']) ?></a></strong>
+                        </li>
+                    <?php endif; ?>
+                    <?php if (!empty($negocio['horario'])): ?>
+                        <li><span>Horario</span><strong><?= e((string) $negocio['horario']) ?></strong></li>
+                    <?php endif; ?>
+                </ul>
+
+                <?php if (!empty($negocio['web'])): ?>
+                    <div class="card__actions">
+                        <a class="btn btn--primary btn--sm" href="<?= e((string) $negocio['web']) ?>" target="_blank" rel="noopener nofollow">
+                            Visitar
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </article>
+        <?php endforeach; ?>
+    </div>
+
+    <p class="section-actions">
+        <a class="btn btn--ghost btn--sm" href="<?= e(url('/negocios')) ?>">Ver el directorio completo</a>
+        <a class="btn btn--ghost btn--sm" href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">
+            Portal de la Unidad Vecinal
+        </a>
     </p>
 <?php endif; ?>
 

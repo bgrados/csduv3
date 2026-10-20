@@ -99,6 +99,21 @@ final class CategoriaMovimiento extends Model
     }
 
     /**
+     * Identificador de una categoría por nombre y tipo (0 si no existe).
+     */
+    public static function idPorNombre(string $nombre, string $tipo): int
+    {
+        $sql = sprintf(
+            'SELECT `id` FROM `%s` WHERE `nombre` = :nombre AND `tipo` = :tipo LIMIT 1',
+            self::table()
+        );
+
+        $valor = self::scalar($sql, ['nombre' => $nombre, 'tipo' => $tipo]);
+
+        return $valor === false || $valor === null ? 0 : (int) $valor;
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public static function find(int $id): ?array

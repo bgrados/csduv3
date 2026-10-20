@@ -11,11 +11,13 @@ use App\Core\Logger;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use App\Core\Uploads;
 use App\Core\Validator;
 use App\Core\View;
 use App\Models\Documento;
 use App\Models\Socio;
 use DateTimeImmutable;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -31,23 +33,6 @@ use Throwable;
 final class DocumentosController
 {
     private const POR_PAGINA = 20;
-
-    /** Tamaño máximo permitido: 5 MB. */
-    private const TAMANO_MAXIMO = 5242880;
-
-    /** Extensiones admitidas. */
-    private const EXTENSIONES = [
-        'pdf' => 'application/pdf',
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'png' => 'image/png',
-        'doc' => 'application/msword',
-        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'xls' => 'application/vnd.ms-excel',
-        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'odt' => 'application/vnd.oasis.opendocument.text',
-        'txt' => 'text/plain',
-    ];
 
     public function index(Request $request): void
     {
@@ -355,98 +340,17 @@ final class DocumentosController
     {
         $archivo = $request->file('archivo');
 
-        if ($archivo === null) {
+        if ($archivo === null || (int) ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
             return null;
         }
 
-        $codigo = (int) ($archivo['error'] ?? UPLOAD_ERR_NO_FILE);
+        try {
+            return Uploads::guardar($archivo, 'documentos');
+        } catch (RuntimeException $exception) {
+            $errores[] = $exception->getMessage();
 
-        if ($codigo === UPLOAD_ERR_NO_FILE) {
             return null;
         }
-
-        if ($codigo !== UPLOAD_ERR_OK) {
-            $errores[] = 'No se pudo subir el archivo. Intente nuevamente.';
-            return null;
-        }
-
-        $tamano = (int) ($archivo['size'] ?? 0);
-
-        if ($tamano <= 0) {
-            $errores[] = 'El archivo está vacío.';
-            return null;
-        }
-
-        if ($tamano > self::TAMANO_MAXIMO) {
-            $errores[] = 'El archivo supera el máximo de 5 MB.';
-            return null;
-        }
-
-        $original = (string) ($archivo['name'] ?? 'archivo');
-        $extension = strtolower((string) pathinfo($original, PATHINFO_EXTENSION));
-
-        if (!isset(self::EXTENSIONES[$extension])) {
-            $errores[] = 'El tipo de archivo no está permitido (PDF, imágenes o documentos de Office).';
-            return null;
-        }
-
-        $temporal = (string) ($archivo['tmp_name'] ?? '');
-
-        if ($temporal === '' || !is_uploaded_file($temporal)) {
-            $errores[] = 'La carga del archivo no es válida.';
-            return null;
-        }
-
-        $mimeReal = $this->mimeReal($temporal);
-        $mime = $mimeReal !== null ? $mimeReal : (string) ($archivo['type'] ?? self::EXTENSIONES[$extension]);
-
-        if (!in_array($mime, self::EXTENSIONES, true)) {
-            $errores[] = 'El contenido del archivo no corresponde a un tipo permitido.';
-            return null;
-        }
-
-        $carpeta = 'documentos/' . date('Y/m');
-        $directorio = storage_path('uploads/' . $carpeta);
-
-        if (!is_dir($directorio) && !mkdir($directorio, 0750, true) && !is_dir($directorio)) {
-            $errores[] = 'No se pudo preparar la carpeta de archivos.';
-            return null;
-        }
-
-        $nombre = bin2hex(random_bytes(16)) . '.' . $extension;
-        $destino = $directorio . DIRECTORY_SEPARATOR . $nombre;
-
-        if (!move_uploaded_file($temporal, $destino)) {
-            $errores[] = 'No se pudo guardar el archivo en el servidor.';
-            return null;
-        }
-
-        @chmod($destino, 0640);
-
-        return [
-            'ruta'            => $carpeta . '/' . $nombre,
-            'nombre_original' => $original,
-            'tipo_mime'       => $mime,
-            'tamano'          => $tamano,
-        ];
-    }
-
-    private function mimeReal(string $ruta): ?string
-    {
-        if (!function_exists('finfo_open')) {
-            return null;
-        }
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-
-        if ($finfo === false) {
-            return null;
-        }
-
-        $mime = finfo_file($finfo, $ruta);
-        finfo_close($finfo);
-
-        return is_string($mime) ? $mime : null;
     }
 
     /**
@@ -454,23 +358,12 @@ final class DocumentosController
      */
     private function rutaAbsoluta(string $ruta): ?string
     {
-        $ruta = str_replace(['..', "\0"], '', $ruta);
-        $base = storage_path('uploads');
-
-        if (!str_starts_with($ruta, 'documentos/')) {
-            return null;
-        }
-
-        return $base . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $ruta);
+        return Uploads::rutaAbsoluta($ruta, 'documentos/');
     }
 
     private function borrarArchivo(string $ruta): void
     {
-        $absoluta = $this->rutaAbsoluta($ruta);
-
-        if ($absoluta !== null && is_file($absoluta)) {
-            @unlink($absoluta);
-        }
+        Uploads::borrar($ruta, 'documentos/');
     }
 
     /**

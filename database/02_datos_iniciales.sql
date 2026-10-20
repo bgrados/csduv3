@@ -40,7 +40,8 @@ INSERT IGNORE INTO `csduv3_configuracion` (`clave`, `valor`, `tipo`, `grupo`, `d
     ('direccion',          '',                                          'texto',  'contacto',   'Dirección de la sede (completar)'),
     ('telefono',           '',                                          'texto',  'contacto',   'Teléfono institucional (completar)'),
     ('email_institucional','',                                          'texto',  'contacto',   'Correo institucional (completar)'),
-    ('anios_mandato',      '4',                                         'numero', 'institucional', 'Duración del mandato de la junta directiva en años (según estatuto)');
+    ('anios_mandato',      '4',                                         'numero', 'institucional', 'Duración del mandato de la junta directiva en años (según estatuto)'),
+    ('porcentaje_adelanto','50',                                       'numero', 'finanzas',      'Porcentaje de adelanto por defecto al crear una reserva de alquiler');
 
 
 -- ---------------------------------------------------------------------------

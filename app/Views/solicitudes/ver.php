@@ -24,6 +24,11 @@ $revisor = trim(((string) ($solicitud['revisor_nombres'] ?? '')) . ' ' . ((strin
         </p>
     </div>
     <div class="page-head__actions">
+        <?php if ($puedeGestionar && in_array($estado, ['pendiente', 'en_revision'], true)): ?>
+            <a class="btn btn--primary" href="<?= e(url('/solicitudes/' . (string) $solicitud['id'] . '/reservar')) ?>">
+                Convertir en reserva
+            </a>
+        <?php endif; ?>
         <span class="badge badge--info"><?= e($estados[$estado] ?? $estado) ?></span>
     </div>
 </div>

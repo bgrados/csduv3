@@ -1043,6 +1043,62 @@ CREATE TABLE IF NOT EXISTS `csduv3_actividades` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Calendario institucional: reuniones, elecciones, actividades y eventos';
 
+CREATE TABLE IF NOT EXISTS `csduv3_fotos` (
+    `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `titulo`          VARCHAR(180) NOT NULL,
+    `descripcion`     VARCHAR(500) NULL,
+    `categoria`       VARCHAR(40) NOT NULL DEFAULT 'evento'
+                      COMMENT 'reunion, campeonato, directiva, socios, evento, instalacion',
+    `archivo`         VARCHAR(255) NULL COMMENT 'Ruta relativa dentro de storage/uploads (nunca pública)',
+    `nombre_original` VARCHAR(200) NULL,
+    `tipo_mime`       VARCHAR(120) NULL,
+    `tamano_bytes`    INT UNSIGNED NULL,
+    `fecha_foto`      DATE NULL,
+    `visible`         TINYINT(1) NOT NULL DEFAULT 1,
+    `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    `subido_por`      BIGINT UNSIGNED NULL,
+    `created_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_fotos_visible` (`visible`, `fecha_foto`),
+    KEY `idx_fotos_categoria` (`categoria`),
+    CONSTRAINT `fk_fotos_usuario`
+        FOREIGN KEY (`subido_por`) REFERENCES `csduv3_usuarios` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Galería institucional: reuniones, campeonatos, junta directiva y socios';
+
+CREATE TABLE IF NOT EXISTS `csduv3_negocios` (
+    `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nombre`          VARCHAR(140) NOT NULL,
+    `categoria`       VARCHAR(40) NOT NULL DEFAULT 'comercio'
+                      COMMENT 'comercio, servicio, profesional, salud, educacion, otro',
+    `descripcion`     VARCHAR(600) NULL,
+    `telefono`        VARCHAR(30) NULL,
+    `whatsapp`        VARCHAR(30) NULL,
+    `email`           VARCHAR(160) NULL,
+    `web`             VARCHAR(255) NULL COMMENT 'Enlace del negocio',
+    `direccion`       VARCHAR(200) NULL,
+    `horario`         VARCHAR(200) NULL,
+    `archivo`         VARCHAR(255) NULL COMMENT 'Logotipo o foto, dentro de storage/uploads',
+    `nombre_original` VARCHAR(200) NULL,
+    `tipo_mime`       VARCHAR(120) NULL,
+    `tamano_bytes`    INT UNSIGNED NULL,
+    `visible`         TINYINT(1) NOT NULL DEFAULT 1,
+    `destacado`       TINYINT(1) NOT NULL DEFAULT 0,
+    `orden`           SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    `creado_por`      BIGINT UNSIGNED NULL,
+    `created_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_negocios_visible` (`visible`, `orden`),
+    KEY `idx_negocios_categoria` (`categoria`),
+    CONSTRAINT `fk_negocios_usuario`
+        FOREIGN KEY (`creado_por`) REFERENCES `csduv3_usuarios` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Negocios de la unidad vecinal publicados por el club';
+
 CREATE TABLE IF NOT EXISTS `csduv3_auditoria` (
     `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `usuario_id`    BIGINT UNSIGNED NULL,

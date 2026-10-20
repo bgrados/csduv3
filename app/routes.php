@@ -12,11 +12,16 @@ use App\Controllers\DiagnosticoController;
 use App\Controllers\DirectivaController;
 use App\Controllers\DocumentosController;
 use App\Controllers\EleccionesController;
+use App\Controllers\GaleriaController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
+use App\Controllers\NegociosController;
 use App\Controllers\PortalAlquilerController;
+use App\Controllers\PortalGaleriaController;
+use App\Controllers\PortalNegociosController;
 use App\Controllers\PortalTorneosController;
 use App\Controllers\RolesController;
+use App\Controllers\ReservasController;
 use App\Controllers\SociosController;
 use App\Controllers\SolicitudesController;
 use App\Controllers\TarifasController;
@@ -61,6 +66,12 @@ $router->get('/alquiler/ambiente/{id}', [PortalAlquilerController::class, 'ambie
 
 $router->get('/torneos', [PortalTorneosController::class, 'index']);
 $router->get('/torneos/{id}', [PortalTorneosController::class, 'ver']);
+
+$router->get('/galeria', [PortalGaleriaController::class, 'index']);
+$router->get('/galeria/imagen/{id}', [PortalGaleriaController::class, 'imagen']);
+
+$router->get('/negocios', [PortalNegociosController::class, 'index']);
+$router->get('/negocios/imagen/{id}', [PortalNegociosController::class, 'imagen']);
 
 // ===========================================================================
 //  Acceso del personal
@@ -224,6 +235,53 @@ $router->post('/solicitudes/{id}/atender', [SolicitudesController::class, 'atend
 $router->post('/solicitudes/{id}/rechazar', [SolicitudesController::class, 'rechazar'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
+
+// --- Reservas ---------------------------------------------------------------
+
+$router->get('/reservas', [ReservasController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiereAlguno(['alquileres.ver', 'alquileres.gestionar']),
+]);
+
+$router->get('/reservas/nuevo', [ReservasController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
+
+$router->post('/reservas', [ReservasController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
+
+$router->get('/reservas/{id}', [ReservasController::class, 'ver'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiereAlguno(['alquileres.ver', 'alquileres.gestionar']),
+]);
+
+$router->get('/reservas/{id}/editar', [ReservasController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
+
+$router->post('/reservas/{id}', [ReservasController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
+
+$router->post('/reservas/{id}/estado', [ReservasController::class, 'cambiarEstado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
+
+$router->post('/reservas/{id}/cancelar', [ReservasController::class, 'cancelar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.cancelar'),
+]);
+
+$router->post('/reservas/{id}/pagos', [ReservasController::class, 'registrarPago'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
 ]);
 
 // --- Ambientes y tarifas ---------------------------------------------------
@@ -496,6 +554,78 @@ $router->post('/directiva/{id}/miembros/{miembroId}/estado', [DirectivaControlle
     PermissionMiddleware::requiere('directiva.gestionar'),
 ]);
 
+// --- Galería de fotos y directorio de negocios ------------------------------
+
+$router->get('/fotos', [GaleriaController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.ver'),
+]);
+
+$router->get('/fotos/nuevo', [GaleriaController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos', [GaleriaController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/fotos/{id}/editar', [GaleriaController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos/{id}', [GaleriaController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos/{id}/estado', [GaleriaController::class, 'estado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos/{id}/eliminar', [GaleriaController::class, 'eliminar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/directorio', [NegociosController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.ver'),
+]);
+
+$router->get('/directorio/nuevo', [NegociosController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/directorio', [NegociosController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/directorio/{id}/editar', [NegociosController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/directorio/{id}', [NegociosController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/directorio/{id}/estado', [NegociosController::class, 'estado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/directorio/{id}/eliminar', [NegociosController::class, 'eliminar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
 // --- Caja -------------------------------------------------------------------
 
 $router->get('/caja', [CajaController::class, 'index'], [
@@ -631,6 +761,11 @@ $router->post('/deportes/encuentros/{id}', [TorneosController::class, 'actualiza
 ]);
 
 // --- Auditoría -------------------------------------------------------------
+
+$router->get('/solicitudes/{id}/reservar', [ReservasController::class, 'desdeSolicitud'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
 
 $router->get('/auditoria', [AuditoriaController::class, 'index'], [
     [AuthMiddleware::class, 'handle'],

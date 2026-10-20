@@ -84,6 +84,9 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <a class="site-nav__link<?= $activa('/alquiler/disponibilidad') ?>" href="<?= e(url('/alquiler/disponibilidad')) ?>"<?= $aria('/alquiler/disponibilidad') ?>>Disponibilidad</a>
             <a class="site-nav__link<?= $activa('/alquiler/solicitud') ?>" href="<?= e(url('/alquiler/solicitud')) ?>"<?= $aria('/alquiler/solicitud') ?>>Solicitar</a>
             <a class="site-nav__link<?= $activa('/torneos') ?>" href="<?= e(url('/torneos')) ?>"<?= $aria('/torneos') ?>>Torneos</a>
+            <a class="site-nav__link<?= $activa('/galeria') ?>" href="<?= e(url('/galeria')) ?>"<?= $aria('/galeria') ?>>Galería</a>
+            <a class="site-nav__link<?= $activa('/negocios') ?>" href="<?= e(url('/negocios')) ?>"<?= $aria('/negocios') ?>>Negocios</a>
+            <a class="site-nav__link site-nav__link--externo" href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">Portal UV3</a>
 
             <?php if ($usuarioActual === null): ?>
                 <a class="btn btn--ghost btn--sm site-nav__cta" href="<?= e(url('/ingresar')) ?>">Ingresar</a>
@@ -110,6 +113,9 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <a href="<?= e(url('/alquiler/disponibilidad')) ?>">Disponibilidad</a>
             <a href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
             <a href="<?= e(url('/torneos')) ?>">Torneos</a>
+            <a href="<?= e(url('/galeria')) ?>">Galería del club</a>
+            <a href="<?= e(url('/negocios')) ?>">Negocios de la unidad</a>
+            <a href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">Portal de la Unidad Vecinal</a>
         </div>
     </div>
     <p class="site-footer__meta">

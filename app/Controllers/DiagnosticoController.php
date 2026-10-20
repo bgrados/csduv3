@@ -58,7 +58,7 @@ final class DiagnosticoController
             'medios_pago', 'periodos', 'movimientos', 'movimientos_auditoria',
             'deportes', 'deporte_puntos', 'torneos', 'torneo_equipos',
             'torneo_participantes', 'jornadas', 'encuentros', 'encuentro_estadisticas',
-            'documentos', 'actividades', 'auditoria',
+            'documentos', 'actividades', 'fotos', 'negocios', 'auditoria',
         ];
 
         $dbConfigurada = (string) Config::get('database.database', '') !== '';

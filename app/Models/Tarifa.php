@@ -57,6 +57,56 @@ final class Tarifa extends Model
         );
     }
 
+    /**
+     * Tarifas activas y vigentes de una instalación.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function vigentesDeInstalacion(int $instalacionId): array
+    {
+        $sql = sprintf(
+            'SELECT t.*, e.`nombre` AS tipo_evento_nombre
+             FROM `%s` t
+             LEFT JOIN `%s` e ON e.`id` = t.`tipo_evento_id`
+             WHERE t.`instalacion_id` = :instalacion_id
+               AND t.`activo` = 1
+               AND (t.`vigente_desde` IS NULL OR t.`vigente_desde` <= CURDATE())
+               AND (t.`vigente_hasta` IS NULL OR t.`vigente_hasta` >= CURDATE())
+             ORDER BY t.`monto` ASC, t.`id` ASC',
+            self::table(),
+            self::prefijada('tipos_evento')
+        );
+
+        return self::fetchAll($sql, ['instalacion_id' => $instalacionId]);
+    }
+
+    /**
+     * Tarifa vigente para una instalación, preferentemente la del tipo de uso.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function vigentePara(int $instalacionId, ?int $tipoEventoId = null): ?array
+    {
+        $sql = sprintf(
+            'SELECT t.*, e.`nombre` AS tipo_evento_nombre
+             FROM `%s` t
+             LEFT JOIN `%s` e ON e.`id` = t.`tipo_evento_id`
+             WHERE t.`instalacion_id` = :instalacion_id
+               AND t.`activo` = 1
+               AND (t.`vigente_desde` IS NULL OR t.`vigente_desde` <= CURDATE())
+               AND (t.`vigente_hasta` IS NULL OR t.`vigente_hasta` >= CURDATE())
+             ORDER BY (t.`tipo_evento_id` = :tipo) DESC, t.`monto` ASC
+             LIMIT 1',
+            self::table(),
+            self::prefijada('tipos_evento')
+        );
+
+        return self::fetchOne($sql, [
+            'instalacion_id' => $instalacionId,
+            'tipo'           => $tipoEventoId ?? 0,
+        ]);
+    }
+
     /** @return array<string, mixed>|null */
     public static function findDeInstalacion(int $id, int $instalacionId): ?array
     {

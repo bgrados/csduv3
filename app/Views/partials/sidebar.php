@@ -115,6 +115,16 @@ $enlaces[] = [
                         <?= Icons::render('documentos', 'icon', 20) ?><span>Documentos</span>
                     </a>
                 </li>
+                <li>
+                    <a class="sidebar__link<?= is_current('/fotos') ? ' is-active' : '' ?>" href="<?= e(url('/fotos')) ?>"<?= is_current('/fotos') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('calendario', 'icon', 20) ?><span>Fotos del club</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar__link<?= is_current('/directorio') ? ' is-active' : '' ?>" href="<?= e(url('/directorio')) ?>"<?= is_current('/directorio') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('directiva', 'icon', 20) ?><span>Negocios de la unidad</span>
+                    </a>
+                </li>
             <?php endif; ?>
         </ul>
 

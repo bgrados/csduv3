@@ -9,7 +9,9 @@ use App\Core\Logger;
 use App\Core\Request;
 use App\Core\View;
 use App\Models\Configuracion;
+use App\Models\Foto;
 use App\Models\Instalacion;
+use App\Models\Negocio;
 
 /**
  * Portada pública del sistema.
@@ -24,6 +26,8 @@ final class HomeController
         $dbDisponible = Database::isAvailable();
         $instalaciones = [];
         $configuracion = [];
+        $fotos = [];
+        $negocios = [];
 
         if ($dbDisponible) {
             try {
@@ -35,11 +39,29 @@ final class HomeController
             }
         }
 
+        // Las secciones de fotos y negocios son opcionales: si sus tablas aún
+        // no existen (migración pendiente) la portada sigue funcionando.
+        if ($dbDisponible) {
+            try {
+                $fotos = Foto::listarVisibles(7);
+            } catch (\Throwable $exception) {
+                Logger::warning('No se pudo cargar la galería de la portada', ['error' => $exception->getMessage()]);
+            }
+
+            try {
+                $negocios = Negocio::listarVisibles();
+            } catch (\Throwable $exception) {
+                Logger::warning('No se pudo cargar el directorio de negocios', ['error' => $exception->getMessage()]);
+            }
+        }
+
         View::display('home/index', [
             'titulo'         => 'Inicio',
             'dbDisponible'   => $dbDisponible,
             'instalaciones'  => $instalaciones,
             'configuracion'  => $configuracion,
+            'fotos'          => $fotos,
+            'negocios'       => $negocios,
         ], 'layouts/publico');
     }
 }
