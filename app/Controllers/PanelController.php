@@ -9,10 +9,14 @@ use App\Core\Database;
 use App\Core\Logger;
 use App\Core\Request;
 use App\Core\View;
+use App\Models\Actividad;
 use App\Models\Deporte;
+use App\Models\Directiva;
+use App\Models\Documento;
 use App\Models\Instalacion;
 use App\Models\Movimiento;
 use App\Models\Permiso;
+use App\Models\ProcesoElectoral;
 use App\Models\Reserva;
 use App\Models\Socio;
 use App\Models\SolicitudAlquiler;
@@ -127,6 +131,54 @@ final class PanelController
             ];
 
             $datos['ultimosMovimientos'] = Movimiento::ultimos(5);
+        }
+
+        if (Auth::can('calendario.ver')) {
+            $proximas = Actividad::listarProximas(5);
+
+            $datos['indicadores'][] = [
+                'titulo'  => 'Próximas actividades',
+                'valor'   => (string) count($proximas),
+                'detalle' => $proximas === []
+                    ? 'Sin actividades programadas'
+                    : (string) $proximas[0]['titulo'],
+                'icono'   => 'calendario',
+                'url'     => url('/calendario'),
+                'tono'    => 'neutro',
+            ];
+        }
+
+        if (Auth::can('documentos.ver')) {
+            $datos['indicadores'][] = [
+                'titulo'  => 'Documentos',
+                'valor'   => (string) Documento::contar(),
+                'detalle' => 'Registrados en el repositorio',
+                'icono'   => 'documentos',
+                'url'     => url('/documentos'),
+                'tono'    => 'neutro',
+            ];
+        }
+
+        if (Auth::can('directiva.ver')) {
+            $datos['indicadores'][] = [
+                'titulo'  => 'Periodos de gestión',
+                'valor'   => (string) Directiva::contar(),
+                'detalle' => 'Histórico de juntas directivas',
+                'icono'   => 'directiva',
+                'url'     => url('/directiva'),
+                'tono'    => 'neutro',
+            ];
+        }
+
+        if (Auth::can('elecciones.ver')) {
+            $datos['indicadores'][] = [
+                'titulo'  => 'Procesos electorales',
+                'valor'   => (string) ProcesoElectoral::contar(),
+                'detalle' => 'Registrados en el club',
+                'icono'   => 'elecciones',
+                'url'     => url('/elecciones'),
+                'tono'    => 'neutro',
+            ];
         }
 
         if (Auth::can('usuarios.ver')) {

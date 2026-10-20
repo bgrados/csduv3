@@ -102,10 +102,19 @@ $enlaces[] = [
                     </a>
                 </li>
             <?php endif; ?>
-            <?php if (can('calendario.ver') || can('documentos.ver')): ?>
-                <li><span class="sidebar__link is-disabled" aria-disabled="true">
-                    <?= Icons::render('documentos', 'icon', 20) ?><span>Calendario y documentos</span><span class="badge badge--soft">Fase 7</span>
-                </span></li>
+            <?php if (can('calendario.ver') || can('calendario.gestionar')): ?>
+                <li>
+                    <a class="sidebar__link<?= is_current('/calendario') ? ' is-active' : '' ?>" href="<?= e(url('/calendario')) ?>"<?= is_current('/calendario') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('calendario', 'icon', 20) ?><span>Calendario</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+            <?php if (can('documentos.ver') || can('documentos.gestionar')): ?>
+                <li>
+                    <a class="sidebar__link<?= is_current('/documentos') ? ' is-active' : '' ?>" href="<?= e(url('/documentos')) ?>"<?= is_current('/documentos') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('documentos', 'icon', 20) ?><span>Documentos</span>
+                    </a>
+                </li>
             <?php endif; ?>
         </ul>
 

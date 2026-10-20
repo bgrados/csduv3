@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Controllers\AmbientesController;
 use App\Controllers\AuditoriaController;
 use App\Controllers\AuthController;
+use App\Controllers\CalendarioController;
 use App\Controllers\CajaController;
 use App\Controllers\DeportesController;
 use App\Controllers\DiagnosticoController;
 use App\Controllers\DirectivaController;
+use App\Controllers\DocumentosController;
 use App\Controllers\EleccionesController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
@@ -284,6 +286,75 @@ $router->post('/ambientes/{id}/tarifas/{tarifaId}', [TarifasController::class, '
 $router->post('/ambientes/{id}/tarifas/{tarifaId}/estado', [TarifasController::class, 'cambiarEstado'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+// --- Documentos -------------------------------------------------------------
+
+$router->get('/documentos', [DocumentosController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.ver'),
+]);
+
+$router->get('/documentos/nuevo', [DocumentosController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/documentos', [DocumentosController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/documentos/{id}/editar', [DocumentosController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/documentos/{id}', [DocumentosController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/documentos/{id}/descargar', [DocumentosController::class, 'descargar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.ver'),
+]);
+
+$router->post('/documentos/{id}/eliminar', [DocumentosController::class, 'eliminar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+// --- Calendario -------------------------------------------------------------
+
+$router->get('/calendario', [CalendarioController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('calendario.ver'),
+]);
+
+$router->get('/calendario/nuevo', [CalendarioController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('calendario.gestionar'),
+]);
+
+$router->post('/calendario', [CalendarioController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('calendario.gestionar'),
+]);
+
+$router->get('/calendario/{id}/editar', [CalendarioController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('calendario.gestionar'),
+]);
+
+$router->post('/calendario/{id}', [CalendarioController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('calendario.gestionar'),
+]);
+
+$router->post('/calendario/{id}/estado', [CalendarioController::class, 'cambiarEstado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('calendario.gestionar'),
 ]);
 
 // --- Elecciones -------------------------------------------------------------

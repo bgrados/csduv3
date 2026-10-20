@@ -445,6 +445,36 @@ code {
 .table tr.is-anulado td { color: var(--color-text-soft); }
 .table tr.is-anulado td strong { text-decoration: line-through; }
 
+/* --- Calendario ------------------------------------------------------------ */
+
+.table--calendario { table-layout: fixed; }
+.table--calendario th { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.table--calendario td { vertical-align: top; height: 92px; }
+
+.calendario__celda { background: var(--color-surface); }
+.calendario__celda.es-otro-mes { background: #f7f9f8; color: var(--color-text-soft); }
+.calendario__numero { display: block; font-size: .78rem; font-weight: 700; margin-bottom: .2rem; }
+
+.calendario__evento {
+    display: block;
+    margin-bottom: .18rem;
+    padding: .1rem .35rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-size: .68rem;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.calendario__evento--directiva { background: #e7eef9; color: #1c3f6e; }
+.calendario__evento--eleccion { background: #fdf0d8; color: #7a5210; }
+.calendario__evento--deportiva { background: #e6f6ee; color: #145c39; }
+.calendario__evento--social { background: #f7e7f3; color: #7c2b5e; }
+.calendario__evento--mantenimiento { background: #eceff1; color: #455a64; }
+
 .card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
