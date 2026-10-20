@@ -557,6 +557,9 @@ final class PortalAlquilerController
             'Reserva confirmada desde el portal publico'
         );
 
+        // Aviso al club por correo (y al cliente si dejo su correo).
+        $this->notificarReserva($reservaId);
+
         Response::redirect(url('/alquiler/reserva-confirmada'));
     }
 
@@ -615,6 +618,25 @@ final class PortalAlquilerController
         }
 
         Response::archivo($absoluta, 'public, max-age=86400');
+    }
+
+    /**
+     * Envia el aviso por correo de la reserva recien confirmada.
+     */
+    private function notificarReserva(int $reservaId): void
+    {
+        try {
+            $reserva = \App\Models\Reserva::find($reservaId);
+
+            if ($reserva !== null) {
+                \App\Notifications\ReservaConfirmada::enviar($reserva);
+            }
+        } catch (\Throwable $exception) {
+            \App\Core\Logger::error('No se pudo enviar el aviso de la reserva', [
+                'reserva_id' => $reservaId,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function portalListo(): bool

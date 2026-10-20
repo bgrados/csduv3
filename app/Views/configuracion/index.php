@@ -182,8 +182,35 @@ $marcaActual = static function (string $tipo) use ($configuracion): string {
         </div>
     </fieldset>
 
+    <fieldset class="form__group">
+        <legend>Notificaciones por correo</legend>
+
+        <div class="form-grid">
+            <div class="field">
+                <label for="correo_notificaciones">Correo que recibe los avisos</label>
+                <input type="email" id="correo_notificaciones" name="correo_notificaciones" maxlength="160" value="<?= e($valor('correo_notificaciones')) ?>" placeholder="reservas@club.org">
+                <p class="field__hint">
+                    Aquí llega el aviso de cada reserva confirmada. Si lo dejas vacío se
+                    usará el «correo institucional».
+                </p>
+            </div>
+
+            <div class="field">
+                <label for="correo_remitente">Correo remitente</label>
+                <input type="email" id="correo_remitente" name="correo_remitente" maxlength="160" value="<?= e($valor('correo_remitente')) ?>" placeholder="club@club.org">
+                <p class="field__hint">
+                    Dirección desde la que salen los correos. Si se deja vacío se usa el
+                    remitente por defecto del hosting.
+                </p>
+            </div>
+        </div>
+    </fieldset>
+
     <div class="form__actions">
         <button type="submit" class="btn btn--primary">Guardar configuración</button>
+        <button type="submit" name="accion" value="probar" class="btn btn--ghost">
+            Guardar y enviar un correo de prueba
+        </button>
     </div>
 </form>
 

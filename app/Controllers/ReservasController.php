@@ -290,6 +290,11 @@ final class ReservasController
 
         Reserva::cambiarEstado((int) $reserva['id'], $estado);
 
+        // Aviso por correo cuando la reserva queda confirmada.
+        if ($estado === 'confirmada') {
+            $this->notificarReserva((int) $reserva['id']);
+        }
+
         Audit::log(
             Auth::id(),
             'cambiar_estado_reserva',
@@ -670,6 +675,25 @@ final class ReservasController
         $valor = DateTimeImmutable::createFromFormat('!H:i', $hora);
 
         return $valor instanceof DateTimeImmutable && $valor->format('H:i') === $hora;
+    }
+
+    /**
+     * Envia el aviso por correo de la reserva confirmada.
+     */
+    private function notificarReserva(int $reservaId): void
+    {
+        try {
+            $reserva = Reserva::find($reservaId);
+
+            if ($reserva !== null) {
+                \App\Notifications\ReservaConfirmada::enviar($reserva);
+            }
+        } catch (\Throwable $exception) {
+            Logger::error('No se pudo enviar el aviso de la reserva', [
+                'reserva_id' => $reservaId,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function baseDisponible(): bool

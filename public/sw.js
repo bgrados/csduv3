@@ -19,7 +19,7 @@
 
 'use strict';
 
-var CACHE = 'csduv3-publica-v5';
+var CACHE = 'csduv3-publica-v6';
 
 /* Rutas del panel administrativo que nunca se cachean. */
 var RUTAS_PRIVADAS = [

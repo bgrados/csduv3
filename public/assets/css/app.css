@@ -531,19 +531,32 @@ code {
 
 /* --- Formato revista (portada pública) ------------------------------------ */
 
+/* Fondo del portal: un degradado muy suave con el verde de la marca. */
+.public-body {
+    background:
+        radial-gradient(1200px 420px at 12% -8%, rgba(0, 159, 57, .10), transparent 70%),
+        radial-gradient(900px 380px at 92% 0%, rgba(254, 254, 8, .55), transparent 65%),
+        var(--color-bg);
+}
+
 .revista {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    padding: 1.2rem 1.3rem 1.6rem;
+    box-shadow: var(--shadow);
+    padding: 0;
     margin-bottom: 2rem;
+    overflow: hidden;
 }
 
+/* Cabecera tipo revista: banda verde con el masthead. */
 .revista__cabecera {
-    border-bottom: 3px double var(--color-border-strong);
-    padding-bottom: .9rem;
+    background:
+        linear-gradient(135deg, var(--brand-green-night) 0%, var(--brand-green-deep) 55%, #0a4d2c 100%);
+    color: #fff;
+    padding: 1rem 1.3rem 1.2rem;
     margin-bottom: 1.3rem;
+    border-bottom: 3px solid var(--brand-yellow);
 }
 
 .revista__cabecera-fila {
@@ -552,17 +565,17 @@ code {
     align-items: center;
     justify-content: space-between;
     gap: .5rem;
-    font-size: .74rem;
-    letter-spacing: .04em;
+    font-size: .72rem;
+    letter-spacing: .05em;
     text-transform: uppercase;
-    color: var(--color-text-soft);
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: .4rem;
-    margin-bottom: .9rem;
+    color: rgba(255, 255, 255, .78);
+    border-bottom: 1px solid rgba(255, 255, 255, .18);
+    padding-bottom: .45rem;
+    margin-bottom: 1rem;
 }
 
-.revista__edicion { color: var(--color-primary); font-weight: 700; }
-.revista__cabecera-enlace a { color: var(--color-primary); font-weight: 700; }
+.revista__edicion { color: var(--brand-yellow); font-weight: 700; }
+.revista__cabecera-enlace a { color: var(--brand-yellow); font-weight: 700; }
 
 .revista__masthead { text-align: center; margin-bottom: .9rem; }
 
@@ -572,15 +585,16 @@ code {
     line-height: .95;
     letter-spacing: .02em;
     font-weight: 800;
-    color: var(--color-primary-dark);
+    color: #fff;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, .28);
 }
 
 .revista__lema {
-    margin: .35rem 0 0;
-    font-size: .82rem;
-    letter-spacing: .18em;
+    margin: .4rem 0 0;
+    font-size: .76rem;
+    letter-spacing: .2em;
     text-transform: uppercase;
-    color: var(--color-text-soft);
+    color: var(--brand-yellow);
 }
 
 .revista__acciones {
@@ -588,9 +602,19 @@ code {
     flex-wrap: wrap;
     gap: .4rem;
     justify-content: center;
-    padding-top: .8rem;
-    border-top: 1px solid var(--color-border);
+    padding-top: .9rem;
+    border-top: 1px solid rgba(255, 255, 255, .18);
 }
+
+.revista__acciones .btn--ghost {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .38);
+    color: #fff;
+}
+
+.revista__acciones .btn--ghost:hover { background: rgba(255, 255, 255, .18); border-color: #fff; }
+.revista__acciones .btn--primary { background: var(--brand-yellow); color: var(--brand-green-night); border-color: var(--brand-yellow); }
+.revista__acciones .btn--primary:hover { background: #fff; border-color: #fff; }
 
 .revista__cuerpo {
     display: grid;
@@ -609,6 +633,7 @@ code {
     overflow: hidden;
     background: #eef2f0;
     aspect-ratio: 16 / 9;
+    box-shadow: 0 10px 30px rgba(6, 59, 34, .18);
 }
 
 .portada__imagen img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -630,14 +655,15 @@ code {
 
 .portada__titular {
     margin: .3rem 0 .4rem;
-    font-size: clamp(1.5rem, 3.6vw, 2.3rem);
-    line-height: 1.12;
-    letter-spacing: -.01em;
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    line-height: 1.08;
+    letter-spacing: -.015em;
+    color: var(--brand-green-night);
 }
 
 .portada__entradilla {
     margin: 0 0 .8rem;
-    font-size: 1.02rem;
+    font-size: 1.05rem;
     line-height: 1.6;
     color: var(--color-text);
 }
@@ -695,12 +721,16 @@ code {
 .carrusel__tarjeta {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
+    border-top: 3px solid var(--brand-green);
     border-radius: var(--radius-md);
     padding: .6rem;
     display: flex;
     flex-direction: column;
     gap: .25rem;
+    transition: transform var(--transition), box-shadow var(--transition);
 }
+
+.carrusel__tarjeta:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
 
 .carrusel__imagen {
     display: block;
@@ -715,11 +745,15 @@ code {
 
 .carrusel__kicker {
     margin: 0;
-    font-size: .66rem;
+    font-size: .64rem;
     text-transform: uppercase;
     letter-spacing: .08em;
     font-weight: 700;
-    color: var(--color-primary);
+    color: var(--brand-green-dark);
+    background: var(--color-primary-soft);
+    align-self: flex-start;
+    padding: .12rem .45rem;
+    border-radius: 999px;
 }
 
 .carrusel__titulo { margin: 0; font-size: .95rem; line-height: 1.25; }
@@ -751,14 +785,23 @@ code {
 
 .recuadro {
     border: 1px solid var(--color-border);
-    border-top: 3px solid var(--color-primary);
+    border-top: 3px solid var(--brand-green);
     border-radius: var(--radius-md);
     padding: .9rem 1rem 1.1rem;
-    background: var(--color-surface);
+    background: linear-gradient(180deg, #f3faf5 0%, var(--color-surface) 45%);
     margin-bottom: 1.1rem;
 }
 
-.recuadro--destacado { background: var(--color-primary-soft); }
+.recuadro--destacado {
+    background: linear-gradient(150deg, var(--brand-green-deep) 0%, var(--brand-green-night) 100%);
+    border-color: var(--brand-green-night);
+    color: #fff;
+}
+
+.recuadro--destacado .recuadro__titulo { color: var(--brand-yellow); }
+.recuadro--destacado .muted { color: rgba(255, 255, 255, .82); }
+.recuadro--destacado .btn--ghost { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .45); color: #fff; }
+.recuadro--destacado .btn--primary { background: var(--brand-yellow); color: var(--brand-green-night); border-color: var(--brand-yellow); }
 
 .recuadro__titulo {
     margin: 0 0 .7rem;
@@ -785,11 +828,12 @@ code {
     flex-direction: column;
     align-items: center;
     min-width: 46px;
-    padding: .25rem .3rem;
+    padding: .3rem .35rem;
     border-radius: var(--radius-sm);
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
+    background: linear-gradient(160deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+    color: #fff;
     line-height: 1;
+    box-shadow: 0 4px 10px rgba(0, 122, 44, .25);
 }
 
 .recuadro__fecha strong { font-size: 1.05rem; }
@@ -952,6 +996,30 @@ code {
     display: flex;
     flex-direction: column;
     gap: .75rem;
+    counter-reset: pasos;
+}
+
+.steps li {
+    counter-increment: pasos;
+    position: relative;
+    padding-left: .2rem;
+}
+
+.steps li::before {
+    content: counter(pasos);
+    position: absolute;
+    left: -1.2rem;
+    top: .05rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: linear-gradient(160deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
 }
 
 .steps li strong { display: block; }
@@ -1527,6 +1595,8 @@ code {
 .card--room { display: flex; flex-direction: column; gap: .5rem; }
 .card--room h2, .card--room h3 { margin-bottom: .1rem; }
 .card--room > .badge { align-self: flex-start; }
+.card--room { border-top: 3px solid var(--brand-green); }
+.card--room:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
 
 .card__foto {
     width: 100%;

@@ -8,6 +8,7 @@ use App\Core\Audit;
 use App\Core\Auth;
 use App\Core\Database;
 use App\Core\Logger;
+use App\Core\Mailer;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
@@ -49,6 +50,8 @@ final class ConfiguracionController
         'direccion'          => ['contacto', 'texto'],
         'facebook'           => ['contacto', 'texto'],
         'instagram'          => ['contacto', 'texto'],
+        'correo_notificaciones' => ['notificaciones', 'texto'],
+        'correo_remitente'   => ['notificaciones', 'texto'],
         'portada_titulo'     => ['portada', 'texto'],
         'portada_resumen'    => ['portada', 'texto'],
         'porcentaje_adelanto' => ['alquileres', 'numero'],
@@ -116,6 +119,8 @@ final class ConfiguracionController
             'portada_resumen'     => 'nullable|string|max:300',
             'porcentaje_adelanto' => 'nullable|integer|min:0|max:100',
             'dias_anticipacion'   => 'nullable|integer|min:0|max:365',
+            'correo_notificaciones' => 'nullable|email|max:160',
+            'correo_remitente'    => 'nullable|email|max:160',
             'fotos_ejemplo'       => 'required|in:0,1',
             'mantenimiento'       => 'required|in:0,1',
         ], [
@@ -170,7 +175,57 @@ final class ConfiguracionController
         Audit::log(Auth::id(), 'actualizar_configuracion', 'configuracion', null, 'Parámetros del club actualizados');
 
         Session::flash('exito', 'La configuración quedó guardada.');
+
+        if ($request->string('accion') === 'probar') {
+            $this->probarCorreo($request);
+        }
+
         Response::redirect(url('/configuracion'));
+    }
+
+    /**
+     * Envia un correo de prueba a la direccion configurada.
+     */
+    private function probarCorreo(Request $request): void
+    {
+        $destino = Mailer::destinoNotificaciones();
+
+        if ($destino === '') {
+            Session::flash(
+                'error',
+                'Aun no hay una direccion de correo configurada. Escriba el correo de avisos '
+                . 'en «Notificaciones» y guarde los cambios.'
+            );
+            Response::redirect(url('/configuracion'));
+        }
+
+        $cuerpo = '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"></head><body '
+            . 'style="margin:0;background:#f5f7f2;font-family:system-ui,Arial,sans-serif;color:#18251b;">'
+            . '<div style="max-width:560px;margin:0 auto;padding:24px;">'
+            . '<div style="background:#063b22;border-radius:16px 16px 0 0;padding:20px 24px;color:#fff;">'
+            . '<p style="margin:0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#fefe08;">'
+            . e((string) config('app.short_name', 'CSDUV3')) . '</p>'
+            . '<h1 style="margin:6px 0 0;font-size:21px;">Correo de prueba</h1></div>'
+            . '<div style="background:#fff;border-radius:0 0 16px 16px;padding:22px 24px;">'
+            . '<p style="margin:0;font-size:15px;line-height:1.6;">'
+            . 'Este es un mensaje de prueba. Si le llega, el club ya recibira aquí el aviso '
+            . 'de cada reserva que se confirme en el portal.</p>'
+            . '<p style="margin:14px 0 0;font-size:13px;color:#6b7a6e;">'
+            . 'Si no llega, pida al administrador del hosting que revise el correo saliente '
+            . 'y la carpeta de spam.</p>'
+            . '</div></div></body></html>';
+
+        $enviado = Mailer::enviar($destino, 'Prueba de correo · ' . (string) config('app.short_name'), $cuerpo);
+
+        if ($enviado) {
+            Session::flash('exito', 'Se envio el correo de prueba a ' . $destino . '.');
+        } else {
+            Session::flash(
+                'error',
+                'El servidor no acepto el correo. Revise la direccion y pida al administrador '
+                . 'del hosting que revise el correo saliente.'
+            );
+        }
     }
 
     /**

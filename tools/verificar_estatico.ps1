@@ -175,7 +175,7 @@ foreach ($archivo in $archivos) {
     # namespace y clase deben coincidir con la ruta (excepto vistas y helpers).
     if ($relativo -match '^app\\Core\\helpers\.php$') {
         # helpers.php contiene funciones globales: no declara namespace ni clase.
-    } elseif ($relativo -match '^app\\(Core|Models|Controllers|Middleware)\\') {
+    } elseif ($relativo -match '^app\\(Core|Models|Controllers|Middleware|Notifications)\\') {
         $esperadoNamespace = 'App\' + ($relativo -replace '^app\\', '' -replace '\\[^\\]+\.php$', '')
         $esperadoClase = [System.IO.Path]::GetFileNameWithoutExtension($archivo.Name)
 
