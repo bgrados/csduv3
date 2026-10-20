@@ -1001,7 +1001,9 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | RS-07 | Pagar más que el saldo pendiente | Se rechaza con «El pago supera el saldo pendiente de la reserva…» y no se registra nada |
 | RS-08 | Registrar un pago con fecha futura | Se rechaza con «No se pueden registrar pagos con fecha futura.» |
 | RS-09 | Cancelar una reserva con motivo | Queda `estado = 'cancelada'` con su motivo; no se borra; ya no admite pagos |
-| RS-10 | Convertir una solicitud en reserva | Desde la ficha de la solicitud, «Convertir en reserva» abre el formulario con los datos cargados; al guardar, la solicitud queda «atendida» con la nota del código de reserva |
+| RS-10 | Convertir una solicitud en reserva | Al abrir «Convertir en reserva» la solicitud pasa a «en revisión»; al guardar, la solicitud queda «atendida» con la nota del código de reserva y el alquiler aparece en caja como ingreso |
+| RS-18 | Convertir una solicitud con un horario ya ocupado | Se avisa del conflicto y se vuelve al formulario de conversión con la solicitud enlazada (no se pierde el vínculo) |
+| RS-19 | Revisar la ficha de una solicitud convertida | Muestra el código de la reserva generada con enlace a `/reservas?q=…` |
 | RS-11 | Editar una reserva cancelada o finalizada | Se rechaza con «Una reserva cancelada o finalizada no se puede editar.» |
 | RS-12 | Reservar de 19:00 a 03:00 (cruce de medianoche) | Se acepta: la reserva termina al día siguiente; en la disponibilidad se muestra «+1 día»; el horario queda bloqueado y la entrada en caja es la del precio acordado |
 | RS-13 | Reservar de 19:00 a 03:00 cuando otra reserva ocupa ese tramo | Se rechaza con «Ese horario ya está reservado…» |

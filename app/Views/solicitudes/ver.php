@@ -100,6 +100,17 @@ $revisor = trim(((string) ($solicitud['revisor_nombres'] ?? '')) . ' ' . ((strin
             <?php if (!empty($solicitud['nota_interna'])): ?>
                 <li><span>Nota interna</span><strong><?= e((string) $solicitud['nota_interna']) ?></strong></li>
             <?php endif; ?>
+            <?php
+            $codigoReserva = preg_match('/RES-\d{4}-\d+/i', (string) ($solicitud['nota_interna'] ?? ''), $coincidencia) === 1
+                ? strtoupper($coincidencia[0])
+                : '';
+            ?>
+            <?php if ($codigoReserva !== ''): ?>
+                <li>
+                    <span>Reserva generada</span>
+                    <strong><a href="<?= e(url('/reservas') . '?q=' . urlencode($codigoReserva)) ?>"><?= e($codigoReserva) ?></a></strong>
+                </li>
+            <?php endif; ?>
             <li><span>Revisada por</span><strong><?= e($revisor !== '' ? $revisor : '—') ?></strong></li>
             <li><span>Fecha de revisión</span><strong><?= e(fecha_legible($solicitud['revisado_at'] ?? null, true)) ?></strong></li>
         </ul>
@@ -110,6 +121,20 @@ $revisor = trim(((string) ($solicitud['revisor_nombres'] ?? '')) . ' ' . ((strin
     <h2 class="section-title">Acciones de revisión</h2>
 
     <div class="action-grid">
+        <?php if ($puedeGestionar && in_array($estado, ['pendiente', 'en_revision'], true)): ?>
+            <section class="card card--highlight">
+                <h3>Convertir en reserva</h3>
+                <p class="muted">
+                    Crea la reserva con la tarifa vigente, el adelanto pactado y el
+                    horario. La solicitud queda <strong>atendida</strong> y el alquiler
+                    se anota como ingreso en la caja del club.
+                </p>
+                <a class="btn btn--primary" href="<?= e(url('/solicitudes/' . (string) $solicitud['id'] . '/reservar')) ?>">
+                    Convertir en reserva
+                </a>
+            </section>
+        <?php endif; ?>
+
         <?php if ($estado === 'pendiente'): ?>
             <section class="card">
                 <h3>Marcar en revisión</h3>
@@ -152,9 +177,10 @@ $revisor = trim(((string) ($solicitud['revisor_nombres'] ?? '')) . ' ' . ((strin
 
     <div class="alert alert--warning" role="status">
         <p>
-            Convertir una solicitud en reserva, con tarifa, adelanto y pago, se implementa en el
-            módulo de alquileres (Fase 4). Mientras tanto, la reserva se registra por el canal
-            que el club determine.
+            La solicitud no crea por si sola una reserva: use «Convertir en reserva»
+            para registrarla con su tarifa, su adelanto y su horario. Al convertirla,
+            el alquiler queda anotado como ingreso en la caja del club y la
+            solicitud pasa a <strong>atendida</strong>.
         </p>
     </div>
 <?php endif; ?>

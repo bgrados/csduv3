@@ -96,18 +96,27 @@ final class ReservasController
             return;
         }
 
+        $solicitudId = (int) ($request->integer('solicitud_id'));
+
         $datos = $this->datosFormulario($request);
         [$limpio, $errores] = $this->validar($datos);
 
         if ($errores !== []) {
             remember_old_input($datos);
             Session::flash('errores', $errores);
+
+            if ($solicitudId > 0) {
+                Response::redirect(url('/solicitudes/' . $solicitudId . '/reservar'));
+            }
+
             Response::redirect(url('/reservas/nuevo'));
         }
 
+        $codigoReserva = Reserva::siguienteCodigo();
+
         try {
             $id = Reserva::crearReservando([
-                'codigo'                => Reserva::siguienteCodigo(),
+                'codigo'                => $codigoReserva,
                 'instalacion_id'        => (int) $limpio['instalacion_id'],
                 'tarifa_id'             => (int) ($limpio['tarifa_id'] ?? 0),
                 'tipo_evento_id'        => (int) ($limpio['tipo_evento_id'] ?? 0),
@@ -121,7 +130,8 @@ final class ReservasController
                 'hora_fin'              => (string) $limpio['hora_fin'],
                 'precio_acordado'       => (float) $limpio['precio_acordado'],
                 'monto_adelanto'        => (float) $limpio['monto_adelanto'],
-                'medio_pago_id'         => (int) ($limpio['medio_pago_id'] ?? 0),                'estado'                => (string) $limpio['estado'],
+                'medio_pago_id'         => (int) ($limpio['medio_pago_id'] ?? 0),
+                'estado'                => (string) $limpio['estado'],
                 'condiciones'           => (string) ($limpio['condiciones'] ?? ''),
                 'observaciones'         => (string) ($limpio['observaciones'] ?? ''),
                 'registrado_por'        => (int) Auth::id(),
@@ -129,15 +139,23 @@ final class ReservasController
         } catch (RuntimeException $exception) {
             remember_old_input($datos);
             Session::flash('error', $exception->getMessage());
+
+            if ($solicitudId > 0) {
+                Response::redirect(url('/solicitudes/' . $solicitudId . '/reservar'));
+            }
+
             Response::redirect(url('/reservas/nuevo'));
         } catch (Throwable $exception) {
             Logger::error('Error al crear una reserva', ['error' => $exception->getMessage()]);
             remember_old_input($datos);
             Session::flash('error', 'No se pudo crear la reserva. Intente nuevamente.');
+
+            if ($solicitudId > 0) {
+                Response::redirect(url('/solicitudes/' . $solicitudId . '/reservar'));
+            }
+
             Response::redirect(url('/reservas/nuevo'));
         }
-
-        $solicitudId = (int) ($datos['solicitud_id'] ?? 0);
 
         Audit::log(Auth::id(), 'crear_reserva', 'reserva', $id, 'Reserva creada: ' . (string) $limpio['solicitante_nombre']);
 
@@ -147,7 +165,7 @@ final class ReservasController
                 'atendida',
                 (int) Auth::id(),
                 null,
-                'Convertida en la reserva ' . (string) $limpio['codigo'] . '.'
+                'Convertida en la reserva ' . $codigoReserva . '.'
             );
 
             Audit::log(
@@ -155,10 +173,10 @@ final class ReservasController
                 'convertir_solicitud_reserva',
                 'solicitud_alquiler',
                 $solicitudId,
-                'Solicitud convertida en la reserva ' . (string) $limpio['codigo']
+                'Solicitud convertida en la reserva ' . $codigoReserva
             );
 
-            Session::flash('exito', 'La reserva quedó registrada y la solicitud se marcó como atendida.');
+            Session::flash('exito', 'La reserva ' . $codigoReserva . ' quedó registrada y la solicitud se marcó como atendida.');
             Response::redirect(url('/reservas/' . $id));
         }
 
@@ -435,6 +453,18 @@ final class ReservasController
 
         if ($solicitud === null) {
             abort(404, 'La solicitud indicada no existe.');
+        }
+
+        // Al abrir la conversión, la solicitud pasa a «en revisión»: el
+        // personal ya la está atendiendo.
+        if ((string) $solicitud['estado'] === 'pendiente') {
+            \App\Models\SolicitudAlquiler::actualizarEstado(
+                (int) $solicitud['id'],
+                'en_revision',
+                (int) Auth::id(),
+                null,
+                'En proceso de conversión a reserva.'
+            );
         }
 
         $tarifa = Tarifa::vigentePara(

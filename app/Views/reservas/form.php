@@ -72,8 +72,11 @@ foreach ($tarifas as $instalacionId => $lista) {
 <form class="form" method="post" action="<?= e($accion) ?>">
     <?= csrf_field() ?>
 
-    <?php if (($solicitudId ?? null) !== null): ?>
-        <input type="hidden" name="solicitud_id" value="<?= e((string) $solicitudId) ?>">
+    <?php
+    $solicitudOculta = old('solicitud_id', ($solicitudId ?? null) === null ? '' : (string) $solicitudId);
+    ?>
+    <?php if ($solicitudOculta !== ''): ?>
+        <input type="hidden" name="solicitud_id" value="<?= e((string) $solicitudOculta) ?>">
     <?php endif; ?>
 
     <fieldset class="form__group">
