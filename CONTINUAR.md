@@ -386,6 +386,30 @@ nuevas.
 - El directorio publica **solo** los negocios marcados como visibles; cada uno
   puede llevar su propio enlace.
 
+### 2.9 La portada con formato de revista
+
+La portada pública pasó a tener **formato de revista (magazine)**:
+
+| Bloque | Contenido |
+| --- | --- |
+| Cabecera | Fecha, «Edición de la Unidad Vecinal N.º 3», masthead con las siglas y accesos rápidos (ambientes, solicitar, torneos, galería, negocios, portal UV3) |
+| Portada | Foto principal con titular, entradilla, categoría y fecha, y llamada a la galería |
+| Noticias y galería | Carrusel horizontal con las fotos; las **destacadas** de portada van primero |
+| Negocios de la unidad | Carrusel con los negocios de la portada y su enlace |
+| Columna lateral | **Próximos eventos** (del calendario), **agenda deportiva** (partidos programados) y recuadro de alquiler de ambientes |
+| Secciones finales | Ambientes publicados, pasos de la solicitud, contacto, PWA y acceso del personal |
+
+**Contenido de ejemplo**: si todavía no hay noticias, eventos, partidos ni negocios
+reales, la portada muestra contenido de ejemplo con la insignia **«Ejemplo»**
+para poder revisar el diseño. En cuanto el club carga contenido real, se
+sustituye solo. Se desactiva con el parámetro `fotos_ejemplo` de la tabla
+`csduv3_configuracion` (por defecto activado).
+
+Archivos: `app/Views/home/index.php`, `app/Controllers/HomeController.php`,
+`app/Models/Actividad.php` (`proximasPublicas()`), `app/Models/Encuentro.php`
+(`proximos()`), `public/assets/css/app.css` y `public/assets/js/app.js`
+(carruseles sin dependencias).
+
 ---
 
 ## 3. Pruebas realizadas

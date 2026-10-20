@@ -1034,6 +1034,18 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | EN-2 | Enlace «Portal UV3» | Abre `https://uv3-platform.vercel.app/` en una pestaña nueva (`target="_blank"`) |
 | EN-3 | Pie de página | Incluye Galería del club, Negocios de la unidad y el portal de la Unidad Vecinal |
 
+### 13.5 La portada con formato de revista
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| RV-1 | Abrir la portada | 200; cabecera con fecha, edición y masthead; portada con foto, titular y entradilla; carruseles de noticias y de negocios; columna con próximos eventos, agenda deportiva y alquiler |
+| RV-2 | Con noticias reales en la base | La portada muestra la foto marcada como «noticia de portada» y el carrusel las demás; ninguna insignia «Ejemplo» |
+| RV-3 | Sin noticias reales | La portada muestra las fotos de ejemplo con la insignia «Ejemplo» y el enlace a la galería |
+| RV-4 | Programar una actividad visible y futura | Aparece en «Próximos eventos» con su día, mes, tipo y lugar |
+| RV-5 | Programar un encuentro con estado «programado» | Aparece en «Agenda deportiva» con fecha, hora, equipos y torneo |
+| RV-6 | Desplazar los carruseles con los botones | La pista se mueve de forma suave; en móvil, deslizando con el dedo |
+| RV-7 | Revisar la portada en 390 px y en 1280 px | Sin desbordamiento horizontal (`scrollWidth` = `innerWidth`); en móvil el bloque de revista se apila en una columna |
+
 ---
 
 ## 14. Registro de resultados
@@ -1051,7 +1063,8 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | Caja, directiva, elecciones, calendario y documentos | `php -l` + verificación estática + R8-R9 | Correcto | 135 archivos de `app/` sin errores de sintaxis; 142 archivos PHP con 0 hallazgos; 41 rutas correctas; 20 vistas renderizadas sin advertencias |
 | Reservas, galería y negocios | `php -l` + verificación estática + enrutamiento y render | Correcto | 153 archivos de `app/` sin errores de sintaxis; 160 archivos PHP con 0 hallazgos; 30 rutas nuevas comprobadas; 13 vistas renderizadas sin advertencias; migración `0002` revisada |
 | Despliegue de reservas, galería y negocios (`522a985`) | Verificación HTTP | Correcto | `/galeria` 200, `/negocios` 200, `/reservas`, `/fotos` y `/directorio` 302 a `/ingresar`; la portada muestra «El club en imágenes», «Negocios de la unidad» y el enlace al portal UV3; 0 errores PHP en las páginas públicas |
-| Pendiente | Secciones 5 a 13 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09, RS-01 a RS-11, GA-01 a GA-06, NE-01 a NE-06, EN-1 a EN-3) | - | Requiere **MariaDB** y una sesion de administrador; las pruebas de escritura requieren una base de datos de pruebas |
+| Portada con formato de revista (`b46ded1`) | Verificación HTTP + capturas headless | Correcto | La portada muestra masthead, portada con titular, dos carruseles, columna con próximos eventos y agenda deportiva; 6 fotos de ejemplo con insignia «Ejemplo»; 0 errores PHP; en 390 px `scrollWidth` = `innerWidth` (sin desbordamiento) y el bloque se apila en una columna |
+| Pendiente | Secciones 5 a 13 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09, RS-01 a RS-11, GA-01 a GA-06, NE-01 a NE-06, EN-1 a EN-3, RV-1 a RV-7) | - | Requiere **MariaDB** y una sesion de administrador; las pruebas de escritura requieren una base de datos de pruebas |
 | Pendiente | Rotación de la contraseña de la base de datos | — | Sigue expuesta en el historial público de Git: rotar en cPanel y actualizar `.env` |
 
 ---
