@@ -6,8 +6,8 @@ namespace App\Controllers;
 
 use App\Core\Database;
 use App\Core\Request;
+use App\Core\Response;
 use App\Core\Uploads;
-use App\Core\View;
 use App\Models\Configuracion;
 
 /**
