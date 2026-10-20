@@ -60,8 +60,18 @@ final class HomeController
         }
 
         // Las secciones son independientes: si una falla, la portada sigue.
-        $noticias = $this->cargar(fn (): array => Foto::listarPortada(5), 'noticias');
+        $portada = $this->cargar(fn (): ?array => Foto::portada(), 'portada');
+        $noticias = $portada === null ? [] : [$portada];
+
+
         $galeria = $this->cargar(fn (): array => Foto::listarVisibles(9), 'galería');
+
+        if ($portada !== null) {
+            $galeria = array_values(array_filter(
+                $galeria,
+                static fn (array $foto): bool => (int) $foto['id'] !== (int) $portada['id']
+            ));
+        }
         $negocios = $this->cargar(fn (): array => Negocio::listarVisibles(), 'negocios');
         $eventos = $this->cargar(fn (): array => Actividad::proximasPublicas(5), 'eventos');
         $partidos = $this->cargar(fn (): array => Encuentro::proximos(4), 'agenda deportiva');

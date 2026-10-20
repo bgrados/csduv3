@@ -116,8 +116,8 @@ $enlaces[] = [
                     </a>
                 </li>
                 <li>
-                    <a class="sidebar__link<?= is_current('/fotos') ? ' is-active' : '' ?>" href="<?= e(url('/fotos')) ?>"<?= is_current('/fotos') ? ' aria-current="page"' : '' ?>>
-                        <?= Icons::render('calendario', 'icon', 20) ?><span>Fotos del club</span>
+                    <a class="sidebar__link<?= is_current('/noticias') ? ' is-active' : '' ?>" href="<?= e(url('/noticias')) ?>"<?= is_current('/noticias') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('calendario', 'icon', 20) ?><span>Noticias y fotos</span>
                     </a>
                 </li>
                 <li>

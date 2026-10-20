@@ -387,17 +387,22 @@ nuevas.
   puede llevar su propio enlace.
 
 ### 2.9 La portada con formato de revista
-
 La portada pública pasó a tener **formato de revista (magazine)**:
 
 | Bloque | Contenido |
 | --- | --- |
 | Cabecera | Fecha, «Edición de la Unidad Vecinal N.º 3», masthead con las siglas y accesos rápidos (ambientes, solicitar, torneos, galería, negocios, portal UV3) |
-| Portada | Foto principal con titular, entradilla, categoría y fecha, y llamada a la galería |
-| Noticias y galería | Carrusel horizontal con las fotos; las **destacadas** de portada van primero |
+| Portada | La **noticia en portada**: foto principal con titular, entradilla, categoría y fecha, y llamada a la galería |
+| Noticias y galería | Carrusel horizontal con las noticias publicadas |
 | Negocios de la unidad | Carrusel con los negocios de la portada y su enlace |
 | Columna lateral | **Próximos eventos** (del calendario), **agenda deportiva** (partidos programados) y recuadro de alquiler de ambientes |
-| Secciones finales | Ambientes publicados, pasos de la solicitud, contacto, PWA y acceso del personal |
+| Secciones finales | Ambientes publicados, pasos de la reserva, contacto e instalación de la aplicación |
+
+**Módulo de noticias** (`/noticias` en el panel): cada noticia lleva una foto,
+un titular, una entradilla, un pie de foto, una categoría y una fecha. Se
+publica o se deja como borrador, y **una sola noticia ocupa la portada** del
+portal (al elegirla, las demás salen de ella). La galería pública (`/galeria`)
+muestra todas las publicadas.
 
 **Contenido de ejemplo**: si todavía no hay noticias, eventos, partidos ni negocios
 reales, la portada muestra contenido de ejemplo con la insignia **«Ejemplo»**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Core\Icons;
 
 /**
- * Alta y edición de una foto de la galería.
+ * Alta y edición de una noticia con su foto.
  *
  * @var array<string, mixed>|null $foto
  * @var string $modo
@@ -38,22 +38,22 @@ $destacado = $destacadoPrevio !== null
     ? (string) $destacadoPrevio === '1'
     : ($esEdicion ? (int) ($foto['destacado'] ?? 0) === 1 : false);
 
-$accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
+$accion = $esEdicion ? url('/noticias/' . (string) $foto['id']) : url('/noticias');
 ?>
 
 <div class="page-head">
     <div>
         <p class="page-head__eyebrow">
-            <a href="<?= e(url('/fotos')) ?>">Fotos del club</a> · registro
+            <a href="<?= e(url('/noticias')) ?>">Noticias y fotos</a> · <?= $esEdicion ? 'editar' : 'nueva' ?>
         </p>
-        <h1><?= $esEdicion ? 'Editar foto' : 'Subir foto' ?></h1>
+        <h1><?= $esEdicion ? 'Editar noticia' : 'Nueva noticia' ?></h1>
         <p class="page-head__lead">
-            Las imágenes se guardan fuera de la carpeta pública y se muestran en la
-            portada y en la galería del portal.
+            Escriba el titular, la entradilla y suba la foto. Las imágenes se
+            convierten a WebP para que pesen menos.
         </p>
     </div>
     <div class="page-head__actions">
-        <a class="btn btn--ghost" href="<?= e(url('/fotos')) ?>">Volver</a>
+        <a class="btn btn--ghost" href="<?= e(url('/noticias')) ?>">Volver</a>
     </div>
 </div>
 
@@ -61,13 +61,13 @@ $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
     <?= csrf_field() ?>
 
     <fieldset class="form__group">
-        <legend>Fotografía</legend>
+        <legend>La foto</legend>
 
         <div class="field">
             <label for="archivo">Imagen <span class="req">*</span></label>
             <input type="file" id="archivo" name="archivo" accept="image/jpeg,image/png,image/webp,image/gif" required>
             <p class="field__hint">
-                JPG, PNG, WEBP o GIF. Máximo <?= e((string) (int) config('security.uploads.max_size_mb', 5)) ?> MB.
+                Se convierte a WebP y se reduce a 2000 px de ancho.
                 <?php if ($esEdicion && !empty($foto['archivo'])): ?>
                     <br>Si no sube una imagen nueva, se conserva la actual.
                 <?php endif; ?>
@@ -76,7 +76,7 @@ $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
     </fieldset>
 
     <fieldset class="form__group">
-        <legend>Ficha</legend>
+        <legend>La noticia</legend>
 
         <div class="form-grid">
             <div class="field">
@@ -96,7 +96,7 @@ $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
             </div>
 
             <div class="field">
-                <label for="fecha_foto">Fecha</label>
+                <label for="fecha_foto">Fecha de la noticia</label>
                 <input type="date" id="fecha_foto" name="fecha_foto" value="<?= e($valor('fecha_foto', date('Y-m-d'))) ?>">
             </div>
 
@@ -106,20 +106,20 @@ $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
             </div>
 
             <div class="field">
-                <label for="visible">Publicada en el portal</label>
+                <label for="visible">Publicada</label>
                 <select id="visible" name="visible">
-                    <option value="1" <?= $visible ? 'selected' : '' ?>>Sí</option>
-                    <option value="0" <?= $visible ? '' : 'selected' ?>>No</option>
+                    <option value="1" <?= $visible ? 'selected' : '' ?>>Sí, visible en el portal</option>
+                    <option value="0" <?= $visible ? '' : 'selected' ?>>No, queda como borrador</option>
                 </select>
             </div>
 
             <div class="field">
-                <label for="destacado">Noticia de portada</label>
+                <label for="destacado">Publicar en la portada</label>
                 <select id="destacado" name="destacado">
-                    <option value="0" <?= $destacado ? '' : 'selected' ?>>No (solo en la galería)</option>
-                    <option value="1" <?= $destacado ? 'selected' : '' ?>>Sí (titular en la portada)</option>
+                    <option value="0" <?= $destacado ? '' : 'selected' ?>>No, solo en la galería</option>
+                    <option value="1" <?= $destacado ? 'selected' : '' ?>>Sí, como noticia de portada</option>
                 </select>
-                <p class="field__hint">Solo las noticias de portada aparecen en el bloque de noticias del portal.</p>
+                <p class="field__hint">Solo puede haber una noticia en portada: al elegirla, las demás salen de ella.</p>
             </div>
         </div>
 
@@ -130,12 +130,12 @@ $accion = $esEdicion ? url('/fotos/' . (string) $foto['id']) : url('/fotos');
 
         <div class="field">
             <label for="descripcion">Pie de foto</label>
-            <textarea id="descripcion" name="descripcion" rows="3" maxlength="500" placeholder="Una frase que acompañe a la foto"><?= e($valor('descripcion')) ?></textarea>
+            <textarea id="descripcion" name="descripcion" rows="3" maxlength="500" placeholder="Detalle de la foto"><?= e($valor('descripcion')) ?></textarea>
         </div>
     </fieldset>
 
     <div class="form__actions">
-        <button type="submit" class="btn btn--primary"><?= $esEdicion ? 'Guardar cambios' : 'Subir foto' ?></button>
-        <a class="btn btn--ghost" href="<?= e(url('/fotos')) ?>">Cancelar</a>
+        <button type="submit" class="btn btn--primary"><?= $esEdicion ? 'Guardar cambios' : 'Publicar noticia' ?></button>
+        <a class="btn btn--ghost" href="<?= e(url('/noticias')) ?>">Cancelar</a>
     </div>
 </form>

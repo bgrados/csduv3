@@ -19,11 +19,11 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Galería institucional: reuniones, campeonatos, junta directiva y socios.
+ * Noticias y galería institucional: reuniones, campeonatos, junta directiva y socios.
  *
- * Solo las fotos visibles se publican en el portal público.
+ * Una sola noticia ocupa la portada del portal; las demás quedan en la galería.
  */
-final class GaleriaController
+final class NoticiasController
 {
     public function index(Request $request): void
     {
@@ -37,16 +37,17 @@ final class GaleriaController
         try {
             $fotos = Foto::todas($categoria);
         } catch (Throwable $exception) {
-            Logger::warning('No se pudo cargar la galería', ['error' => $exception->getMessage()]);
+            Logger::warning('No se pudieron cargar las noticias', ['error' => $exception->getMessage()]);
             $fotos = [];
-            Session::flash('error', 'La galería todavía no está disponible: falta aplicar la migración de la base de datos.');
+            Session::flash('error', 'Las noticias todavía no están disponibles: falta aplicar la migración de la base de datos.');
         }
 
-        View::display('galeria/index', [
-            'titulo'     => 'Fotos del club',
+        View::display('noticias/index', [
+            'titulo'     => 'Noticias y fotos',
             'fotos'      => $fotos,
             'categorias' => Foto::CATEGORIAS,
             'categoria'  => $categoria,
+            'portada'    => Foto::portada(),
         ]);
     }
 
@@ -56,8 +57,8 @@ final class GaleriaController
             return;
         }
 
-        View::display('galeria/form', [
-            'titulo'     => 'Subir foto',
+        View::display('noticias/form', [
+            'titulo'     => 'Nueva noticia',
             'foto'       => null,
             'modo'       => 'crear',
             'categorias' => Foto::CATEGORIAS,
@@ -78,7 +79,7 @@ final class GaleriaController
         if ($errores !== []) {
             remember_old_input($datos);
             Session::flash('errores', $errores);
-            Response::redirect(url('/fotos/nuevo'));
+            Response::redirect(url('/noticias/nuevo'));
         }
 
         try {
@@ -101,14 +102,14 @@ final class GaleriaController
             Logger::error('Error al registrar una foto', ['error' => $exception->getMessage()]);
             Uploads::borrar((string) $archivo['ruta'], 'fotos/');
             remember_old_input($datos);
-            Session::flash('error', 'No se pudo registrar la foto.');
-            Response::redirect(url('/fotos/nuevo'));
+            Session::flash('error', 'No se pudo registrar la noticia.');
+            Response::redirect(url('/noticias/nuevo'));
         }
 
         Audit::log(Auth::id(), 'crear_foto', 'foto', $id, 'Foto publicada: ' . (string) $limpio['titulo']);
 
-        Session::flash('exito', 'La foto quedó registrada.');
-        Response::redirect(url('/fotos'));
+        Session::flash('exito', 'La noticia quedó registrada.');
+        Response::redirect(url('/noticias'));
     }
 
     public function editar(Request $request, string $id): void
@@ -119,8 +120,8 @@ final class GaleriaController
 
         $foto = $this->obtener((int) $id);
 
-        View::display('galeria/form', [
-            'titulo'     => 'Editar foto',
+        View::display('noticias/form', [
+            'titulo'     => 'Editar noticia',
             'foto'       => $foto,
             'modo'       => 'editar',
             'categorias' => Foto::CATEGORIAS,
@@ -144,7 +145,7 @@ final class GaleriaController
         if ($errores !== []) {
             remember_old_input($datos);
             Session::flash('errores', $errores);
-            Response::redirect(url('/fotos/' . $fotoId . '/editar'));
+            Response::redirect(url('/noticias/' . $fotoId . '/editar'));
         }
 
         $rutaAnterior = (string) ($foto['archivo'] ?? '');
@@ -176,8 +177,8 @@ final class GaleriaController
 
         Audit::log(Auth::id(), 'editar_foto', 'foto', $fotoId, 'Foto actualizada: ' . (string) $limpio['titulo']);
 
-        Session::flash('exito', 'La foto se actualizó.');
-        Response::redirect(url('/fotos'));
+        Session::flash('exito', 'La noticia se actualizó.');
+        Response::redirect(url('/noticias'));
     }
 
     public function estado(Request $request, string $id): void
@@ -195,7 +196,7 @@ final class GaleriaController
             'exito',
             $visible ? 'La foto ya se publica en el portal.' : 'La foto dejó de publicarse en el portal.'
         );
-        Response::redirect(url('/fotos'));
+        Response::redirect(url('/noticias'));
     }
 
     public function destacar(Request $request, string $id): void
@@ -205,28 +206,21 @@ final class GaleriaController
         }
 
         $foto = $this->obtener((int) $id);
-        $destacado = (int) $foto['destacado'] === 1;
+        $enPortada = (int) $foto['destacado'] === 1;
 
-        self::cambiarDestacado((int) $foto['id'], !$destacado);
+        if ($enPortada) {
+            Foto::quitarPortada((int) $foto['id']);
+        } else {
+            Foto::establecerPortada((int) $foto['id']);
+        }
 
         Session::flash(
             'exito',
-            $destacado
-                ? 'La noticia dejó de aparecer en la portada.'
-                : 'La noticia ya aparece en la portada.'
+            $enPortada
+                ? 'La noticia dejó de ocupar la portada.'
+                : 'La noticia ya ocupa la portada del portal.'
         );
-        Response::redirect(url('/fotos'));
-    }
-
-    /**
-     * Marca o desmarca una foto como noticia de portada.
-     */
-    public static function cambiarDestacado(int $id, bool $destacado): void
-    {
-        self::run(
-            sprintf('UPDATE `%s` SET `destacado` = :destacado WHERE `id` = :id', self::table()),
-            ['destacado' => $destacado ? 1 : 0, 'id' => $id]
-        );
+        Response::redirect(url('/noticias'));
     }
 
     public function eliminar(Request $request, string $id): void
@@ -247,8 +241,8 @@ final class GaleriaController
 
         Audit::log(Auth::id(), 'eliminar_foto', 'foto', (int) $foto['id'], 'Foto eliminada: ' . (string) $foto['titulo']);
 
-        Session::flash('exito', 'La foto se eliminó.');
-        Response::redirect(url('/fotos'));
+        Session::flash('exito', 'La noticia se eliminó.');
+        Response::redirect(url('/noticias'));
     }
 
     /**

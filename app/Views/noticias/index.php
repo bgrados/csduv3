@@ -5,11 +5,12 @@ declare(strict_types=1);
 use App\Core\Icons;
 
 /**
- * Galería institucional (panel).
+ * Noticias y fotos del club (panel).
  *
  * @var array<int, array<string, mixed>> $fotos
  * @var array<string, string> $categorias
  * @var string $categoria
+ * @var array<string, mixed>|null $portada
  */
 
 $puedeGestionar = can('documentos.gestionar');
@@ -26,22 +27,37 @@ $tamano = static function (?int $bytes): string {
 <div class="page-head">
     <div>
         <p class="page-head__eyebrow">Institucional</p>
-        <h1>Fotos del club</h1>
+        <h1>Noticias y fotos</h1>
         <p class="page-head__lead">
-            Suba las fotos de las reuniones, los campeonatos, la junta directiva y
-            fotos publicadas aparecen en la portada y en la galería pública.
+            Cada noticia lleva una foto, un titular y una entradilla. Una sola
+            noticia puede ocupar la portada del portal; las demás quedan en la
+            galería pública.
         </p>
     </div>
     <div class="page-head__actions">
+        <a class="btn btn--ghost" href="<?= e(url('/galeria')) ?>">Ver la galería pública</a>
         <?php if ($puedeGestionar): ?>
-            <a class="btn btn--primary" href="<?= e(url('/fotos/nuevo')) ?>">
-                <?= Icons::render('documentos', 'icon', 18) ?> Subir foto
+            <a class="btn btn--primary" href="<?= e(url('/noticias/nuevo')) ?>">
+                <?= Icons::render('documentos', 'icon', 18) ?> Nueva noticia
             </a>
         <?php endif; ?>
     </div>
 </div>
 
-<form class="form form--filters" method="get" action="<?= e(url('/fotos')) ?>">
+<?php if ($portada !== null): ?>
+    <div class="card card--highlight">
+        <p class="card__label">Noticia en portada</p>
+        <div class="galeria__portada">
+            <img src="<?= e(url('/galeria/imagen/' . (string) $portada['id'])) ?>" alt="<?= e((string) $portada['titulo']) ?>">
+            <div>
+                <h3 style="margin:.2rem 0;"><?= e((string) $portada['titulo']) ?></h3>
+                <p class="muted"><?= e((string) ($portada['resumen'] ?? '')) ?></p>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<form class="form form--filters" method="get" action="<?= e(url('/noticias')) ?>">
     <div class="field">
         <label for="categoria">Categoría</label>
         <select id="categoria" name="categoria">
@@ -57,7 +73,7 @@ $tamano = static function (?int $bytes): string {
     <div class="field field--actions">
         <button type="submit" class="btn btn--ghost">Filtrar</button>
         <?php if ($categoria !== ''): ?>
-            <a class="btn btn--ghost" href="<?= e(url('/fotos')) ?>">Limpiar</a>
+            <a class="btn btn--ghost" href="<?= e(url('/noticias')) ?>">Limpiar</a>
         <?php endif; ?>
     </div>
 </form>
@@ -65,20 +81,20 @@ $tamano = static function (?int $bytes): string {
 <?php if ($fotos === []): ?>
     <div class="empty-state">
         <span class="empty-state__icon"><?= Icons::render('documentos', 'icon', 26) ?></span>
-        <h2>Todavía no hay fotos</h2>
+        <h2>Todavía no hay noticias</h2>
         <p>
-            Sube las fotos de las reuniones, los campeonatos, la junta directiva y
-            los socios: forman la sección de la portada.
+            Publique la primera noticia con su foto: las reuniones, los campeonatos,
+            la junta directiva o la actividad de los socios.
         </p>
         <?php if ($puedeGestionar): ?>
-            <p><a class="btn btn--primary" href="<?= e(url('/fotos/nuevo')) ?>">Subir la primera foto</a></p>
+            <p><a class="btn btn--primary" href="<?= e(url('/noticias/nuevo')) ?>">Publicar la primera noticia</a></p>
         <?php endif; ?>
     </div>
 <?php else: ?>
     <div class="galeria">
         <?php foreach ($fotos as $foto): ?>
             <article class="galeria__item">
-                <a class="galeria__imagen" href="<?= e(url('/fotos/' . (string) $foto['id'] . '/editar')) ?>">
+                <a class="galeria__imagen" href="<?= e(url('/noticias/' . (string) $foto['id'] . '/editar')) ?>">
                     <?php if (!empty($foto['archivo'])): ?>
                         <img src="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>" alt="<?= e((string) $foto['titulo']) ?>" loading="lazy">
                     <?php else: ?>
@@ -96,34 +112,31 @@ $tamano = static function (?int $bytes): string {
                 <?php if (!empty($foto['resumen'])): ?>
                     <p class="galeria__descripcion"><?= e((string) $foto['resumen']) ?></p>
                 <?php endif; ?>
-                <?php if (!empty($foto['descripcion'])): ?>
-                    <p class="galeria__descripcion"><?= e((string) $foto['descripcion']) ?></p>
-                <?php endif; ?>
 
                 <div class="galeria__acciones">
                     <span class="badge <?= (int) $foto['visible'] === 1 ? 'badge--ok' : 'badge--soft' ?>">
-                        <?= (int) $foto['visible'] === 1 ? 'Publicada' : 'Oculta' ?>
+                        <?= (int) $foto['visible'] === 1 ? 'Publicada' : 'Borrador' ?>
                     </span>
-                    <span class="badge <?= (int) ($foto['destacado'] ?? 0) === 1 ? 'badge--info' : 'badge--soft' ?>">
-                        <?= (int) ($foto['destacado'] ?? 0) === 1 ? 'En portada' : 'Solo galería' ?>
-                    </span>
+                    <?php if ((int) ($foto['destacado'] ?? 0) === 1): ?>
+                        <span class="badge badge--info">En portada</span>
+                    <?php endif; ?>
 
                     <?php if ($puedeGestionar): ?>
-                        <a class="btn btn--ghost btn--sm" href="<?= e(url('/fotos/' . (string) $foto['id'] . '/editar')) ?>">Editar</a>
-                        <form method="post" action="<?= e(url('/fotos/' . (string) $foto['id'] . '/destacar')) ?>">
+                        <a class="btn btn--ghost btn--sm" href="<?= e(url('/noticias/' . (string) $foto['id'] . '/editar')) ?>">Editar</a>
+                        <form method="post" action="<?= e(url('/noticias/' . (string) $foto['id'] . '/portada')) ?>">
                             <?= csrf_field() ?>
                             <button type="submit" class="btn btn--ghost btn--sm">
                                 <?= (int) ($foto['destacado'] ?? 0) === 1 ? 'Quitar de portada' : 'Poner en portada' ?>
                             </button>
                         </form>
-                        <form method="post" action="<?= e(url('/fotos/' . (string) $foto['id'] . '/estado')) ?>">
+                        <form method="post" action="<?= e(url('/noticias/' . (string) $foto['id'] . '/estado')) ?>">
                             <?= csrf_field() ?>
                             <input type="hidden" name="accion" value="<?= (int) $foto['visible'] === 1 ? 'ocultar' : 'publicar' ?>">
                             <button type="submit" class="btn btn--ghost btn--sm">
-                                <?= (int) $foto['visible'] === 1 ? 'Ocultar' : 'Publicar' ?>
+                                <?= (int) $foto['visible'] === 1 ? 'Despublicar' : 'Publicar' ?>
                             </button>
                         </form>
-                        <form method="post" action="<?= e(url('/fotos/' . (string) $foto['id'] . '/eliminar')) ?>" data-confirmar="¿Eliminar esta foto?">
+                        <form method="post" action="<?= e(url('/noticias/' . (string) $foto['id'] . '/eliminar')) ?>" data-confirmar="¿Eliminar esta noticia y su foto?">
                             <?= csrf_field() ?>
                             <button type="submit" class="btn btn--ghost btn--sm">Eliminar</button>
                         </form>

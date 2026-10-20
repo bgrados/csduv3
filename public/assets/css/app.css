@@ -526,6 +526,9 @@ code {
 .galeria__acciones { margin-top: auto; display: flex; gap: .35rem; align-items: center; flex-wrap: wrap; padding-top: .4rem; }
 .galeria__acciones .btn { margin: 0; }
 
+.galeria__portada { display: flex; gap: .9rem; align-items: center; margin-top: .4rem; }
+.galeria__portada img { width: 120px; height: 78px; object-fit: cover; border-radius: var(--radius-sm); flex: 0 0 auto; }
+
 /* --- Formato revista (portada pública) ------------------------------------ */
 
 .revista {

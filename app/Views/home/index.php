@@ -429,33 +429,22 @@ $categoriasNegocio = [
     </div>
 <?php endif; ?>
 
-<h2 class="section-title">Instale el portal en su teléfono</h2>
-<div class="card">
-    <p>
-        Este portal puede instalarse como aplicación en Android, iPhone y computadoras.
-        Búsquelo en el menú del navegador («Añadir a la pantalla de inicio» o «Instalar aplicación»)
-        o utilice el botón <strong>Instalar</strong> cuando aparezca.
-    </p>
-    <p class="card__hint">
-        La aplicación instalada guarda en caché solo las páginas informativas públicas.
-        Las solicitudes y los datos privados siempre se consultan en el servidor.
-    </p>
-    <p>
-        <button type="button" class="btn btn--primary btn--sm" data-install-app>Instalar aplicación</button>
-    </p>
+<div data-instalar-seccion>
+    <h2 class="section-title">Instale el portal en su teléfono</h2>
+    <div class="card">
+        <p>
+            Este portal puede instalarse como aplicación en Android, iPhone y computadoras.
+            Búsquelo en el menú del navegador («Añadir a la pantalla de inicio» o «Instalar aplicación»)
+            o utilice el botón <strong>Instalar</strong> cuando aparezca.
+        </p>
+        <p class="card__hint">
+            La aplicación instalada guarda en caché solo las páginas informativas públicas.
+            Las solicitudes y los datos privados siempre se consultan en el servidor.
+        </p>
+        <p>
+            <button type="button" class="btn btn--primary btn--sm" data-install-app>Instalar aplicación</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-instalar-ocultar>Ahora no</button>
+        </p>
+    </div>
 </div>
 
-<h2 class="section-title">Acceso del personal</h2>
-<div class="card">
-    <p class="muted">
-        El panel administrativo está reservado al personal autorizado del club.
-        Requiere usuario y contraseña.
-    </p>
-    <p>
-        <?php if (auth() === null): ?>
-            <a class="btn btn--ghost btn--sm" href="<?= e(url('/ingresar')) ?>">Ingresar al panel</a>
-        <?php else: ?>
-            <a class="btn btn--ghost btn--sm" href="<?= e(url('/panel')) ?>">Ir al panel</a>
-        <?php endif; ?>
-    </p>
-</div>

@@ -75,6 +75,53 @@ final class Foto extends Model
     }
 
     /**
+     * La noticia que ocupa la portada del portal.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function portada(): ?array
+    {
+        $sql = sprintf(
+            'SELECT * FROM `%s`
+             WHERE `visible` = 1 AND `destacado` = 1
+             ORDER BY `fecha_foto` DESC, `id` DESC
+             LIMIT 1',
+            self::table()
+        );
+
+        return self::fetchOne($sql);
+    }
+
+    /**
+     * Publica una noticia en portada: solo puede haber una.
+     *
+     * Las demás noticias publicadas en portada se devuelven a la galería.
+     */
+    public static function establecerPortada(int $id): void
+    {
+        self::run(
+            sprintf('UPDATE `%s` SET `destacado` = 0 WHERE `destacado` = 1 AND `id` <> :id', self::table()),
+            ['id' => $id]
+        );
+
+        self::run(
+            sprintf('UPDATE `%s` SET `destacado` = 1 WHERE `id` = :id', self::table()),
+            ['id' => $id]
+        );
+    }
+
+    /**
+     * Quita una noticia de la portada.
+     */
+    public static function quitarPortada(int $id): void
+    {
+        self::run(
+            sprintf('UPDATE `%s` SET `destacado` = 0 WHERE `id` = :id', self::table()),
+            ['id' => $id]
+        );
+    }
+
+    /**
      * Todas las fotos (panel administrativo).
      *
      * @return array<int, array<string, mixed>>

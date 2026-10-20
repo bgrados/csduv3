@@ -13,11 +13,11 @@ use App\Controllers\DiagnosticoController;
 use App\Controllers\DirectivaController;
 use App\Controllers\DocumentosController;
 use App\Controllers\EleccionesController;
-use App\Controllers\GaleriaController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
 use App\Controllers\MarcaController;
 use App\Controllers\NegociosController;
+use App\Controllers\NoticiasController;
 use App\Controllers\PortalAlquilerController;
 use App\Controllers\PortalGaleriaController;
 use App\Controllers\PortalNegociosController;
@@ -561,48 +561,6 @@ $router->post('/directiva/{id}/miembros/{miembroId}/estado', [DirectivaControlle
     PermissionMiddleware::requiere('directiva.gestionar'),
 ]);
 
-// --- Galería de fotos y directorio de negocios ------------------------------
-
-$router->get('/fotos', [GaleriaController::class, 'index'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.ver'),
-]);
-
-$router->get('/fotos/nuevo', [GaleriaController::class, 'nuevo'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.gestionar'),
-]);
-
-$router->post('/fotos', [GaleriaController::class, 'crear'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.gestionar'),
-]);
-
-$router->get('/fotos/{id}/editar', [GaleriaController::class, 'editar'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.gestionar'),
-]);
-
-$router->post('/fotos/{id}', [GaleriaController::class, 'actualizar'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.gestionar'),
-]);
-
-$router->post('/fotos/{id}/estado', [GaleriaController::class, 'estado'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.gestionar'),
-]);
-
-$router->post('/fotos/{id}/destacar', [GaleriaController::class, 'destacar'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.gestionar'),
-]);
-
-$router->post('/fotos/{id}/eliminar', [GaleriaController::class, 'eliminar'], [
-    [AuthMiddleware::class, 'handle'],
-    PermissionMiddleware::requiere('documentos.gestionar'),
-]);
-
 $router->get('/directorio', [NegociosController::class, 'index'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('documentos.ver'),
@@ -658,6 +616,88 @@ $router->post('/configuracion/marca/{tipo}', [ConfiguracionController::class, 's
 $router->post('/configuracion/marca/{tipo}/restaurar', [ConfiguracionController::class, 'restaurarMarca'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('configuracion.gestionar'),
+]);
+
+// --- Noticias y galería ------------------------------------------------------
+
+$router->get('/noticias', [NoticiasController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.ver'),
+]);
+
+$router->get('/noticias/nuevo', [NoticiasController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/noticias', [NoticiasController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/noticias/{id}/editar', [NoticiasController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/noticias/{id}', [NoticiasController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/noticias/{id}/portada', [NoticiasController::class, 'destacar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/noticias/{id}/estado', [NoticiasController::class, 'estado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/noticias/{id}/eliminar', [NoticiasController::class, 'eliminar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/fotos', [NoticiasController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.ver'),
+]);
+
+$router->get('/fotos/nuevo', [NoticiasController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos', [NoticiasController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->get('/fotos/{id}/editar', [NoticiasController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos/{id}', [NoticiasController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos/{id}/estado', [NoticiasController::class, 'estado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos/{id}/portada', [NoticiasController::class, 'destacar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+$router->post('/fotos/{id}/eliminar', [NoticiasController::class, 'eliminar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('documentos.gestionar'),
 ]);
 
 // --- Caja -------------------------------------------------------------------

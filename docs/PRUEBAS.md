@@ -1078,6 +1078,18 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | CF-09 | Activar el aviso de mantenimiento | El portal público muestra el aviso arriba del todo |
 | CF-10 | Subir una foto de 4000×3000 | Queda en WebP, con un ancho máximo de 2000 px y un peso menor que el original |
 
+### 13.5 Noticias y portada
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| NT-01 | `GET /noticias` con `documentos.ver` | 200; lista de noticias con miniatura, titular, categoría, fecha y estado; la que está en portada se distingue |
+| NT-02 | Publicar una noticia nueva con foto | 302 con «La noticia quedó registrada»; aparece en `/galeria` y en el carrusel de la portada |
+| NT-03 | Poner una noticia en portada | La noticia ocupa la portada del portal y **las demás salen de ella** (solo una puede estar en portada) |
+| NT-04 | Quitar la noticia de la portada | La portada vuelve a la siguiente noticia o al contenido de ejemplo |
+| NT-05 | Dejar una noticia como borrador | No aparece en la galería pública ni en la portada, pero sí en el panel |
+| NT-06 | Editar el titular o la entradilla | Se actualizan en la galería y en la portada |
+| NT-07 | El aviso de instalación de la aplicación | Solo aparece en la primera visita; después de cerrarlo (o de instalar la app) no vuelve a mostrarse |
+
 ---
 
 ## 14. Registro de resultados

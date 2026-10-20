@@ -151,11 +151,6 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <?php endif; ?>
         </div>
     </div>
-    <p class="site-footer__meta">
-        Las reservas tomadas con «Reservar ahora» se confirman al instante y bloquean el
-        horario. Las solicitudes enviadas desde este portal quedan pendientes de revisión
-        del club.
-    </p>
 </footer>
 
 <div class="install-banner" data-install-banner hidden>

@@ -269,6 +269,66 @@
         });
     }
 
+    /**
+     * Aviso de instalación de la aplicación.
+     *
+     * Solo se muestra la primera vez: después de cerrarlo (o de instalar la
+     * aplicación) se recuerda en el navegador y no vuelve a aparecer.
+     */
+    function inicializarAvisoInstalacion() {
+        var seccion = document.querySelector('[data-instalar-seccion]');
+
+        if (!seccion) {
+            return;
+        }
+
+        var CLAVE = 'csduv3-instalacion-vista';
+
+        function ocultar() {
+            seccion.hidden = true;
+        }
+
+        function recordar() {
+            try {
+                window.localStorage.setItem(CLAVE, '1');
+            } catch (error) {
+                /* Sin almacenamiento local: se mostrara de nuevo. */
+            }
+        }
+
+        try {
+            if (window.localStorage.getItem(CLAVE) === '1') {
+                ocultar();
+                return;
+            }
+        } catch (error) {
+            /* Sin almacenamiento local: se mostrara siempre. */
+        }
+
+        // Si la aplicacion ya esta instalada, no tiene sentido insistir.
+        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+            ocultar();
+            return;
+        }
+
+        var cerrar = seccion.querySelector('[data-instalar-ocultar]');
+
+        if (cerrar) {
+            cerrar.addEventListener('click', function () {
+                recordar();
+                ocultar();
+            });
+        }
+
+        var instalar = seccion.querySelector('[data-install-app]');
+
+        if (instalar) {
+            instalar.addEventListener('click', function () {
+                recordar();
+            });
+        }
+    }
+
     function inicializarPwa() {
         registrarServiceWorker();
         prepararInstalacion();
@@ -280,6 +340,7 @@
         inicializarBusquedaEnTablas();
         inicializarAlertasCerrables();
         inicializarCarruseles();
+        inicializarAvisoInstalacion();
         inicializarPwa();
     }
 
