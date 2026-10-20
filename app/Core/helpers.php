@@ -284,6 +284,49 @@ if (!function_exists('club')) {
     }
 }
 
+if (!function_exists('redes_club')) {
+    /**
+     * Redes sociales configuradas por el club.
+     *
+     * Devuelve solo las redes que el club completó y cuyo enlace es válido
+     * (http o https). El WhatsApp se arma a partir del número guardado en
+     * Contacto, si lo hay.
+     *
+     * @return array<string, string> clave de la red => enlace
+     */
+    function redes_club(): array
+    {
+        $redes = [];
+
+        foreach (\App\Core\Redes::disponibles() as $clave => $datos) {
+            if ($clave === 'whatsapp') {
+                continue;
+            }
+
+            $enlace = trim(club($clave, ''));
+
+            if ($enlace === '') {
+                continue;
+            }
+
+            // Solo se aceptan enlaces http o https: nada de javascript: ni datos.
+            if (!preg_match('#^https?://#i', $enlace)) {
+                continue;
+            }
+
+            $redes[$clave] = $enlace;
+        }
+
+        $whatsapp = preg_replace('/[^0-9+]/', '', club('whatsapp', ''));
+
+        if (is_string($whatsapp) && strlen(preg_replace('/\D/', '', $whatsapp) ?? '') >= 7) {
+            $redes['whatsapp'] = 'https://wa.me/' . ltrim($whatsapp, '+');
+        }
+
+        return $redes;
+    }
+}
+
 if (!function_exists('marca_url')) {
     /**
      * URL pública de una imagen de marca (logo, favicon o portada).

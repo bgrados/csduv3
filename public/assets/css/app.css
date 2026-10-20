@@ -1545,6 +1545,85 @@ code {
 .site-footer__links a { color: #dcefe0; }
 .site-footer__links a:hover { color: var(--brand-yellow); }
 
+/* --------------------------------------------------------------------------
+   Redes sociales del club: un recuadro por red, con su color de marca.
+   -------------------------------------------------------------------------- */
+
+.redes {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    margin-top: .5rem;
+}
+
+.redes__titulo {
+    margin: 0;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #9fe6b5;
+}
+
+.redes__lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.redes__icono {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: #fff;
+    background: #4b5a50;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .18);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.redes__icono:hover,
+.redes__icono:focus-visible {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .28);
+    filter: saturate(1.15) brightness(1.05);
+}
+
+.redes__icono:focus-visible {
+    outline: 3px solid var(--brand-yellow);
+    outline-offset: 2px;
+}
+
+.redes__glifo {
+    display: block;
+}
+
+/* Muestra del logo junto al nombre de la red en el formulario de configuración. */
+.redes__marca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-right: .35rem;
+    border-radius: 6px;
+    vertical-align: -4px;
+    box-shadow: none;
+}
+
+.redes__icono--facebook { background: #1877f2; }
+.redes__icono--instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+.redes__icono--youtube { background: #ff0000; }
+.redes__icono--tiktok { background: #111; }
+.redes__icono--x { background: #000; }
+.redes__icono--whatsapp { background: #25d366; }
+
+/* En el pie del panel el fondo es claro: se usa un borde suave. */
+.footer .redes__titulo { color: var(--color-text-soft, #5c6b61); }
+.footer .redes__icono { box-shadow: none; }
+
 .site-footer__meta {
     max-width: 1120px;
     margin: 1.1rem auto 0;

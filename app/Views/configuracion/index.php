@@ -119,16 +119,38 @@ $marcaActual = static function (string $tipo) use ($configuracion): string {
                 <label for="direccion">Dirección</label>
                 <input type="text" id="direccion" name="direccion" maxlength="200" value="<?= e($valor('direccion')) ?>">
             </div>
+        </div>
+    </fieldset>
 
-            <div class="field">
-                <label for="facebook">Facebook</label>
-                <input type="url" id="facebook" name="facebook" maxlength="255" value="<?= e($valor('facebook')) ?>" placeholder="https://facebook.com/…">
-            </div>
+    <fieldset class="form__group">
+        <legend>Redes sociales</legend>
 
-            <div class="field">
-                <label for="instagram">Instagram</label>
-                <input type="url" id="instagram" name="instagram" maxlength="255" value="<?= e($valor('instagram')) ?>" placeholder="https://instagram.com/…">
-            </div>
+        <p class="field__hint">
+            Cada red con enlace aparece en el pie de página con su logo y su
+            color de marca. Si una red todavía no existe, déjalo vacío: no se
+            mostrará hasta que la crees.
+        </p>
+
+        <div class="form-grid">
+            <?php foreach (\App\Core\Redes::disponibles() as $claveRed => $datosRed): ?>
+                <?php if ($claveRed === 'whatsapp') { continue; } ?>
+                <div class="field">
+                    <label for="<?= e($claveRed) ?>">
+                        <span class="redes__marca redes__icono <?= e($datosRed['clase']) ?>">
+                            <?= \App\Core\Redes::render($claveRed, 14) ?>
+                        </span>
+                        <?= e($datosRed['etiqueta']) ?>
+                    </label>
+                    <input
+                        type="url"
+                        id="<?= e($claveRed) ?>"
+                        name="<?= e($claveRed) ?>"
+                        maxlength="255"
+                        value="<?= e($valor($claveRed)) ?>"
+                        placeholder="https://<?= e($claveRed) ?>.com/…"
+                    >
+                </div>
+            <?php endforeach; ?>
         </div>
     </fieldset>
 

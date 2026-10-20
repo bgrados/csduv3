@@ -49,8 +49,11 @@ final class ConfiguracionController
         'whatsapp'           => ['contacto', 'texto'],
         'email_institucional' => ['contacto', 'texto'],
         'direccion'          => ['contacto', 'texto'],
-        'facebook'           => ['contacto', 'texto'],
-        'instagram'          => ['contacto', 'texto'],
+        'facebook'           => ['redes', 'texto'],
+        'instagram'          => ['redes', 'texto'],
+        'youtube'            => ['redes', 'texto'],
+        'tiktok'             => ['redes', 'texto'],
+        'x'                  => ['redes', 'texto'],
         'correo_notificaciones' => ['notificaciones', 'texto'],
         'correo_remitente'   => ['notificaciones', 'texto'],
         'portada_titulo'     => ['portada', 'texto'],
@@ -116,6 +119,9 @@ final class ConfiguracionController
             'direccion'           => 'nullable|string|max:200',
             'facebook'            => 'nullable|url|max:255',
             'instagram'           => 'nullable|url|max:255',
+            'youtube'             => 'nullable|url|max:255',
+            'tiktok'              => 'nullable|url|max:255',
+            'x'                   => 'nullable|url|max:255',
             'portada_titulo'      => 'nullable|string|max:180',
             'portada_resumen'     => 'nullable|string|max:300',
             'porcentaje_adelanto' => 'nullable|integer|min:0|max:100',
@@ -136,6 +142,9 @@ final class ConfiguracionController
             'direccion'           => 'la dirección',
             'facebook'            => 'el enlace de Facebook',
             'instagram'           => 'el enlace de Instagram',
+            'youtube'             => 'el enlace de YouTube',
+            'tiktok'              => 'el enlace de TikTok',
+            'x'                   => 'el enlace de X',
             'portada_titulo'      => 'el título de la portada',
             'portada_resumen'     => 'la bajada de la portada',
             'porcentaje_adelanto' => 'el porcentaje de adelanto',
@@ -144,6 +153,16 @@ final class ConfiguracionController
 
         $errores = array_values($validador->errors());
         $limpio = $validador->validated();
+
+        // Las redes sociales solo admiten enlaces http o https.
+        foreach (['facebook', 'instagram', 'youtube', 'tiktok', 'x'] as $claveRed) {
+            $enlace = trim((string) ($limpio[$claveRed] ?? ''));
+
+            if ($enlace !== '' && preg_match('#^https?://#i', $enlace) !== 1) {
+                $errores[] = 'El enlace de ' . \App\Core\Redes::etiqueta($claveRed)
+                    . ' debe empezar por http:// o https://.';
+            }
+        }
 
         if ($errores !== []) {
             remember_old_input($datos);

@@ -1041,6 +1041,9 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | EN-1 | Barra de navegación de la portada | Enlaces a Inicio, Ambientes, Disponibilidad, Solicitar, Torneos, Galería, Negocios y «Portal UV3» |
 | EN-2 | Enlace «Portal UV3» | Abre `https://uv3-platform.vercel.app/` en una pestaña nueva (`target="_blank"`) |
 | EN-3 | Pie de página | Incluye Galería del club, Negocios de la unidad y el portal de la Unidad Vecinal |
+| EN-4 | Redes sociales del club en el pie | Cada red configurada aparece en un recuadro con su logo y su color de marca (Facebook, Instagram, YouTube, TikTok, X y WhatsApp); las redes sin enlace no aparecen |
+| EN-5 | Configurar el enlace de Instagram en `/configuracion` | Se guarda y el recuadro de Instagram aparece en el pie; si el enlace no empieza por `http://` o `https://` se avisa y no se guarda |
+| EN-6 | Configurar un enlace de red con `javascript:` | Se rechaza con el aviso de que el enlace debe empezar por `http://` o `https://` |
 
 ### 13.5 La portada con formato de revista
 

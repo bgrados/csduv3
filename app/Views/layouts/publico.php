@@ -143,13 +143,8 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <a href="<?= e(url('/galeria')) ?>">Galería del club</a>
             <a href="<?= e(url('/negocios')) ?>">Negocios de la unidad</a>
             <a href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">Portal de la Unidad Vecinal</a>
-            <?php $facebookClub = club('facebook', ''); $instagramClub = club('instagram', ''); ?>
-            <?php if ($facebookClub !== ''): ?>
-                <a href="<?= e($facebookClub) ?>" target="_blank" rel="noopener">Facebook</a>
-            <?php endif; ?>
-            <?php if ($instagramClub !== ''): ?>
-                <a href="<?= e($instagramClub) ?>" target="_blank" rel="noopener">Instagram</a>
-            <?php endif; ?>
+            <?php $tituloRedes = 'Síguenos en redes'; ?>
+            <?php require __DIR__ . '/../partials/redes.php'; ?>
         </div>
 
         <div class="site-footer__club">
