@@ -1046,6 +1046,23 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | RV-6 | Desplazar los carruseles con los botones | La pista se mueve de forma suave; en móvil, deslizando con el dedo |
 | RV-7 | Revisar la portada en 390 px y en 1280 px | Sin desbordamiento horizontal (`scrollWidth` = `innerWidth`); en móvil el bloque de revista se apila en una columna |
 
+### 13.6 Reserva directa desde el portal público
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| RB-01 | Abrir `/alquiler/reservar` con un ambiente con tarifa | 200; formulario con ambiente, tarifa, tipo de uso, fecha, horas, datos de contacto, forma de pago y el resumen con tarifa, adelanto y saldo |
+| RB-02 | Reservar con un ambiente **sin** tarifa | Se avisa de que no hay tarifas publicadas y se ofrece el envío de una solicitud |
+| RB-03 | Enviar el formulario con datos válidos | Redirección a `/alquiler/reserva-confirmada`; la reserva queda **confirmada** y con código `RES-AAAA-####`; el horario aparece como ocupado en la disponibilidad |
+| RB-04 | Marcar «ya transferí o pagué» | Se registra el adelanto en caja: un movimiento de ingreso y una fila en `csduv3_reserva_pagos`; el monto pagado de la reserva sube |
+| RB-05 | No marcar el pago | La reserva queda confirmada con el saldo pendiente y sin movimiento en caja |
+| RB-06 | Reservar un horario ya ocupado | Se rechaza con «Ese horario ya está reservado…»; no se crea ninguna reserva |
+| RB-07 | Enviar sin el token CSRF | Error 419; no se crea ninguna reserva |
+| RB-08 | Enviar con el campo trampa completados o en menos de 3 segundos | Se descarta la reserva con un mensaje claro |
+| RB-09 | Repetir más de 5 reservas desde la misma conexión | Se bloquea por límite de conexión |
+| RB-10 | Reservar 4 veces seguidas con el mismo teléfono | La cuarta se rechaza con «Ya tiene 3 reservas futuras registradas con este teléfono.» |
+| RB-11 | Abrir `/alquiler/reserva-confirmada` sin haber reservado | Muestra el estado vacío, sin datos de ninguna reserva |
+| RB-12 | Comprobar la página de confirmación | Muestra el código, el ambiente, la fecha, el horario, los importes y los próximos pasos; **no** muestra datos de otras reservas |
+
 ---
 
 ## 14. Registro de resultados
@@ -1064,7 +1081,7 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | Reservas, galería y negocios | `php -l` + verificación estática + enrutamiento y render | Correcto | 153 archivos de `app/` sin errores de sintaxis; 160 archivos PHP con 0 hallazgos; 30 rutas nuevas comprobadas; 13 vistas renderizadas sin advertencias; migración `0002` revisada |
 | Despliegue de reservas, galería y negocios (`522a985`) | Verificación HTTP | Correcto | `/galeria` 200, `/negocios` 200, `/reservas`, `/fotos` y `/directorio` 302 a `/ingresar`; la portada muestra «El club en imágenes», «Negocios de la unidad» y el enlace al portal UV3; 0 errores PHP en las páginas públicas |
 | Portada con formato de revista (`b46ded1`) | Verificación HTTP + capturas headless | Correcto | La portada muestra masthead, portada con titular, dos carruseles, columna con próximos eventos y agenda deportiva; 6 fotos de ejemplo con insignia «Ejemplo»; 0 errores PHP; en 390 px `scrollWidth` = `innerWidth` (sin desbordamiento) y el bloque se apila en una columna |
-| Pendiente | Secciones 5 a 13 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09, RS-01 a RS-11, GA-01 a GA-06, NE-01 a NE-06, EN-1 a EN-3, RV-1 a RV-7) | - | Requiere **MariaDB** y una sesion de administrador; las pruebas de escritura requieren una base de datos de pruebas |
+| Pendiente | Secciones 5 a 13 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09, RS-01 a RS-11, GA-01 a GA-06, NE-01 a NE-06, EN-1 a EN-3, RV-1 a RV-7, RB-01 a RB-12) | - | Requiere **MariaDB** y una sesion de administrador; las pruebas de escritura requieren una base de datos de pruebas |
 | Pendiente | Rotación de la contraseña de la base de datos | — | Sigue expuesta en el historial público de Git: rotar en cPanel y actualizar `.env` |
 
 ---

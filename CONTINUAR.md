@@ -410,6 +410,25 @@ Archivos: `app/Views/home/index.php`, `app/Controllers/HomeController.php`,
 (`proximos()`), `public/assets/css/app.css` y `public/assets/js/app.js`
 (carruseles sin dependencias).
 
+### 2.10 Reserva confirmada desde la web
+
+El portal público tiene **dos caminos** para el alquiler:
+
+| Camino | Qué hace | Cuándo usarlo |
+| --- | --- | --- |
+| **Reservar ahora** (`/alquiler/reservar`) | Toma la tarifa publicada, calcula el precio, el adelanto y el saldo, **confirma la reserva** y bloquea el horario. Si el solicitante marca que ya pagó, el abono se anota en caja | El solicitante ya conoce el precio y quiere asegurar la fecha |
+| **Solicitud** (`/alquiler/solicitud`) | Registra la consulta en estado «pendiente» para que el personal la revise y la convierta en reserva | El solicitante quiere consultar antes de comprometer |
+
+La reserva directa usa la misma comprobación transaccional de solapamiento
+(`SELECT … FOR UPDATE`) que el panel, con las protecciones del portal público:
+trampa para robots, tiempo mínimo de llenado, límite por conexión y máximo de
+3 reservas futuras por teléfono. La página de confirmación se construye con la
+sesión del solicitante: **no se expone ninguna reserva ajena**.
+
+El precio sale de la tarifa vigente del ambiente (activa y dentro de su
+vigencia). El adelanto es el `porcentaje_adelanto` de la configuración
+(50 % por defecto) y solo aplica si el ambiente tiene «requiere adelanto».
+
 ---
 
 ## 3. Pruebas realizadas
