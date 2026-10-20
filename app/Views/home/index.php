@@ -375,23 +375,27 @@ $categoriasNegocio = [
     </div>
 <?php endif; ?>
 
-<h2 class="section-title">Cómo funciona la solicitud</h2>
+<h2 class="section-title">Cómo funciona la reserva</h2>
 <ol class="steps">
     <li>
         <strong>Consulte el ambiente y la fecha</strong>
         <span>Revise las características, la tarifa publicada y los horarios ya ocupados.</span>
     </li>
     <li>
-        <strong>Envíe su solicitud</strong>
-        <span>Complete un formulario corto con sus datos de contacto y los detalles del evento.</span>
+        <strong>Reserve en línea o envíe una consulta</strong>
+        <span>Con «Reservar ahora» la reserva queda confirmada al instante y el horario bloqueado. Si prefiere consultar antes, envíe una solicitud.</span>
     </li>
     <li>
-        <strong>El club revisa la solicitud</strong>
-        <span>El personal autorizado revisa la disponibilidad y las condiciones. Recibirá un código de seguimiento.</span>
+        <strong>Complete sus datos</strong>
+        <span>Nombre, teléfono y correo de contacto, con el detalle del evento.</span>
     </li>
     <li>
-        <strong>La reserva se confirma solo por el club</strong>
-        <span>Enviar la solicitud no confirma el alquiler ni bloquea el horario de forma definitiva.</span>
+        <strong>Pague el adelanto o el saldo</strong>
+        <span>Puede marcar que ya pagó (se anota en la caja del club) o pagar al llegar a la sede.</span>
+    </li>
+    <li>
+        <strong>El club se contacta con usted</strong>
+        <span>Para coordinar la entrega del ambiente y las condiciones del alquiler.</span>
     </li>
 </ol>
 

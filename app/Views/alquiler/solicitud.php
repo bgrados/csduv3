@@ -147,6 +147,8 @@ $valor = static function (string $campo, mixed $porDefecto = '') use ($prefill):
                 <label for="acepta_condiciones">
                     Confirmo que los datos son correctos y entiendo que esta solicitud
                     <strong>no confirma</strong> el alquiler: el club debe revisarla y comunicarse conmigo.
+                    Si desea reservar el horario de inmediato, use
+                    <a href="<?= e(url('/alquiler/reservar')) ?>">Reservar ahora</a>.
                 </label>
             </div>
         </fieldset>
