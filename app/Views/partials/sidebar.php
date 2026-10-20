@@ -63,10 +63,12 @@ $enlaces[] = [
                     </a>
                 </li>
             <?php endif; ?>
-            <?php if (can('directiva.ver')): ?>
-                <li><span class="sidebar__link is-disabled" aria-disabled="true">
-                    <?= Icons::render('directiva', 'icon', 20) ?><span>Directiva</span><span class="badge badge--soft">Fase 3</span>
-                </span></li>
+            <?php if (can('directiva.ver') || can('directiva.gestionar')): ?>
+                <li>
+                    <a class="sidebar__link<?= is_current('/directiva') ? ' is-active' : '' ?>" href="<?= e(url('/directiva')) ?>"<?= is_current('/directiva') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('directiva', 'icon', 20) ?><span>Directiva</span>
+                    </a>
+                </li>
             <?php endif; ?>
             <?php if (can('elecciones.ver')): ?>
                 <li><span class="sidebar__link is-disabled" aria-disabled="true">

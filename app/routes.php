@@ -8,6 +8,7 @@ use App\Controllers\AuthController;
 use App\Controllers\CajaController;
 use App\Controllers\DeportesController;
 use App\Controllers\DiagnosticoController;
+use App\Controllers\DirectivaController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
 use App\Controllers\PortalAlquilerController;
@@ -282,6 +283,83 @@ $router->post('/ambientes/{id}/tarifas/{tarifaId}', [TarifasController::class, '
 $router->post('/ambientes/{id}/tarifas/{tarifaId}/estado', [TarifasController::class, 'cambiarEstado'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+// --- Junta directiva --------------------------------------------------------
+
+$router->get('/directiva', [DirectivaController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.ver'),
+]);
+
+$router->get('/directiva/cargos', [DirectivaController::class, 'cargos'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.ver'),
+]);
+
+$router->post('/directiva/cargos', [DirectivaController::class, 'guardarCargo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva/cargos/{id}', [DirectivaController::class, 'editarCargo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva/cargos/{id}/estado', [DirectivaController::class, 'estadoCargo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->get('/directiva/nuevo', [DirectivaController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva', [DirectivaController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->get('/directiva/{id}', [DirectivaController::class, 'ver'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.ver'),
+]);
+
+$router->get('/directiva/{id}/editar', [DirectivaController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva/{id}', [DirectivaController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva/{id}/estado', [DirectivaController::class, 'cambiarEstado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva/{id}/miembros', [DirectivaController::class, 'agregarMiembro'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->get('/directiva/{id}/miembros/{miembroId}/editar', [DirectivaController::class, 'editarMiembro'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva/{id}/miembros/{miembroId}', [DirectivaController::class, 'actualizarMiembro'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
+]);
+
+$router->post('/directiva/{id}/miembros/{miembroId}/estado', [DirectivaController::class, 'estadoMiembro'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('directiva.gestionar'),
 ]);
 
 // --- Caja -------------------------------------------------------------------
