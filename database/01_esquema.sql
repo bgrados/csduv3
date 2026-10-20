@@ -553,7 +553,6 @@ CREATE TABLE IF NOT EXISTS `csduv3_reservas` (
     CONSTRAINT `fk_reservas_cancela`
         FOREIGN KEY (`cancelada_por`) REFERENCES `csduv3_usuarios` (`id`)
         ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT `chk_reservas_horario` CHECK (`hora_fin` > `hora_inicio`),
     CONSTRAINT `chk_reservas_importes` CHECK (`precio_acordado` >= 0 AND `monto_adelanto` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT='Reservas de instalaciones. El solapamiento se controla en la aplicación

@@ -1003,6 +1003,12 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | RS-09 | Cancelar una reserva con motivo | Queda `estado = 'cancelada'` con su motivo; no se borra; ya no admite pagos |
 | RS-10 | Convertir una solicitud en reserva | Desde la ficha de la solicitud, «Convertir en reserva» abre el formulario con los datos cargados; al guardar, la solicitud queda «atendida» con la nota del código de reserva |
 | RS-11 | Editar una reserva cancelada o finalizada | Se rechaza con «Una reserva cancelada o finalizada no se puede editar.» |
+| RS-12 | Reservar de 19:00 a 03:00 (cruce de medianoche) | Se acepta: la reserva termina al día siguiente; en la disponibilidad se muestra «+1 día»; el horario queda bloqueado y la entrada en caja es la del precio acordado |
+| RS-13 | Reservar de 19:00 a 03:00 cuando otra reserva ocupa ese tramo | Se rechaza con «Ese horario ya está reservado…» |
+| RS-14 | Reservar 24 horas seguidas (00:00 a 00:00) | Se acepta y termina al día siguiente |
+| RS-15 | Confirmar una reserva y revisar `/caja` | Aparece un ingreso «Alquiler {ambiente} · {código}» por el precio acordado; no se duplica al registrar el cobro |
+| RS-16 | Cancelar una reserva que ya tenía ingreso en caja | Caja recibe el egreso de reversa y el alquiler deja de sumar |
+| RS-17 | Revisar que ninguna consulta repita un marcador con nombre | La verificación estática lo comprueba en todos los modelos |
 
 ### 13.2 Galería de fotos
 

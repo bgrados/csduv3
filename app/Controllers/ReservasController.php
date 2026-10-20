@@ -581,8 +581,6 @@ final class ReservasController
 
             if (!$this->horaValida($inicio) || !$this->horaValida($fin)) {
                 $errores[] = 'Las horas indicadas no son válidas.';
-            } elseif ($fin <= $inicio) {
-                $errores[] = 'La hora de fin debe ser posterior a la hora de inicio.';
             }
 
             $precio = (float) $limpio['precio_acordado'];

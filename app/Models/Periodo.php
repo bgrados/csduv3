@@ -51,11 +51,11 @@ final class Periodo extends Model
     {
         return self::fetchOne(
             sprintf(
-                'SELECT * FROM `%s` WHERE `fecha_inicio` <= :fecha AND `fecha_fin` >= :fecha
+                'SELECT * FROM `%s` WHERE `fecha_inicio` <= :desde AND `fecha_fin` >= :hasta
                  ORDER BY `fecha_inicio` DESC LIMIT 1',
                 self::table()
             ),
-            ['fecha' => $fecha]
+            ['desde' => $fecha, 'hasta' => $fecha]
         );
     }
 

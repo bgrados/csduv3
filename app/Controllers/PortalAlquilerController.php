@@ -228,10 +228,6 @@ final class PortalAlquilerController
             $errores[] = 'La fecha del evento no puede ser anterior a hoy.';
         }
 
-        if ($horaFin <= $horaInicio) {
-            $errores[] = 'La hora de fin debe ser posterior a la hora de inicio.';
-        }
-
         $telefono = (string) $limpio['solicitante_telefono'];
 
         if (preg_match('/^[0-9+()\s.-]{6,30}$/', $telefono) !== 1) {
@@ -449,10 +445,6 @@ final class PortalAlquilerController
 
         if ($fecha !== '' && $fecha < date('Y-m-d')) {
             $errores[] = 'La fecha del evento no puede ser anterior a hoy.';
-        }
-
-        if ($horaInicio !== '' && $horaFin !== '' && $horaFin <= $horaInicio) {
-            $errores[] = 'La hora de fin debe ser posterior a la hora de inicio.';
         }
 
         $telefono = (string) ($limpio['solicitante_telefono'] ?? '');

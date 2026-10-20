@@ -403,7 +403,36 @@ if ($patrones.Count -gt 0) {
 }
 
 # ---------------------------------------------------------------------------
-#  8. Funciones auxiliares esperadas
+#  8. Marcadores PDO repetidos en las consultas
+# ---------------------------------------------------------------------------
+#  Con PDO::ATTR_EMULATE_PREPARES = false un marcador con nombre no puede
+#  repetirse: la consulta falla con SQLSTATE[HY093].
+
+foreach ($modelo in Get-ChildItem -Path (Join-Path $raiz 'app') -Filter '*.php' -File -Recurse) {
+    $texto = [System.IO.File]::ReadAllText($modelo.FullName)
+    $relativo = $modelo.FullName.Substring($raiz.Length + 1)
+
+    $consultas = [regex]::Matches($texto, "'((?:SELECT|INSERT INTO|UPDATE|DELETE FROM)[\s\S]*?)'", 'IgnoreCase')
+
+    foreach ($consulta in $consultas) {
+        $marcadores = [regex]::Matches($consulta.Groups[1].Value, ':([a-z_][a-z0-9_]*)', 'IgnoreCase')
+
+        if ($marcadores.Count -lt 2) {
+            continue
+        }
+
+        $conteo = $marcadores | ForEach-Object { $_.Groups[1].Value.ToLower() } | Group-Object
+
+        foreach ($grupo in $conteo) {
+            if ($grupo.Count -gt 1) {
+                $hallazgos.Add("$relativo : el marcador :$($grupo.Name) se repite $($grupo.Count) veces en la misma consulta")
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
+#  9. Funciones auxiliares esperadas
 # ---------------------------------------------------------------------------
 
 $helpers = [System.IO.File]::ReadAllText((Join-Path $raiz 'app\Core\helpers.php'))

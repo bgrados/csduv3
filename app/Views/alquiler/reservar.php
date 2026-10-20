@@ -152,6 +152,10 @@ $saldo = max(0.0, $precio - $adelanto);
             <div class="field">
                 <label for="hora_fin">Hora de fin <span class="req">*</span></label>
                 <input type="time" id="hora_fin" name="hora_fin" required value="<?= e($valor('hora_fin')) ?>">
+                <p class="field__hint">
+                    Si la hora de fin es anterior a la de inicio, el alquiler termina
+                    de madrugada (por ejemplo, de 19:00 a 03:00 del día siguiente).
+                </p>
             </div>
 
             <div class="field">

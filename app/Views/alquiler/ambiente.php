@@ -117,8 +117,18 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
                 <tbody>
                 <?php foreach ($franjas as $franja): ?>
                     <tr>
-                        <td><?= e($hora($franja['hora_inicio'] ?? null)) ?></td>
-                        <td><?= e($hora($franja['hora_fin'] ?? null)) ?></td>
+                        <td>
+                            <?= e($hora($franja['hora_inicio'] ?? null)) ?>
+                            <?php if ((int) ($franja['cruza_medianoche'] ?? 0) === 1): ?>
+                                <br><span class="muted"><?= e(fecha_legible((string) ($franja['fecha_evento'] ?? ''))) ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?= e($hora($franja['hora_fin'] ?? null)) ?>
+                            <?php if ((int) ($franja['cruza_medianoche'] ?? 0) === 1): ?>
+                                <br><span class="muted">+1 día</span>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <span class="badge <?= ((string) ($franja['estado'] ?? '') === 'confirmada') ? 'badge--danger' : 'badge--warn' ?>">
                                 <?= e((string) ($franja['estado'] ?? '')) ?>

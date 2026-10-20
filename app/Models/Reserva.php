@@ -36,6 +36,9 @@ final class Reserva extends Model
 
     /**
      * ¿Existe una reserva activa que se superpone con el rango indicado?
+     *
+     * Si la hora de fin es menor o igual que la de inicio, la reserva termina
+     * al día siguiente (por ejemplo, de 19:00 a 03:00).
      */
     public static function haySolapamiento(
         int $instalacionId,
@@ -44,22 +47,27 @@ final class Reserva extends Model
         string $horaFin,
         ?int $exceptoId = null
     ): bool {
+        $inicio = self::instanteInicio($fecha, $horaInicio);
+        $fin = self::instanteFin($fecha, $horaInicio, $horaFin);
+
         $sql = sprintf(
             'SELECT COUNT(*)
              FROM `%s`
              WHERE `instalacion_id` = :instalacion_id
-               AND `fecha_evento` = :fecha
                AND `estado` IN (\'pendiente\', \'confirmada\')
-               AND `hora_inicio` < :hora_fin
-               AND `hora_fin` > :hora_inicio',
+               AND TIMESTAMP(`fecha_evento`, `hora_inicio`) < :fin
+               AND CASE
+                   WHEN `hora_fin` <= `hora_inicio`
+                       THEN TIMESTAMP(DATE_ADD(`fecha_evento`, INTERVAL 1 DAY), `hora_fin`)
+                   ELSE TIMESTAMP(`fecha_evento`, `hora_fin`)
+               END > :inicio',
             self::table()
         );
 
         $params = [
             'instalacion_id' => $instalacionId,
-            'fecha'          => $fecha,
-            'hora_fin'       => self::normalizarHora($horaFin),
-            'hora_inicio'    => self::normalizarHora($horaInicio),
+            'inicio' => $inicio,
+            'fin'    => $fin,
         ];
 
         if ($exceptoId !== null) {
@@ -73,21 +81,71 @@ final class Reserva extends Model
     /**
      * Franjas ocupadas de una instalación en una fecha (sin datos personales).
      *
-     * @return array<int, array{hora_inicio: string, hora_fin: string, estado: string}>
+     * Incluye las reservas que empezaron el día anterior y terminan de
+     * madrugada en esta fecha.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function franjasOcupadas(int $instalacionId, string $fecha): array
     {
         $sql = sprintf(
-            'SELECT `hora_inicio`, `hora_fin`, `estado`
+            'SELECT `hora_inicio`, `hora_fin`, `estado`, `fecha_evento`,
+                    IF(`hora_fin` <= `hora_inicio`, 1, 0) AS cruza_medianoche
              FROM `%s`
              WHERE `instalacion_id` = :instalacion_id
-               AND `fecha_evento` = :fecha
                AND `estado` IN (\'pendiente\', \'confirmada\')
-             ORDER BY `hora_inicio` ASC',
+               AND (
+                   `fecha_evento` = :fecha
+                   OR (`hora_fin` <= `hora_inicio` AND DATE_ADD(`fecha_evento`, INTERVAL 1 DAY) = :fecha)
+               )
+             ORDER BY `fecha_evento` ASC, `hora_inicio` ASC',
             self::table()
         );
 
         return self::fetchAll($sql, ['instalacion_id' => $instalacionId, 'fecha' => $fecha]);
+    }
+
+    /**
+     * Instante de inicio de la reserva (formato Y-m-d H:i:s).
+     */
+    public static function instanteInicio(string $fecha, string $horaInicio): string
+    {
+        $marca = strtotime($fecha . ' ' . self::normalizarHora($horaInicio));
+
+        return $marca === false ? $fecha . ' 00:00:00' : date('Y-m-d H:i:s', $marca);
+    }
+
+    /**
+     * Instante de fin de la reserva.
+     *
+     * Si la hora de fin es menor o igual que la de inicio, termina al día
+     * siguiente (por ejemplo, de 19:00 a 03:00).
+     */
+    public static function instanteFin(string $fecha, string $horaInicio, string $horaFin): string
+    {
+        $inicio = self::normalizarHora($horaInicio);
+        $fin = self::normalizarHora($horaFin);
+
+        $marcaInicio = strtotime($fecha . ' ' . $inicio);
+        $marcaFin = strtotime($fecha . ' ' . $fin);
+
+        if ($marcaInicio === false || $marcaFin === false) {
+            return $fecha . ' ' . $fin;
+        }
+
+        if ($marcaFin <= $marcaInicio) {
+            $marcaFin = strtotime('+1 day', $marcaFin);
+        }
+
+        return date('Y-m-d H:i:s', $marcaFin);
+    }
+
+    /**
+     * ¿La reserva termina al día siguiente?
+     */
+    public static function cruzaMedianoche(string $horaInicio, string $horaFin): bool
+    {
+        return self::normalizarHora($horaFin) <= self::normalizarHora($horaInicio);
     }
 
     /**
@@ -666,22 +724,27 @@ final class Reserva extends Model
         string $horaFin,
         ?int $exceptoId = null
     ): void {
+        $inicio = self::instanteInicio($fecha, $horaInicio);
+        $fin = self::instanteFin($fecha, $horaInicio, $horaFin);
+
         $sql = sprintf(
             'SELECT `id` FROM `%s`
              WHERE `instalacion_id` = :instalacion_id
-               AND `fecha_evento` = :fecha
                AND `estado` IN (\'pendiente\', \'confirmada\')
-               AND `hora_inicio` < :hora_fin
-               AND `hora_fin` > :hora_inicio
+               AND TIMESTAMP(`fecha_evento`, `hora_inicio`) < :fin
+               AND CASE
+                   WHEN `hora_fin` <= `hora_inicio`
+                       THEN TIMESTAMP(DATE_ADD(`fecha_evento`, INTERVAL 1 DAY), `hora_fin`)
+                   ELSE TIMESTAMP(`fecha_evento`, `hora_fin`)
+               END > :inicio
              FOR UPDATE',
             self::table()
         );
 
         $params = [
             'instalacion_id' => $instalacionId,
-            'fecha'          => $fecha,
-            'hora_inicio'    => $horaInicio,
-            'hora_fin'       => $horaFin,
+            'inicio' => $inicio,
+            'fin'    => $fin,
         ];
 
         if ($exceptoId !== null) {
