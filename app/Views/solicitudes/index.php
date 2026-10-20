@@ -15,6 +15,8 @@ declare(strict_types=1);
 
 $hora = static fn (?string $valor): string => $valor === null || $valor === '' ? '—' : substr($valor, 0, 5);
 
+$puedeGestionar = can('alquileres.gestionar');
+
 $claseEstado = static function (string $valor): string {
     return match ($valor) {
         'pendiente'   => 'badge--warn',
@@ -111,7 +113,14 @@ $claseEstado = static function (string $valor): string {
                                 <br><span class="badge badge--danger">posible cruce</span>
                             <?php endif; ?>
                         </td>
-                        <td><a class="btn btn--ghost btn--sm" href="<?= e(url('/solicitudes/' . (string) $solicitud['id'])) ?>">Revisar</a></td>
+                        <td class="acciones-fila">
+                            <a class="btn btn--ghost btn--sm" href="<?= e(url('/solicitudes/' . (string) $solicitud['id'])) ?>">Revisar</a>
+                            <?php if ($puedeGestionar && in_array((string) $solicitud['estado'], ['pendiente', 'en_revision'], true)): ?>
+                                <a class="btn btn--primary btn--sm" href="<?= e(url('/solicitudes/' . (string) $solicitud['id'] . '/reservar')) ?>">
+                                    Convertir en reserva
+                                </a>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>

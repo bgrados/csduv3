@@ -1115,6 +1115,18 @@ code {
     vertical-align: top;
 }
 
+/* Acciones dentro de una fila de tabla (solicitudes, reservas, etc.). */
+.acciones-fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    align-items: flex-start;
+}
+
+.acciones-fila .btn {
+    white-space: nowrap;
+}
+
 .table thead th {
     font-size: .76rem;
     text-transform: uppercase;
