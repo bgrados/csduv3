@@ -9,6 +9,7 @@ use App\Controllers\CajaController;
 use App\Controllers\DeportesController;
 use App\Controllers\DiagnosticoController;
 use App\Controllers\DirectivaController;
+use App\Controllers\EleccionesController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
 use App\Controllers\PortalAlquilerController;
@@ -283,6 +284,68 @@ $router->post('/ambientes/{id}/tarifas/{tarifaId}', [TarifasController::class, '
 $router->post('/ambientes/{id}/tarifas/{tarifaId}/estado', [TarifasController::class, 'cambiarEstado'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+// --- Elecciones -------------------------------------------------------------
+
+$router->get('/elecciones', [EleccionesController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.ver'),
+]);
+
+$router->get('/elecciones/nuevo', [EleccionesController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones', [EleccionesController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->get('/elecciones/{id}', [EleccionesController::class, 'ver'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.ver'),
+]);
+
+$router->get('/elecciones/{id}/editar', [EleccionesController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones/{id}', [EleccionesController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones/{id}/estado', [EleccionesController::class, 'cambiarEstado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones/{id}/listas', [EleccionesController::class, 'guardarLista'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones/{id}/listas/{listaId}/estado', [EleccionesController::class, 'estadoLista'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones/{id}/candidatos', [EleccionesController::class, 'guardarCandidato'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones/{id}/candidatos/{candidatoId}/eliminar', [EleccionesController::class, 'eliminarCandidato'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
+]);
+
+$router->post('/elecciones/{id}/resultados', [EleccionesController::class, 'guardarResultado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('elecciones.gestionar'),
 ]);
 
 // --- Junta directiva --------------------------------------------------------

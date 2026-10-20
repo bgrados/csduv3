@@ -70,10 +70,12 @@ $enlaces[] = [
                     </a>
                 </li>
             <?php endif; ?>
-            <?php if (can('elecciones.ver')): ?>
-                <li><span class="sidebar__link is-disabled" aria-disabled="true">
-                    <?= Icons::render('elecciones', 'icon', 20) ?><span>Elecciones</span><span class="badge badge--soft">Fase 3</span>
-                </span></li>
+            <?php if (can('elecciones.ver') || can('elecciones.gestionar')): ?>
+                <li>
+                    <a class="sidebar__link<?= is_current('/elecciones') ? ' is-active' : '' ?>" href="<?= e(url('/elecciones')) ?>"<?= is_current('/elecciones') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('elecciones', 'icon', 20) ?><span>Elecciones</span>
+                    </a>
+                </li>
             <?php endif; ?>
         </ul>
 
