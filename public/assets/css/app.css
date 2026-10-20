@@ -441,6 +441,10 @@ code {
 .cards--4 { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); }
 .cards--3 { grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
 
+/* Filas anuladas de caja: se muestran atenuadas y tachadas. */
+.table tr.is-anulado td { color: var(--color-text-soft); }
+.table tr.is-anulado td strong { text-decoration: line-through; }
+
 .card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);

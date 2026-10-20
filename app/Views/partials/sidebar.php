@@ -84,10 +84,12 @@ $enlaces[] = [
                     </a>
                 </li>
             <?php endif; ?>
-            <?php if (can('caja.ver')): ?>
-                <li><span class="sidebar__link is-disabled" aria-disabled="true">
-                    <?= Icons::render('caja', 'icon', 20) ?><span>Caja</span><span class="badge badge--soft">Fase 5</span>
-                </span></li>
+            <?php if (can('caja.ver') || can('caja.registrar')): ?>
+                <li>
+                    <a class="sidebar__link<?= is_current('/caja') ? ' is-active' : '' ?>" href="<?= e(url('/caja')) ?>"<?= is_current('/caja') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('caja', 'icon', 20) ?><span>Caja</span>
+                    </a>
+                </li>
             <?php endif; ?>
             <?php if (can('deportes.ver')): ?>
                 <li>

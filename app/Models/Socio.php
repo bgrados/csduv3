@@ -110,6 +110,32 @@ final class Socio extends Model
         );
     }
 
+    /**
+     * Busca un socio por su código, sin distinguir mayúsculas.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function findPorCodigo(string $codigo): ?array
+    {
+        $codigo = trim($codigo);
+
+        if ($codigo === '') {
+            return null;
+        }
+
+        $sql = sprintf(
+            'SELECT s.*, c.`nombre` AS categoria_nombre
+             FROM `%s` s
+             LEFT JOIN `%s` c ON c.`id` = s.`categoria_id`
+             WHERE s.`codigo` = :codigo
+             LIMIT 1',
+            self::table(),
+            CategoriaSocio::table()
+        );
+
+        return self::fetchOne($sql, ['codigo' => $codigo]);
+    }
+
     /** @return array<string, mixed>|null */
     public static function findConCategoria(int $id): ?array
     {

@@ -122,7 +122,7 @@ final class PanelController
                 'valor'   => dinero($resumen['saldo']),
                 'detalle' => 'Ingresos ' . dinero($resumen['ingresos']) . ' · Egresos ' . dinero($resumen['egresos']),
                 'icono'   => 'caja',
-                'url'     => null,
+                'url'     => url('/caja'),
                 'tono'    => $resumen['saldo'] < 0 ? 'atencion' : 'neutro',
             ];
 

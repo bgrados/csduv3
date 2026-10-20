@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\AmbientesController;
 use App\Controllers\AuditoriaController;
 use App\Controllers\AuthController;
+use App\Controllers\CajaController;
 use App\Controllers\DeportesController;
 use App\Controllers\DiagnosticoController;
 use App\Controllers\HomeController;
@@ -281,6 +282,78 @@ $router->post('/ambientes/{id}/tarifas/{tarifaId}', [TarifasController::class, '
 $router->post('/ambientes/{id}/tarifas/{tarifaId}/estado', [TarifasController::class, 'cambiarEstado'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+// --- Caja -------------------------------------------------------------------
+
+$router->get('/caja', [CajaController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.ver'),
+]);
+
+$router->get('/caja/nuevo', [CajaController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja', [CajaController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->get('/caja/configuracion', [CajaController::class, 'configuracion'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.ver'),
+]);
+
+$router->post('/caja/categorias', [CajaController::class, 'guardarCategoria'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja/categorias/{id}/estado', [CajaController::class, 'estadoCategoria'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja/medios-pago', [CajaController::class, 'guardarMedio'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja/medios-pago/{id}/estado', [CajaController::class, 'estadoMedio'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja/periodos', [CajaController::class, 'guardarPeriodo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja/periodos/{id}/estado', [CajaController::class, 'estadoPeriodo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->get('/caja/reportes', [CajaController::class, 'reportes'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.reportes'),
+]);
+
+$router->get('/caja/{id}/editar', [CajaController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja/{id}', [CajaController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.registrar'),
+]);
+
+$router->post('/caja/{id}/anular', [CajaController::class, 'anular'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('caja.anular'),
 ]);
 
 // --- Deportes y torneos ----------------------------------------------------
