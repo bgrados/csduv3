@@ -228,6 +228,47 @@
         }
     }
 
+    /**
+     * Carruseles horizontales de la portada (se desplazan con los botones).
+     */
+    function inicializarCarruseles() {
+        document.querySelectorAll('[data-carrusel]').forEach(function (carrusel) {
+            var pista = carrusel.querySelector('[data-carrusel-pista]');
+            var anterior = carrusel.querySelector('[data-carrusel-prev]');
+            var siguiente = carrusel.querySelector('[data-carrusel-next]');
+
+            if (!pista) {
+                return;
+            }
+
+            function desplazamiento() {
+                var tarjeta = pista.querySelector('.carrusel__tarjeta');
+                var ancho = tarjeta ? tarjeta.offsetWidth + 14 : pista.clientWidth * 0.8;
+
+                return Math.max(160, ancho);
+            }
+
+            function mover(direccion) {
+                pista.scrollBy({
+                    left: direccion * desplazamiento(),
+                    behavior: 'smooth'
+                });
+            }
+
+            if (anterior) {
+                anterior.addEventListener('click', function () {
+                    mover(-1);
+                });
+            }
+
+            if (siguiente) {
+                siguiente.addEventListener('click', function () {
+                    mover(1);
+                });
+            }
+        });
+    }
+
     function inicializarPwa() {
         registrarServiceWorker();
         prepararInstalacion();
@@ -238,6 +279,7 @@
         inicializarConfirmaciones();
         inicializarBusquedaEnTablas();
         inicializarAlertasCerrables();
+        inicializarCarruseles();
         inicializarPwa();
     }
 

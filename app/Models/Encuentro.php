@@ -32,6 +32,41 @@ final class Encuentro extends Model
         );
     }
 
+    /**
+     * Próximos partidos programados, para la agenda deportiva pública.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function proximos(int $limite = 4): array
+    {
+        $limite = max(1, min(20, $limite));
+
+        $sql = sprintf(
+            'SELECT e.`id`, e.`fecha`, e.`hora`, e.`estado`,
+                    l.`nombre` AS local_nombre,
+                    v.`nombre` AS visitante_nombre,
+                    t.`nombre` AS torneo_nombre,
+                    i.`nombre` AS instalacion_nombre
+             FROM `%s` e
+             LEFT JOIN `%s` l ON l.`id` = e.`equipo_local_id`
+             LEFT JOIN `%s` v ON v.`id` = e.`equipo_visitante_id`
+             LEFT JOIN `%s` t ON t.`id` = e.`torneo_id`
+             LEFT JOIN `%s` i ON i.`id` = e.`instalacion_id`
+             WHERE e.`estado` = \'programado\'
+               AND e.`fecha` >= CURDATE()
+             ORDER BY e.`fecha` ASC, e.`hora` ASC
+             LIMIT %d',
+            self::table(),
+            self::prefijada('torneo_equipos'),
+            self::prefijada('torneo_equipos'),
+            self::prefijada('torneos'),
+            self::prefijada('instalaciones'),
+            $limite
+        );
+
+        return self::fetchAll($sql);
+    }
+
     /** @return array<string, mixed>|null */
     public static function findConEquipos(int $id): ?array
     {

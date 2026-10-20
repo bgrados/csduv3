@@ -2,63 +2,314 @@
 
 declare(strict_types=1);
 
+use App\Core\Icons;
+
 /**
- * Portada pública del sistema.
- *
- * No muestra datos internos: solo la presentación institucional, los ambientes
- * publicados y el acceso al portal de alquileres.
+ * Portada del portal con formato de revista.
  *
  * @var bool  $dbDisponible
  * @var array<int, array<string, mixed>> $instalaciones
  * @var array<string, string> $configuracion
- * @var array<int, array<string, mixed>> $fotos
+ * @var array<int, array<string, mixed>> $noticias
+ * @var array<int, array<string, mixed>> $galeria
  * @var array<int, array<string, mixed>> $negocios
+ * @var array<int, array<string, mixed>> $eventos
+ * @var array<int, array<string, mixed>> $partidos
+ * @var bool $contenidoEjemplo
  */
 
 $telefono = trim((string) ($configuracion['telefono'] ?? ''));
 $correo = trim((string) ($configuracion['email_institucional'] ?? ''));
 $direccion = trim((string) ($configuracion['direccion'] ?? ''));
 $visibles = array_slice($instalaciones, 0, 6);
+
+$nombreClub = (string) config('app.name');
+$siglas = (string) config('app.short_name');
+$meses = [
+    1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre',
+];
+$fechaEdicion = (int) date('j') . ' de ' . $meses[(int) date('n')] . ' de ' . date('Y');
+
+// URL de la imagen de una noticia: la del portal si viene de la base de datos,
+// o el archivo estático de ejemplo.
+$imagen = static function (array $noticia): string {
+    $id = (int) ($noticia['id'] ?? 0);
+
+    if ($id > 0 && !empty($noticia['archivo'])) {
+        return url('/galeria/imagen/' . (string) $id);
+    }
+
+    return asset((string) ($noticia['archivo'] ?? ''));
+};
+
+$portada = $noticias[0] ?? null;
+$resto = array_slice($noticias, 1);
+$destacados = array_merge($resto, $galeria);
+$destacados = array_slice($destacados, 0, 8);
+$ejemplos = static function (array $elemento): bool {
+    return (bool) ($elemento['ejemplo'] ?? false);
+};
+
+$tiposEvento = [
+    'institucional' => 'Institucional',
+    'directiva'      => 'Junta directiva',
+    'eleccion'       => 'Elecciones',
+    'deportiva'      => 'Deportiva',
+    'social'         => 'Social',
+    'mantenimiento'  => 'Mantenimiento',
+];
+
+$categoriasNegocio = [
+    'comercio'    => 'Comercio',
+    'servicio'    => 'Servicio',
+    'profesional' => 'Profesional',
+    'salud'       => 'Salud',
+    'educacion'   => 'Educación',
+    'otro'        => 'Otro',
+];
 ?>
 
-<section class="hero">
-    <div class="hero__content">
-        <p class="page-head__eyebrow">Portal público</p>
-        <h1><?= e((string) config('app.name')) ?></h1>
-        <p class="hero__lead">
-            Consulte los ambientes disponibles, las tarifas publicadas por el club, la
-            disponibilidad por fecha, los torneos en curso y la galería de fotos del
-            club. Envíe su solicitud de alquiler desde el teléfono, sin necesidad de
-            crear una cuenta.
-        </p>
-        <div class="hero__actions">
-            <a class="btn btn--primary" href="<?= e(url('/alquiler')) ?>">Ver ambientes y tarifas</a>
-            <a class="btn btn--ghost" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
-            <a class="btn btn--ghost" href="<?= e(url('/torneos')) ?>">Ver torneos</a>
-            <a class="btn btn--ghost" href="<?= e(url('/galeria')) ?>">Galería del club</a>
-            <a class="btn btn--ghost" href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">
-                Portal de la Unidad Vecinal
+<section class="revista">
+    <header class="revista__cabecera">
+        <div class="revista__cabecera-fila">
+            <span><?= e($fechaEdicion) ?></span>
+            <span class="revista__edicion">Edición de la Unidad Vecinal N.º 3</span>
+            <span class="revista__cabecera-enlace">
+                <a href="<?= e(url('/ingresar')) ?>">Ingresar</a>
+            </span>
+        </div>
+
+        <div class="revista__masthead">
+            <h1 class="revista__titulo"><?= e($siglas) ?></h1>
+            <p class="revista__lema"><?= e($nombreClub) ?></p>
+        </div>
+
+        <div class="revista__acciones">
+            <a class="btn btn--primary btn--sm" href="<?= e(url('/alquiler')) ?>">Ambientes y tarifas</a>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('/torneos')) ?>">Torneos</a>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('/galeria')) ?>">Galería</a>
+            <a class="btn btn--ghost btn--sm" href="<?= e(url('/negocios')) ?>">Negocios</a>
+            <a class="btn btn--ghost btn--sm" href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">
+                Portal UV3
             </a>
         </div>
+    </header>
+
+    <?php if (!$dbDisponible): ?>
+        <div class="alert alert--warning" role="status">
+            <p>El portal está temporalmente en mantenimiento. Vuelva a intentarlo en unos minutos.</p>
+        </div>
+    <?php endif; ?>
+
+    <div class="revista__cuerpo">
+        <div class="revista__principal">
+            <?php if ($portada !== null): ?>
+                <article class="portada">
+                    <a class="portada__imagen" href="<?= e(url('/galeria')) ?>">
+                        <img src="<?= e($imagen($portada)) ?>" alt="<?= e((string) $portada['titulo']) ?>">
+                    </a>
+                    <div class="portada__texto">
+                        <p class="portada__kicker">
+                            <?= e(\App\Models\Foto::CATEGORIAS[(string) $portada['categoria']] ?? (string) $portada['categoria']) ?>
+                            <?php if (!empty($portada['fecha_foto'])): ?>
+                                · <?= e(fecha_legible((string) $portada['fecha_foto'])) ?>
+                            <?php endif; ?>
+                            <?php if ($ejemplos($portada)): ?>
+                                <span class="badge badge--soft">Ejemplo</span>
+                            <?php endif; ?>
+                        </p>
+                        <h2 class="portada__titular"><?= e((string) $portada['titulo']) ?></h2>
+                        <p class="portada__entradilla">
+                            <?= e((string) ($portada['resumen'] ?? ($portada['descripcion'] ?? 'Fotografía de la actividad del club.'))) ?>
+                        </p>
+                        <a class="btn btn--primary btn--sm" href="<?= e(url('/galeria')) ?>">Ver la galería completa</a>
+                    </div>
+                </article>
+            <?php else: ?>
+                <div class="card">
+                    <h2 class="card__value" style="font-size:1.15rem;">El club en imágenes</h2>
+                    <p class="muted">
+                        Todavía no hay noticias publicadas. Desde el panel puede subir las fotos de
+                        las reuniones, los pneumaticos y la junta directiva.
+                    </p>
+                    <p><a class="btn btn--ghost btn--sm" href="<?= e(url('/galeria')) ?>">Ir a la galería</a></p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($destacados !== []): ?>
+                <section class="revista__seccion">
+                    <div class="revista__seccion-cabecera">
+                        <h2 class="revista__seccion-titulo">Noticias y galería</h2>
+                        <a class="revista__seccion-enlace" href="<?= e(url('/galeria')) ?>">Ver todo &rarr;</a>
+                    </div>
+
+                    <div class="carrusel" data-carrusel>
+                        <div class="carrusel__pista" data-carrusel-pista>
+                            <?php foreach ($destacados as $noticia): ?>
+                                <article class="carrusel__tarjeta">
+                                    <a class="carrusel__imagen" href="<?= e(url('/galeria')) ?>">
+                                        <img src="<?= e($imagen($noticia)) ?>" alt="<?= e((string) $noticia['titulo']) ?>" loading="lazy">
+                                    </a>
+                                    <p class="carrusel__kicker">
+                                        <?= e(\App\Models\Foto::CATEGORIAS[(string) $noticia['categoria']] ?? (string) $noticia['categoria']) ?>
+                                    </p>
+                                    <h3 class="carrusel__titulo"><?= e((string) $noticia['titulo']) ?></h3>
+                                    <?php if (!empty($noticia['resumen'])): ?>
+                                        <p class="carrusel__resumen"><?= e((string) $noticia['resumen']) ?></p>
+                                    <?php endif; ?>
+                                    <?php if (!empty($noticia['fecha_foto'])): ?>
+                                        <p class="carrusel__fecha"><?= e(fecha_legible((string) $noticia['fecha_foto'])) ?></p>
+                                    <?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <div class="carrusel__controles">
+                            <button type="button" class="carrusel__boton" data-carrusel-prev aria-label="Anterior">&larr;</button>
+                            <button type="button" class="carrusel__boton" data-carrusel-next aria-label="Siguiente">&rarr;</button>
+                        </div>
+                    </div>
+                </section>
+            <?php endif; ?>
+
+            <section class="revista__seccion">
+                <div class="revista__seccion-cabecera">
+                    <h2 class="revista__seccion-titulo">Negocios de la unidad</h2>
+                    <a class="revista__seccion-enlace" href="<?= e(url('/negocios')) ?>">Directorio completo &rarr;</a>
+                </div>
+
+                <?php if ($negocios === []): ?>
+                    <div class="card">
+                        <p class="muted">
+                            El club está preparando el directorio de comercios y servicios de la
+                            unidad vecinal.
+                        </p>
+                    </div>
+                <?php else: ?>
+                    <div class="carrusel" data-carrusel>
+                        <div class="carrusel__pista" data-carrusel-pista>
+                            <?php foreach ($negocios as $negocio): ?>
+                                <article class="carrusel__tarjeta carrusel__tarjeta--negocio">
+                                    <p class="carrusel__kicker">
+                                        <?= e($categoriasNegocio[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?>
+                                    </p>
+                                    <h3 class="carrusel__titulo"><?= e((string) $negocio['nombre']) ?></h3>
+                                    <?php if (!empty($negocio['descripcion'])): ?>
+                                        <p class="carrusel__resumen"><?= e((string) $negocio['descripcion']) ?></p>
+                                    <?php endif; ?>
+                                    <ul class="carrusel__datos">
+                                        <?php if (!empty($negocio['telefono'])): ?>
+                                            <li><?= e((string) $negocio['telefono']) ?></li>
+                                        <?php endif; ?>
+                                        <?php if (!empty($negocio['horario'])): ?>
+                                            <li><?= e((string) $negocio['horario']) ?></li>
+                                        <?php endif; ?>
+                                    </ul>
+                                    <?php if (!empty($negocio['web'])): ?>
+                                        <a class="btn btn--ghost btn--sm" href="<?= e((string) $negocio['web']) ?>" target="_blank" rel="noopener nofollow">
+                                            Visitar
+                                        </a>
+                                    <?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <div class="carrusel__controles">
+                            <button type="button" class="carrusel__boton" data-carrusel-prev aria-label="Anterior">&larr;</button>
+                            <button type="button" class="carrusel__boton" data-carrusel-next aria-label="Siguiente">&rarr;</button>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </section>
+        </div>
+
+        <aside class="revista__columna">
+            <section class="recuadro">
+                <h2 class="recuadro__titulo">Próximos eventos</h2>
+
+                <?php if ($eventos === []): ?>
+                    <p class="muted">Todavía no hay eventos programados.</p>
+                <?php else: ?>
+                    <ul class="recuadro__lista">
+                        <?php foreach ($eventos as $evento): ?>
+                            <li class="recuadro__evento">
+                                <span class="recuadro__fecha">
+                                    <strong><?= e((string) (int) date('j', strtotime((string) $evento['fecha_inicio']))) ?></strong>
+                                    <small><?= e(substr((string) $meses[(int) date('n', strtotime((string) $evento['fecha_inicio']))], 0, 3)) ?></small>
+                                </span>
+                                <span class="recuadro__evento-texto">
+                                    <strong><?= e((string) $evento['titulo']) ?></strong>
+                                    <small>
+                                        <?= e($tiposEvento[(string) $evento['tipo']] ?? (string) $evento['tipo']) ?>
+                                        <?php if (!empty($evento['lugar'])): ?>
+                                            · <?= e((string) $evento['lugar']) ?>
+                                        <?php endif; ?>
+                                    </small>
+                                    <?php if ($ejemplos($evento)): ?>
+                                        <span class="badge badge--soft">Ejemplo</span>
+                                    <?php endif; ?>
+                                </span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </section>
+
+            <section class="recuadro">
+                <h2 class="recuadro__titulo">Agenda deportiva</h2>
+
+                <?php if ($partidos === []): ?>
+                    <p class="muted">No hay partidos programados por ahora.</p>
+                <?php else: ?>
+                    <ul class="recuadro__lista">
+                        <?php foreach ($partidos as $partido): ?>
+                            <li class="recuadro__evento">
+                                <span class="recuadro__fecha">
+                                    <strong><?= e((string) (int) date('j', strtotime((string) $partido['fecha']))) ?></strong>
+                                    <small><?= e(substr((string) $meses[(int) date('n', strtotime((string) $partido['fecha']))], 0, 3)) ?></small>
+                                </span>
+                                <span class="recuadro__evento-texto">
+                                    <strong>
+                                        <?= e((string) $partido['local_nombre']) ?>
+                                        vs
+                                        <?= e((string) $partido['visitante_nombre']) ?>
+                                    </strong>
+                                    <small>
+                                        <?= e((string) $partido['torneo_nombre']) ?>
+                                        <?php if (!empty($partido['hora'])): ?>
+                                            · <?= e(substr((string) $partido['hora'], 0, 5)) ?>
+                                        <?php endif; ?>
+                                    </small>
+                                    <?php if ($ejemplos($partido)): ?>
+                                        <span class="badge badge--soft">Ejemplo</span>
+                                    <?php endif; ?>
+                                </span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <p class="recuadro__pie">
+                    <a class="btn btn--ghost btn--sm" href="<?= e(url('/torneos')) ?>">Ver torneos y posiciones</a>
+                </p>
+            </section>
+
+            <section class="recuadro recuadro--destacado">
+                <h2 class="recuadro__titulo">Alquiler de ambientes</h2>
+                <p class="muted">
+                    Consulte los ambientes del club, las tarifas publicadas y la
+                    disponibilidad por fecha. La reserva la confirma el club.
+                </p>
+                <p>
+                    <a class="btn btn--primary btn--sm" href="<?= e(url('/alquiler')) ?>">Ver ambientes</a>
+                    <a class="btn btn--ghost btn--sm" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar</a>
+                </p>
+            </section>
+        </aside>
     </div>
 </section>
-
-<?php if (!$dbDisponible): ?>
-    <div class="alert alert--warning" role="status">
-        <p>El portal está temporalmente en mantenimiento. Vuelva a intentarlo en unos minutos.</p>
-    </div>
-<?php endif; ?>
-
-<?php if ($dbDisponible && $visibles === []): ?>
-    <div class="empty-state">
-        <span class="empty-state__icon"><?= \App\Core\Icons::render('alquileres', 'icon', 26) ?></span>
-        <h2>Ambientes en preparación</h2>
-        <p>
-            El club todavía no ha publicado sus ambientes y tarifas en el portal.
-            Mientras tanto, puede comunicarse directamente con la institución.
-        </p>
-    </div>
-<?php endif; ?>
 
 <?php if ($visibles !== []): ?>
     <h2 class="section-title">Ambientes publicados</h2>
@@ -98,132 +349,15 @@ $visibles = array_slice($instalaciones, 0, 6);
     <p class="section-actions">
         <a class="btn btn--ghost btn--sm" href="<?= e(url('/alquiler')) ?>">Ver todos los ambientes</a>
     </p>
-<?php endif; ?>
-
-<h2 class="section-title">Noticias del club</h2>
-
-<?php if ($fotos === []): ?>
-    <div class="card">
-        <p class="muted">
-            El club está preparando sus noticias: las reuniones, los campeonatos y la
-            actividad de la junta directiva.
-        </p>
+<?php elseif ($dbDisponible): ?>
+    <div class="empty-state">
+        <span class="empty-state__icon"><?= Icons::render('alquileres', 'icon', 26) ?></span>
+        <h2>Ambientes en preparación</h2>
         <p>
-            <a class="btn btn--ghost btn--sm" href="<?= e(url('/galeria')) ?>">Ver la galería</a>
+            El club todavía no ha publicado sus ambientes y tarifas en el portal.
+            Mientras tanto, puede comunicarse directamente con la institución.
         </p>
     </div>
-<?php else: ?>
-    <?php
-    $fotoPrincipal = array_shift($fotos);
-    ?>
-    <div class="periodico">
-        <article class="periodico__portada">
-            <a class="periodico__portada-imagen" href="<?= e(url('/galeria/imagen/' . (string) $fotoPrincipal['id'])) ?>">
-                <img src="<?= e(url('/galeria/imagen/' . (string) $fotoPrincipal['id'])) ?>" alt="<?= e((string) $fotoPrincipal['titulo']) ?>">
-            </a>
-            <div class="periodico__portada-texto">
-                <p class="periodico__kicker">
-                    <?= e(\App\Models\Foto::CATEGORIAS[(string) $fotoPrincipal['categoria']] ?? (string) $fotoPrincipal['categoria']) ?>
-                    <?php if (!empty($fotoPrincipal['fecha_foto'])): ?>
-                        · <?= e(fecha_legible((string) $fotoPrincipal['fecha_foto'])) ?>
-                    <?php endif; ?>
-                </p>
-                <h3><?= e((string) $fotoPrincipal['titulo']) ?></h3>
-                <?php if (!empty($fotoPrincipal['resumen'])): ?>
-                    <p><?= e((string) $fotoPrincipal['resumen']) ?></p>
-                <?php elseif (!empty($fotoPrincipal['descripcion'])): ?>
-                    <p><?= e((string) $fotoPrincipal['descripcion']) ?></p>
-                <?php endif; ?>
-            </div>
-        </article>
-
-        <?php if ($fotos !== []): ?>
-            <div class="periodico__notas">
-                <?php foreach (array_slice($fotos, 0, 4) as $foto): ?>
-                    <a class="periodico__nota" href="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>">
-                        <img src="<?= e(url('/galeria/imagen/' . (string) $foto['id'])) ?>" alt="<?= e((string) $foto['titulo']) ?>" loading="lazy">
-                        <span>
-                            <strong><?= e((string) $foto['titulo']) ?></strong>
-                            <small>
-                                <?= e(\App\Models\Foto::CATEGORIAS[(string) $foto['categoria']] ?? (string) $foto['categoria']) ?>
-                                <?php if (!empty($foto['fecha_foto'])): ?>
-                                    · <?= e(fecha_legible((string) $foto['fecha_foto'])) ?>
-                                <?php endif; ?>
-                            </small>
-                        </span>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
-
-    <p class="section-actions">
-        <a class="btn btn--ghost btn--sm" href="<?= e(url('/galeria')) ?>">Ver todas las fotos</a>
-    </p>
-<?php endif; ?>
-
-<h2 class="section-title">Negocios de la unidad</h2>
-
-<?php
-$negociosPortada = array_values(array_filter(
-    $negocios,
-    static fn (array $negocio): bool => (int) ($negocio['destacado'] ?? 0) === 1
-));
-?>
-
-<?php if ($negociosPortada === []): ?>
-    <div class="card">
-        <p class="muted">
-            El club está preparando el directorio de comercios y servicios de la
-            unidad vecinal. Mientras tanto, puede comunicarse con la institución.
-        </p>
-    </div>
-<?php else: ?>
-    <div class="cards cards--3">
-        <?php foreach (array_slice($negociosPortada, 0, 6) as $negocio): ?>
-            <article class="card negocio">
-                <?php if (!empty($negocio['archivo'])): ?>
-                    <img class="negocio__logo" src="<?= e(url('/negocios/imagen/' . (string) $negocio['id'])) ?>" alt="<?= e((string) $negocio['nombre']) ?>" loading="lazy">
-                <?php endif; ?>
-
-                <p class="card__label">
-                    <?= e(\App\Models\Negocio::CATEGORIAS[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?>
-                </p>
-                <h3 class="negocio__nombre"><?= e((string) $negocio['nombre']) ?></h3>
-
-                <?php if (!empty($negocio['descripcion'])): ?>
-                    <p class="negocio__descripcion"><?= e((string) $negocio['descripcion']) ?></p>
-                <?php endif; ?>
-
-                <ul class="facts">
-                    <?php if (!empty($negocio['telefono'])): ?>
-                        <li>
-                            <span>Teléfono</span>
-                            <strong><a href="tel:<?= e(preg_replace('/[^0-9+]/', '', (string) $negocio['telefono'])) ?>"><?= e((string) $negocio['telefono']) ?></a></strong>
-                        </li>
-                    <?php endif; ?>
-                    <?php if (!empty($negocio['horario'])): ?>
-                        <li><span>Horario</span><strong><?= e((string) $negocio['horario']) ?></strong></li>
-                    <?php endif; ?>
-                </ul>
-
-                <?php if (!empty($negocio['web'])): ?>
-                    <div class="card__actions">
-                        <a class="btn btn--primary btn--sm" href="<?= e((string) $negocio['web']) ?>" target="_blank" rel="noopener nofollow">
-                            Visitar
-                        </a>
-                    </div>
-                <?php endif; ?>
-            </article>
-        <?php endforeach; ?>
-    </div>
-
-    <p class="section-actions">
-        <a class="btn btn--ghost btn--sm" href="<?= e(url('/negocios')) ?>">Ver el directorio completo</a>
-        <a class="btn btn--ghost btn--sm" href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">
-            Portal de la Unidad Vecinal
-        </a>
-    </p>
 <?php endif; ?>
 
 <h2 class="section-title">Cómo funciona la solicitud</h2>
@@ -246,6 +380,15 @@ $negociosPortada = array_values(array_filter(
     </li>
 </ol>
 
+<?php if ($telefono !== '' || $correo !== '' || $direccion !== ''): ?>
+    <h2 class="section-title">Contacto institucional</h2>
+    <div class="card">
+        <?php if ($direccion !== ''): ?><p><?= e($direccion) ?></p><?php endif; ?>
+        <?php if ($telefono !== ''): ?><p>Teléfono: <?= e($telefono) ?></p><?php endif; ?>
+        <?php if ($correo !== ''): ?><p>Correo: <?= e($correo) ?></p><?php endif; ?>
+    </div>
+<?php endif; ?>
+
 <h2 class="section-title">Instale el portal en su teléfono</h2>
 <div class="card">
     <p>
@@ -261,15 +404,6 @@ $negociosPortada = array_values(array_filter(
         <button type="button" class="btn btn--primary btn--sm" data-install-app>Instalar aplicación</button>
     </p>
 </div>
-
-<?php if ($telefono !== '' || $correo !== '' || $direccion !== ''): ?>
-    <h2 class="section-title">Contacto institucional</h2>
-    <div class="card">
-        <?php if ($direccion !== ''): ?><p><?= e($direccion) ?></p><?php endif; ?>
-        <?php if ($telefono !== ''): ?><p>Teléfono: <?= e($telefono) ?></p><?php endif; ?>
-        <?php if ($correo !== ''): ?><p>Correo: <?= e($correo) ?></p><?php endif; ?>
-    </div>
-<?php endif; ?>
 
 <h2 class="section-title">Acceso del personal</h2>
 <div class="card">

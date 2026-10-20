@@ -85,6 +85,32 @@ final class Actividad extends Model
     }
 
     /**
+     * Próximas actividades programadas y visibles para el portal público.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function proximasPublicas(int $limite = 5): array
+    {
+        $limite = max(1, min(20, $limite));
+
+        $sql = sprintf(
+            'SELECT a.*, i.`nombre` AS instalacion_nombre
+             FROM `%s` a
+             LEFT JOIN `%s` i ON i.`id` = a.`instalacion_id`
+             WHERE a.`visible` = 1
+               AND a.`estado` = \'programada\'
+               AND a.`fecha_inicio` >= NOW()
+             ORDER BY a.`fecha_inicio` ASC
+             LIMIT %d',
+            self::table(),
+            self::prefijada('instalaciones'),
+            $limite
+        );
+
+        return self::fetchAll($sql);
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public static function find(int $id): ?array
