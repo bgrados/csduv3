@@ -19,7 +19,7 @@
 
 'use strict';
 
-var CACHE = 'csduv3-publica-v4';
+var CACHE = 'csduv3-publica-v5';
 
 /* Rutas del panel administrativo que nunca se cachean. */
 var RUTAS_PRIVADAS = [
@@ -154,22 +154,28 @@ self.addEventListener('fetch', function (evento) {
 
 function desdeCacheOPeticion(peticion) {
     return caches.match(peticion).then(function (respuesta) {
+        /* Se actualiza en segundo plano: la proxima visita ya trae la version nueva. */
+        var desdeRed = fetch(peticion).then(function (nueva) {
+            if (nueva && nueva.ok && nueva.type === 'basic') {
+                var copia = nueva.clone();
+
+                caches.open(CACHE).then(function (cache) {
+                    cache.put(peticion, copia);
+                });
+            }
+
+            return nueva;
+        }).catch(function () {
+            return null;
+        });
+
         if (respuesta) {
+            desdeRed;
             return respuesta;
         }
 
-        return fetch(peticion).then(function (nueva) {
-            if (!nueva || !nueva.ok || nueva.type !== 'basic') {
-                return nueva;
-            }
-
-            var copia = nueva.clone();
-
-            caches.open(CACHE).then(function (cache) {
-                cache.put(peticion, copia);
-            });
-
-            return nueva;
+        return desdeRed.then(function (nueva) {
+            return nueva || respuesta;
         });
     });
 }

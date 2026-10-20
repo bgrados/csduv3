@@ -282,7 +282,7 @@
             return;
         }
 
-        var CLAVE = 'csduv3-instalacion-vista';
+        var CLAVE = 'csduv3-instalacion-descartada';
 
         function ocultar() {
             seccion.hidden = true;
@@ -317,6 +317,13 @@
             cerrar.addEventListener('click', function () {
                 recordar();
                 ocultar();
+
+                // El aviso flotante tampoco debe volver a salir.
+                var aviso = document.querySelector('[data-install-banner]');
+
+                if (aviso) {
+                    aviso.hidden = true;
+                }
             });
         }
 
