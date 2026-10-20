@@ -102,6 +102,8 @@ detectar errores de sintaxis, de enrutamiento y de render.
 | R5 | Algoritmo de fixture | Reproducción del algoritmo de `Torneo::generarFixture()` con 2 a 8 equipos | **Correcto.** Sin cruces repetidos y con el número exacto de partidos (`n(n-1)/2`); con bye cuando el número de equipos es impar |
 | R6 | División de sentencias SQL | `dividirEnSentencias()` sobre `0001_solicitudes_alquiler.sql` (2 sentencias) y `01_esquema.sql` (45 sentencias) | **Correcto.** Ningún comentario queda en las sentencias |
 | R7 | Marcadores PDO repetidos | Revisión de las consultas nuevas: con `PDO::ATTR_EMULATE_PREPARES = false` no se repite ningún marcador con nombre | **Correcto.** Se corrigió `TorneoEquipo::tieneEncuentros()` (`:id` duplicado → `:local` / `:visitante`) |
+| R8 | Enrutamiento de los módulos de caja, directiva, elecciones, calendario y documentos | Instancia real de `App\Core\Router` con 41 URLs de los cinco módulos | **Correcto.** Cada URL resuelve al controlador y al método esperados |
+| R9 | Render de las 20 vistas de los cinco módulos | `View::render()` con datos de muestra | **Correcto.** Sin advertencias ni variables indefinidas |
 
 > Estas comprobaciones **no** demuestran que el código funcione contra la base
 > de datos: solo detectan errores frecuentes. La validación real es la de las
@@ -878,7 +880,106 @@ SELECT COUNT(*) FROM csduv3_jornadas;
 
 ---
 
-## 11. Registro de resultados
+## 11. Pruebas de Caja (módulo nuevo)
+
+> **Estado: pendientes de ejecución.** El código pasa `php -l`, la verificación
+> estática, la prueba de enrutamiento y el render de sus cuatro vistas, pero
+> **no se ha escrito nada en la base de datos**.
+>
+> **Nunca ejecutar estas pruebas contra producción.**
+
+### 11.0 Preparación
+
+Usuarios: `admin.prueba` (todo), `tesoreria.prueba` (rol Tesorería:
+`caja.ver`, `caja.registrar`, `caja.anular`, `caja.reportes`) y
+`consulta.prueba` (solo `caja.ver`).
+
+```sql
+SELECT COUNT(*) FROM csduv3_movimientos;
+SELECT COUNT(*) FROM csduv3_movimientos_auditoria;
+SELECT COUNT(*) FROM csduv3_categorias_movimiento;   -- esperado: 7
+SELECT COUNT(*) FROM csduv3_medios_pago;              -- esperado: 2
+SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
+```
+
+### 11.1 Casos
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| CX-01 | `GET /caja` con `caja.ver` | 200; listado, resumen del mes (ingresos, egresos y saldo) y filtros; sin movimiento muestra estado vacío |
+| CX-02 | `GET /caja` sin el permiso | 403 y el menú no muestra el enlace |
+| CX-03 | `GET /caja` sin sesión | 302 a `/ingresar` |
+| CX-04 | `GET /caja` con solo `caja.ver` | Se ve el listado, pero no los botones «Nuevo movimiento», «Editar» ni «Anular»; los POST responden 403 |
+| CX-05 | Alta válida: ingreso de S/ 150,00 del 02/10/2026, categoría «Cuotas», medio «Efectivo», concepto «Cuota de socios» | 302 al listado con «El movimiento quedó registrado»; la fila existe con `estado = 'registrado'`, `responsable_id` del usuario y `periodo_id` nulo; auditoría `crear_movimiento` y fila `creacion` en `csduv3_movimientos_auditoria` |
+| CX-06 | Validaciones: monto `0`, monto `-5`, monto `abc`, fecha futura, hora no aplicable, periodo cerrado y código de socio inexistente | Cada caso se rechaza en el servidor con un mensaje en español; no se inserta ninguna fila |
+| CX-07 | Un movimiento con `estado = 'anulado'` no puede editarse | El formulario de edición no se abre y el POST se rechaza con «Un movimiento anulado no se puede editar.» |
+| CX-08 | Anulación: indicar el motivo (mínimo 5 caracteres) | 302 con «El movimiento quedó anulado. El registro se conserva.»; la fila queda `estado = 'anulado'` con `anulado_por`, `anulado_at` y `motivo_anulacion`; **no** se borra; auditoría `anular_movimiento` y fila `anulacion` en `csduv3_movimientos_auditoria` |
+| CX-09 | Un movimiento anulado deja de computar | El resumen del período ya no lo incluye y la tabla lo muestra tachado |
+| CX-10 | Configuración: crear una categoría de ingreso, un medio de pago y un periodo | Aparecen en la página de configuración; la categoría duplicada con el mismo nombre y tipo se rechaza |
+| CX-11 | Cerrar un periodo e intentar registrar un movimiento en él | Se rechaza con «El periodo seleccionado está cerrado y no admite nuevos movimientos.» |
+| CX-12 | Reportes (`GET /caja/reportes`) con `caja.reportes` | Totales del período, tabla por categoría y tabla por mes; sin ese permiso, 403 |
+| CX-13 | Revisar `csduv3_movimientos_auditoria` tras CX-05, CX-08 y una edición | Cada operación deja su fila con `accion`, `datos_anteriores`, `datos_nuevos` y `usuario_id` |
+
+---
+
+## 12. Pruebas de Directiva, Elecciones, Calendario y Documentos
+
+> **Estado: pendientes de ejecución.** Mismo criterio que la sección 11.
+
+### 12.1 Directiva
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| DI-01 | `GET /directiva` con `directiva.ver` | 200; lista de periodos de gestión con su estado y el número de integrantes; estado vacío si no hay ninguno |
+| DI-02 | Crear el catálogo de cargos (Presidente, Tesorero…) | Los cargos aparecen ordenados y son seleccionables al registrar integrantes; el nombre duplicado se rechaza |
+| DI-03 | Crear un periodo de gestión con fecha de fin anterior a la de inicio | Se rechaza con «La fecha de fin no puede ser anterior a la de inicio.» |
+| DI-04 | Registrar un integrante con el código de un socio | 302 con «El integrante quedó registrado»; la fila guarda `socio_id` y `nombre_completo` vacío; en la tabla se muestra el nombre del socio y su código |
+| DI-05 | Registrar un integrante sin código de socio y sin nombre | Se rechaza con «Indique el código de un socio o el nombre completo de la persona.» |
+| DI-06 | Registrar un integrante con un código de socio inexistente | Se rechaza con «No existe un socio con ese código.» |
+| DI-07 | Marcar un integrante como «cesado» y luego «vigente» | Cambia la insignia del estado y queda registrado en `/auditoria`; el histórico se conserva |
+| DI-08 | Concluir un periodo de gestión y abrir otro | El anterior queda «Concluida» y el nuevo «Vigente»; el anterior sigue visible en el listado |
+
+### 12.2 Elecciones
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| EL-01 | `GET /elecciones` con `elecciones.ver` | 200; listado de procesos con estado, número de listas y de candidatos |
+| EL-02 | Crear un proceso con fecha de elección anterior a la de convocatoria | Se rechaza con «La fecha de elección no puede ser anterior a la de convocatoria.» |
+| EL-03 | El campo «años de mandato» trae el valor de la configuración del club | El formulario muestra el valor configurado (4 por defecto) y se puede cambiar |
+| EL-04 | Inscribir dos listas y candidatos en cada una | Cada lista muestra su número de candidatos; el candidato puede vincularse con un socio por código y con un cargo de la junta directiva |
+| EL-05 | Registrar un resultado por lista | La tabla de resultados muestra votos, nulos y en blanco; auditoría `registrar_resultado_electoral` |
+| EL-06 | Marcar una lista como ganadora | La lista queda «Ganadora» y **todas las demás** dejan de serlo |
+| EL-07 | Retirar un candidato | Desaparece de la lista y queda registrado en `/auditoria` |
+| EL-08 | Marcar el proceso como «Anulado» | Sigue consultable, pero no admite nuevas listas, candidatos ni resultados |
+
+### 12.3 Calendario
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| CA-01 | `GET /calendario` con `calendario.ver` | 200; cuadrícula del mes con los días de la semana, el número del día y las actividades; navegación entre meses |
+| CA-02 | Programar una actividad con fecha, hora y lugar | 302 con «La actividad quedó programada»; la actividad aparece en el día correspondiente del mes y en la tabla del mes |
+| CA-03 | Programar una actividad con la hora `25:00` | Se rechaza con «La hora no es válida.» |
+| CA-04 | Programar una actividad con fecha de fin anterior a la de inicio | Se rechaza con «La fecha de fin no puede ser anterior a la fecha de inicio.» |
+| CA-05 | Marcar una actividad como «realizada» | Cambia la insignia y queda registrada en `/auditoria` |
+| CA-06 | Filtrar por tipo | Solo se muestran las actividades del tipo elegido |
+
+### 12.4 Documentos
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| DO-01 | `GET /documentos` con `documentos.ver` | 200; listado con categoría, fecha, tamaño y privacidad; estado vacío si no hay documentos |
+| DO-02 | Registrar un documento con archivo PDF válido (menos de 5 MB) | 302 con «El documento quedó registrado»; la fila guarda `nombre_original`, `tipo_mime` y `tamano_bytes`; el archivo queda en `storage/uploads/documentos/…`, **fuena de `public/`** |
+| DO-03 | Subir un archivo con extensión no permitida (`.php`, `.exe`) | Se rechaza con «El tipo de archivo no está permitido (PDF, imágenes o documentos de Office).» y no se guarda nada |
+| DO-04 | Subir un archivo mayor de 5 MB | Se rechaza con «El archivo supera el máximo de 5 MB.» |
+| DO-05 | Subir un archivo cuya extensión no corresponde a su contenido | Se rechaza con «El contenido del archivo no corresponde a un tipo permitido.» |
+| DO-06 | Descargar un documento | Se entrega el archivo con el nombre original; queda registrado en `/auditoria` |
+| DO-07 | Editar un documento y subir un archivo nuevo | Se actualizan los datos y el archivo; el archivo anterior se elimina del disco |
+| DO-08 | Eliminar un documento | Se elimina el registro y el archivo; auditoría `eliminar_documento` |
+| DO-09 | Intentar acceder a `storage/uploads/…` desde el navegador | 403 o 404: los archivos nunca se sirven como estáticos |
+
+---
+
+## 13. Registro de resultados
 
 | Fecha | Prueba | Resultado | Observaciones |
 | --- | --- | --- | --- |
@@ -890,12 +991,13 @@ SELECT COUNT(*) FROM csduv3_jornadas;
 | Producción | Verificación HTTP | Correcto | Rediseño visible (tema `#063B22`, `logo.jpg`, CSS y SW v3). **La base de datos volvió a responder**: portada, `/alquiler`, `/ingresar` y `/panel` con 200 y sin aviso de mantenimiento |
 | Ambientes y torneos | `php -l` + verificación estática + R3-R7 | Correcto | 102 archivos de `app/` sin errores de sintaxis; 109 archivos PHP con 0 hallazgos; 16 rutas correctas; 11 vistas renderizadas; fixture correcto de 2 a 8 equipos; `tools/migrar.php` corregido |
 | Ambientes y torneos | Despliegue en producción (`f1de87d`) | Correcto | `/torneos` 200 con estado vacío «Todavía no hay torneos publicados»; `/torneos/1` 404; `/ambientes`, `/deportes` y `/deportes/torneos/nuevo` 302 a `/ingresar` (la ruta existe y exige sesión); `/`, `/alquiler` e `/ingresar` 200; service worker `csduv3-publica-v4`; menú público con «Torneos» |
-| Pendiente | Secciones 5 a 10 (incluye PS-01 a PS-35, AM-01 a AM-14 y TO-01 a TO-21) | — | Requiere **MariaDB** y una sesión de administrador; las pruebas de escritura requieren una base de datos de pruebas |
+| Caja, directiva, elecciones, calendario y documentos | `php -l` + verificación estática + R8-R9 | Correcto | 135 archivos de `app/` sin errores de sintaxis; 142 archivos PHP con 0 hallazgos; 41 rutas correctas; 20 vistas renderizadas sin advertencias |
+| Pendiente | Secciones 5 a 12 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09) | — | Requiere **MariaDB** y una sesión de administrador; las pruebas de escritura requieren una base de datos de pruebas |
 | Pendiente | Rotación de la contraseña de la base de datos | — | Sigue expuesta en el historial público de Git: rotar en cPanel y actualizar `.env` |
 
 ---
 
-## 12. Limitaciones conocidas
+## 14. Limitaciones conocidas
 
 La comprobación de solapamiento de horarios **no usa transacción ni
 `SELECT ... FOR UPDATE`**. Dos envíos exactamente simultáneos podrían crear dos
@@ -927,3 +1029,21 @@ El módulo de ambientes y tarifas no **crea** los ambientes ni sus precios: el
 club los carga. El portal público solo muestra los ambientes **activos** con al
 menos una **tarifa vigente**; no se inventan datos ni se muestran precios de
 referencia.
+
+La caja es un **registro financiero administrativo**: no constituye contabilidad
+tributaria ni emite comprobantes electrónicos autorizados por SUNAT. Los
+movimientos se anulan, no se eliminan, y quedan en
+`csduv3_movimientos_auditoria`; el módulo no calcula saldos por cuenta ni
+conciliaciones bancarias.
+
+El módulo de elecciones es un **registro administrativo** de lo que declara la
+organización: no es un sistema de votación electrónica, no valida identidades ni
+la elegibilidad de los candidatos, y no gestiona el padrón de socios que votan.
+
+El calendario es **interno**: las actividades no se publican en el portal
+público (el campo `visible` queda preparado para una fase posterior).
+
+Los documentos se sirven siempre por el controlador, con el permiso
+`documentos.ver`: ningún archivo de `storage/uploads` es accesible como
+estático. La marca «Compartible» ordena el archivo, pero **no** habilita una
+descarga anónima en esta versión.

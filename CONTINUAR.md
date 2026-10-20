@@ -25,7 +25,8 @@ los módulos **Ambientes y tarifas** (`/ambientes`) y **Deportes y torneos**
 >    desde el Terminal de cPanel; FileZilla no ejecuta PHP).
 > 2. **Rotar la contraseña de la base de datos**, que estuvo expuesta en el
 >    historial público de Git, y actualizar `.env`.
-> 3. Ejecutar los casos `AM-*` y `TO-*` de [docs/PRUEBAS.md](docs/PRUEBAS.md).
+> 3. Ejecutar los casos `AM-*`, `TO-*`, `CX-*`, `DI-*`, `EL-*`, `CA-*` y `DO-*` de
+   [docs/PRUEBAS.md](docs/PRUEBAS.md).
 
 ---
 
@@ -291,6 +292,50 @@ nuevo**: se usan las tablas `deportes`, `deporte_puntos`, `torneos`,
   puntos (3/1/0 por defecto; 2 puntos por victoria en básquet).
 - El portal público muestra los torneos que **no** están anulados.
 
+### 2.7 Caja, directiva, elecciones, calendario y documentos (módulos nuevos)
+
+Se escribieron los cinco módulos que quedaban deshabilitados en el menú. **Ninguno
+requiere migración**: todas sus tablas ya existían en `01_esquema.sql` y se usan
+los permisos que ya define `02_datos_iniciales.sql`.
+
+| Módulo | Permisos | Qué hace |
+| --- | --- | --- |
+| **Caja** (`/caja`) | `caja.ver`, `caja.registrar`, `caja.anular`, `caja.reportes` | Ingresos y egresos con filtros y resumen, catálogos (categorías, medios de pago, periodos), reportes por categoría y por mes, y anulación con motivo |
+| **Directiva** (`/directiva`) | `directiva.ver`, `directiva.gestionar` | Periodos de gestión, catálogo de cargos e integrantes (socios o personas externas), con ceses y renuncias |
+| **Elecciones** (`/elecciones`) | `elecciones.ver`, `elecciones.gestionar` | Procesos electorales, listas, candidatos y resultados; una sola lista ganadora por proceso |
+| **Calendario** (`/calendario`) | `calendario.ver`, `calendario.gestionar` | Vista de mes con las actividades del club, programación, lugares y estados |
+| **Documentos** (`/documentos`) | `documentos.ver`, `documentos.gestionar` | Repositorio institucional con categorías, adjuntos y descarga controlada |
+
+**Archivos nuevos**
+
+| Archivo | Función |
+| --- | --- |
+| `app/Controllers/CajaController.php` | Caja: movimientos, catálogos, anulación y reportes |
+| `app/Controllers/DirectivaController.php` | Junta directiva: periodos, cargos e integrantes |
+| `app/Controllers/EleccionesController.php` | Procesos electorales: listas, candidatos y resultados |
+| `app/Controllers/CalendarioController.php` | Calendario institucional |
+| `app/Controllers/DocumentosController.php` | Documentos y descarga de archivos |
+| `app/Models/{Movimiento,CategoriaMovimiento,MedioPago,Periodo}.php` | Caja y sus catálogos |
+| `app/Models/{Directiva,DirectivaCargo,DirectivaMiembro}.php` | Junta directiva |
+| `app/Models/{ProcesoElectoral,ListaElectoral,Candidato,ResultadoElectoral}.php` | Elecciones |
+| `app/Models/Actividad.php` | Calendario |
+| `app/Models/Documento.php` | Documentos |
+| `app/Views/{caja,directiva,elecciones,calendario,documentos}/` | Vistas de los cinco módulos |
+
+**Decisiones y límites del alcance**
+
+- La caja es un **registro financiero administrativo**: no es contabilidad
+  tributaria ni emite comprobantes electrónicos. Los movimientos **no se
+  eliminan**, se anulan con motivo y quedan en `csduv3_movimientos_auditoria`.
+- No se admiten movimientos con fecha futura ni en un periodo cerrado.
+- Las elecciones son un **registro administrativo** de lo que declara la
+  organización: no es votación electrónica ni valida identidades.
+- Los documentos se guardan en `storage/uploads/documentos`, **fuera de la
+  carpeta pública**, y se entregan por el controlador después de comprobar el
+  permiso. Se validan extensión, contenido real y tamaño (máximo 5 MB).
+- El calendario es **interno**: las actividades no se publican en el portal
+  público (el campo `visible` queda preparado para una fase posterior).
+
 ---
 
 ## 3. Pruebas realizadas
@@ -384,11 +429,11 @@ no se hayan obtenido.
 
 | Fase | Contenido |
 | --- | --- |
-| 3 | Socios (corte 1 implementado) y junta directiva |
-| 4 | Reservas, calendario y pagos (incluye cerrar la condición de carrera) |
-| 5 | Caja, ingresos, egresos e informes financieros |
+| 3 | Socios (corte 1), junta directiva y elecciones — **implementados** |
+| 4 | Reservas, calendario y pagos (incluye cerrar la condición de carrera) — calendario implementado |
+| 5 | Caja, ingresos, egresos e informes financieros — **implementado** (corte 1) |
 | 6 | Deportes: modalidades adicionales, estadísticas por jugador y tabla por sets |
-| 7 | Documentos, auditoría, reportes y mejoras de experiencia |
+| 7 | Documentos, auditoría, reportes y mejoras de experiencia — documentos implementados |
 | 8 | Pruebas integrales, revisión de seguridad y despliegue |
 
 ---
