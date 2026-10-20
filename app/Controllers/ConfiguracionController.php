@@ -252,4 +252,17 @@ final class ConfiguracionController
         Session::flash('exito', self::MARCAS[$tipo] . ' restaurada a la de la aplicación.');
         Response::redirect(url('/configuracion'));
     }
+
+    /**
+     * Comprueba que la base de datos esté disponible antes de mostrar la página.
+     */
+    private function baseDisponible(): bool
+    {
+        if (Database::isAvailable()) {
+            return true;
+        }
+
+        Session::flash('error', 'La base de datos no está disponible en este momento.');
+        Response::redirect(url('/panel'));
+    }
 }

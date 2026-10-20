@@ -299,7 +299,36 @@ foreach ($controlador in Get-ChildItem -Path (Join-Path $raiz 'app\Controllers')
 }
 
 # ---------------------------------------------------------------------------
-#  6. Funciones auxiliares esperadas
+#  6. Metodos propios de cada clase (llamadas a $this->metodo)
+# ---------------------------------------------------------------------------
+#  Comprueba que todo metodo invocado con $this-> exista en la misma clase.
+#  Una llamada a un metodo inexistente provoca un error 500 en produccion.
+
+foreach ($clase in Get-ChildItem -Path (Join-Path $raiz 'app') -Filter '*.php' -File -Recurse) {
+    $texto = [System.IO.File]::ReadAllText($clase.FullName)
+    $relativo = $clase.FullName.Substring($raiz.Length + 1)
+
+    if ($texto -notmatch '\$this->') {
+        continue
+    }
+
+    $definidos = New-Object System.Collections.Generic.HashSet[string]
+
+    foreach ($m in [regex]::Matches($texto, '(?:public|private|protected)\s+(?:static\s+)?function\s+([A-Za-z_][A-Za-z0-9_]*)')) {
+        [void] $definidos.Add($m.Groups[1].Value)
+    }
+
+    foreach ($m in [regex]::Matches($texto, '\$this->([A-Za-z_][A-Za-z0-9_]*)\s*\(')) {
+        $metodo = $m.Groups[1].Value
+
+        if (-not $definidos.Contains($metodo)) {
+            $hallazgos.Add("$relativo : se llama a `$this->$metodo() pero ese metodo no existe en la clase")
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
+#  7. Funciones auxiliares esperadas
 # ---------------------------------------------------------------------------
 
 $helpers = [System.IO.File]::ReadAllText((Join-Path $raiz 'app\Core\helpers.php'))
