@@ -111,6 +111,29 @@ final class Actividad extends Model
     }
 
     /**
+     * La próxima actividad visible del club.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function proximaPublica(): ?array
+    {
+        $sql = sprintf(
+            'SELECT a.*, i.`nombre` AS instalacion_nombre
+             FROM `%s` a
+             LEFT JOIN `%s` i ON i.`id` = a.`instalacion_id`
+             WHERE a.`visible` = 1
+               AND a.`estado` = \'programada\'
+               AND a.`fecha_inicio` >= NOW()
+             ORDER BY a.`fecha_inicio` ASC
+             LIMIT 1',
+            self::table(),
+            self::prefijada('instalaciones')
+        );
+
+        return self::fetchOne($sql);
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public static function find(int $id): ?array

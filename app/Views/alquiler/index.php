@@ -41,6 +41,14 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
         <?php foreach ($instalaciones as $instalacion): ?>
             <?php $tarifas = $instalacion['tarifas'] ?? []; ?>
             <article class="card card--room">
+                <?php if (!empty($instalacion['archivo'])): ?>
+                    <img
+                        class="card__foto"
+                        src="<?= e(url('/ambiente/imagen/' . (string) $instalacion['id'])) ?>"
+                        alt="<?= e((string) $instalacion['nombre']) ?>"
+                        loading="lazy"
+                    >
+                <?php endif; ?>
                 <h2><?= e((string) $instalacion['nombre']) ?></h2>
                 <p class="muted"><?= e((string) ($instalacion['tipo'] ?? 'Ambiente')) ?></p>
 

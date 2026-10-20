@@ -240,6 +240,16 @@ final class Foto extends Model
         return (int) self::scalar(sprintf('SELECT COUNT(*) FROM `%s`', self::table()));
     }
 
+    /**
+     * Noticias publicadas en el portal.
+     */
+    public static function contarPublicadas(): int
+    {
+        return (int) self::scalar(
+            sprintf('SELECT COUNT(*) FROM `%s` WHERE `visible` = 1', self::table())
+        );
+    }
+
     private static function vacioANulo(mixed $valor): ?string
     {
         return $valor === null || $valor === '' ? null : (string) $valor;

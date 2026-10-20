@@ -11,6 +11,7 @@ use App\Core\RateLimiter;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use App\Core\Uploads;
 use App\Core\Validator;
 use App\Core\View;
 use App\Models\Configuracion;
@@ -590,6 +591,30 @@ final class PortalAlquilerController
         }
 
         return $valor;
+    }
+
+    /**
+     * Entrega la foto de un ambiente publicado.
+     */
+    public function imagenAmbiente(Request $request, string $id): void
+    {
+        if (!$this->portalListo()) {
+            return;
+        }
+
+        $instalacion = Instalacion::find((int) $id);
+
+        if ($instalacion === null || (int) $instalacion['activo'] !== 1) {
+            abort(404, 'La imagen solicitada no está disponible.');
+        }
+
+        $absoluta = Uploads::rutaAbsoluta((string) ($instalacion['archivo'] ?? ''), 'ambientes/');
+
+        if ($absoluta === null || !is_file($absoluta)) {
+            abort(404, 'La imagen solicitada no está disponible.');
+        }
+
+        Response::archivo($absoluta, 'public, max-age=86400');
     }
 
     private function portalListo(): bool

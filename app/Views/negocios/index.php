@@ -26,14 +26,14 @@ $puedeGestionar = can('documentos.gestionar');
     </div>
     <div class="page-head__actions">
         <?php if ($puedeGestionar): ?>
-            <a class="btn btn--primary" href="<?= e(url('/negocios/nuevo')) ?>">
+            <a class="btn btn--primary" href="<?= e(url('/directorio/nuevo')) ?>">
                 <?= Icons::render('documentos', 'icon', 18) ?> Nuevo negocio
             </a>
         <?php endif; ?>
     </div>
 </div>
 
-<form class="form form--filters" method="get" action="<?= e(url('/negocios')) ?>">
+<form class="form form--filters" method="get" action="<?= e(url('/directorio')) ?>">
     <div class="field">
         <label for="categoria">Categoría</label>
         <select id="categoria" name="categoria">
@@ -49,7 +49,7 @@ $puedeGestionar = can('documentos.gestionar');
     <div class="field field--actions">
         <button type="submit" class="btn btn--ghost">Filtrar</button>
         <?php if ($categoria !== ''): ?>
-            <a class="btn btn--ghost" href="<?= e(url('/negocios')) ?>">Limpiar</a>
+            <a class="btn btn--ghost" href="<?= e(url('/directorio')) ?>">Limpiar</a>
         <?php endif; ?>
     </div>
 </form>
@@ -60,7 +60,7 @@ $puedeGestionar = can('documentos.gestionar');
         <h2>Todavía no hay negocios registrados</h2>
         <p>Registre los comercios y servicios de la unidad para publicarlos en el portal del club.</p>
         <?php if ($puedeGestionar): ?>
-            <p><a class="btn btn--primary" href="<?= e(url('/negocios/nuevo')) ?>">Registrar el primero</a></p>
+            <p><a class="btn btn--primary" href="<?= e(url('/directorio/nuevo')) ?>">Registrar el primero</a></p>
         <?php endif; ?>
     </div>
 <?php else: ?>
@@ -114,15 +114,15 @@ $puedeGestionar = can('documentos.gestionar');
                         </td>
                         <?php if ($puedeGestionar): ?>
                             <td class="table__actions">
-                                <a class="btn btn--ghost btn--sm" href="<?= e(url('/negocios/' . (string) $negocio['id'] . '/editar')) ?>">Editar</a>
-                                <form method="post" action="<?= e(url('/negocios/' . (string) $negocio['id'] . '/estado')) ?>">
+                                <a class="btn btn--ghost btn--sm" href="<?= e(url('/directorio/' . (string) $negocio['id'] . '/editar')) ?>">Editar</a>
+                                <form method="post" action="<?= e(url('/directorio/' . (string) $negocio['id'] . '/estado')) ?>">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="accion" value="<?= (int) $negocio['visible'] === 1 ? 'ocultar' : 'publicar' ?>">
                                     <button type="submit" class="btn btn--ghost btn--sm">
                                         <?= (int) $negocio['visible'] === 1 ? 'Ocultar' : 'Publicar' ?>
                                     </button>
                                 </form>
-                                <form method="post" action="<?= e(url('/negocios/' . (string) $negocio['id'] . '/eliminar')) ?>" data-confirmar="¿Eliminar este negocio del portal?">
+                                <form method="post" action="<?= e(url('/directorio/' . (string) $negocio['id'] . '/eliminar')) ?>" data-confirmar="¿Eliminar este negocio del portal?">
                                     <?= csrf_field() ?>
                                     <button type="submit" class="btn btn--ghost btn--sm">Eliminar</button>
                                 </form>

@@ -167,6 +167,16 @@ final class Negocio extends Model
         return (int) self::scalar(sprintf('SELECT COUNT(*) FROM `%s`', self::table()));
     }
 
+    /**
+     * Negocios publicados en el portal.
+     */
+    public static function contarPublicados(): int
+    {
+        return (int) self::scalar(
+            sprintf('SELECT COUNT(*) FROM `%s` WHERE `visible` = 1', self::table())
+        );
+    }
+
     private static function vacioANulo(mixed $valor): ?string
     {
         return $valor === null || $valor === '' ? null : (string) $valor;

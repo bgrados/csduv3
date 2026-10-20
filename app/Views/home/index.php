@@ -21,7 +21,6 @@ use App\Core\Icons;
 $telefono = trim((string) ($configuracion['telefono'] ?? ''));
 $correo = trim((string) ($configuracion['email_institucional'] ?? ''));
 $direccion = trim((string) ($configuracion['direccion'] ?? ''));
-$visibles = array_slice($instalaciones, 0, 6);
 
 $nombreClub = (string) config('app.name');
 $siglas = (string) config('app.short_name');
@@ -42,6 +41,13 @@ $imagen = static function (array $noticia): string {
 
     return asset((string) ($noticia['archivo'] ?? ''));
 };
+
+$noticias = is_array($noticias ?? null) ? $noticias : [];
+$galeria = is_array($galeria ?? null) ? $galeria : [];
+$negocios = is_array($negocios ?? null) ? $negocios : [];
+$eventos = is_array($eventos ?? null) ? $eventos : [];
+$partidos = is_array($partidos ?? null) ? $partidos : [];
+$visibles = is_array($instalaciones ?? null) ? array_slice($instalaciones, 0, 6) : [];
 
 $portada = $noticias[0] ?? null;
 $resto = array_slice($noticias, 1);
@@ -338,6 +344,14 @@ $categoriasNegocio = [
         <?php foreach ($visibles as $instalacion): ?>
             <?php $tarifas = $instalacion['tarifas'] ?? []; ?>
             <article class="card card--room">
+                <?php if (!empty($instalacion['archivo'])): ?>
+                    <img
+                        class="card__foto"
+                        src="<?= e(url('/ambiente/imagen/' . (string) $instalacion['id'])) ?>"
+                        alt="<?= e((string) $instalacion['nombre']) ?>"
+                        loading="lazy"
+                    >
+                <?php endif; ?>
                 <h3><?= e((string) $instalacion['nombre']) ?></h3>
                 <p class="muted"><?= e((string) ($instalacion['tipo'] ?? '')) ?></p>
 

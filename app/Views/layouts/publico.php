@@ -18,6 +18,7 @@ $siglasClub = club('siglas', (string) config('app.short_name'));
 $logoClub = marca_url('logo', 'assets/img/logo.jpg');
 $faviconClub = marca_url('favicon', 'assets/img/favicon.svg');
 $enMantenimiento = club('mantenimiento', '0') === '1';
+$resumenClub = \App\Models\Resumen::datos();
 $entorno = (string) config('app.env');
 $usuarioActual = auth();
 $rutaActual = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
@@ -148,6 +149,31 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <?php endif; ?>
             <?php if ($instagramClub !== ''): ?>
                 <a href="<?= e($instagramClub) ?>" target="_blank" rel="noopener">Instagram</a>
+            <?php endif; ?>
+        </div>
+
+        <div class="site-footer__club">
+            <p class="site-footer__titulo">En el club</p>
+            <ul class="site-footer__cifras">
+                <li><strong><?= e((string) $resumenClub['ambientes']) ?></strong> ambientes para alquiler</li>
+                <li><strong><?= e((string) $resumenClub['noticias']) ?></strong> noticias publicadas</li>
+                <li><strong><?= e((string) $resumenClub['negocios']) ?></strong> negocios de la unidad</li>
+            </ul>
+
+            <?php if ($resumenClub['evento'] !== null): ?>
+                <p class="site-footer__proximo">
+                    <span class="site-footer__titulo">Próximo evento</span>
+                    <strong><?= e((string) $resumenClub['evento']['titulo']) ?></strong>
+                    <span class="muted">
+                        <?= e(fecha_legible(substr((string) $resumenClub['evento']['fecha_inicio'], 0, 10))) ?>
+                        <?php if ((int) $resumenClub['evento']['todo_el_dia'] === 0): ?>
+                            · <?= e(substr((string) $resumenClub['evento']['fecha_inicio'], 11, 5)) ?>
+                        <?php endif; ?>
+                        <?php if (!empty($resumenClub['evento']['lugar'])): ?>
+                            · <?= e((string) $resumenClub['evento']['lugar']) ?>
+                        <?php endif; ?>
+                    </span>
+                </p>
             <?php endif; ?>
         </div>
     </div>

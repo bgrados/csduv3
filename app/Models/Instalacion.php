@@ -123,6 +123,10 @@ final class Instalacion extends Model
             'aforo'            => self::enteroANulo($datos['aforo'] ?? null),
             'requiere_adelanto' => (int) ($datos['requiere_adelanto'] ?? 0) === 1 ? 1 : 0,
             'activo'           => (int) ($datos['activo'] ?? 1) === 1 ? 1 : 0,
+            'archivo'          => self::vacioANulo($datos['archivo'] ?? null),
+            'nombre_original'  => self::vacioANulo($datos['nombre_original'] ?? null),
+            'tipo_mime'        => self::vacioANulo($datos['tipo_mime'] ?? null),
+            'tamano_bytes'     => self::enteroANulo($datos['tamano_bytes'] ?? null),
         ]);
     }
 
@@ -140,7 +144,11 @@ final class Instalacion extends Model
                      `ubicacion` = :ubicacion,
                      `aforo` = :aforo,
                      `requiere_adelanto` = :requiere_adelanto,
-                     `activo` = :activo
+                     `activo` = :activo,
+                     `archivo` = :archivo,
+                     `nombre_original` = :nombre_original,
+                     `tipo_mime` = :tipo_mime,
+                     `tamano_bytes` = :tamano_bytes
                  WHERE `id` = :id',
                 self::table()
             ),
@@ -152,6 +160,10 @@ final class Instalacion extends Model
                 'aforo'             => self::enteroANulo($datos['aforo'] ?? null),
                 'requiere_adelanto' => (int) ($datos['requiere_adelanto'] ?? 0) === 1 ? 1 : 0,
                 'activo'            => (int) ($datos['activo'] ?? 1) === 1 ? 1 : 0,
+                'archivo'           => self::vacioANulo($datos['archivo'] ?? null),
+                'nombre_original'   => self::vacioANulo($datos['nombre_original'] ?? null),
+                'tipo_mime'         => self::vacioANulo($datos['tipo_mime'] ?? null),
+                'tamano_bytes'      => self::enteroANulo($datos['tamano_bytes'] ?? null),
                 'id'                => $id,
             ]
         );
@@ -187,6 +199,28 @@ final class Instalacion extends Model
     {
         return (int) self::scalar(
             sprintf('SELECT COUNT(*) FROM `%s` WHERE `activo` = 1', self::table())
+        );
+    }
+
+    /**
+     * Ambientes que el club publica en el portal: activos y con tarifa vigente.
+     */
+    public static function contarPublicadas(): int
+    {
+        return (int) self::scalar(
+            sprintf(
+                'SELECT COUNT(*) FROM `%s` i
+                 WHERE i.`activo` = 1
+                   AND EXISTS (
+                       SELECT 1 FROM `%s` t
+                       WHERE t.`instalacion_id` = i.`id`
+                         AND t.`activo` = 1
+                         AND (t.`vigente_desde` IS NULL OR t.`vigente_desde` <= CURDATE())
+                         AND (t.`vigente_hasta` IS NULL OR t.`vigente_hasta` >= CURDATE())
+                   )',
+                self::table(),
+                Tarifa::table()
+            )
         );
     }
 

@@ -21,8 +21,7 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
         </p>
         <h1><?= e((string) $instalacion['nombre']) ?></h1>
         <p class="page-head__lead"><?= e((string) ($instalacion['descripcion'] ?? 'Ambiente del club')) ?></p>
-    </div>
-    <div class="page-head__actions">
+    </div>    <div class="page-head__actions">
         <a class="btn btn--primary" href="<?= e(url('/alquiler/reservar?instalacion_id=' . (string) $instalacion['id'] . '&fecha=' . urlencode($fecha))) ?>">
             Reservar ahora
         </a>
@@ -31,6 +30,15 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
         </a>
     </div>
 </div>
+
+<?php if (!empty($instalacion['archivo'])): ?>
+    <figure class="ambiente__foto">
+        <img
+            src="<?= e(url('/ambiente/imagen/' . (string) $instalacion['id'])) ?>"
+            alt="<?= e((string) $instalacion['nombre']) ?>"
+        >
+    </figure>
+<?php endif; ?>
 
 <div class="grid-2">
     <section class="card">

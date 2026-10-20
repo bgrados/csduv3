@@ -52,8 +52,32 @@ $accion = $esEdicion ? url('/ambientes/' . (string) $instalacion['id']) : url('/
     </div>
 </div>
 
-<form class="form" method="post" action="<?= e($accion) ?>">
+<form class="form" method="post" action="<?= e($accion) ?>" enctype="multipart/form-data">
     <?= csrf_field() ?>
+
+    <fieldset class="form__group">
+        <legend>Foto del ambiente</legend>
+
+        <?php if ($esEdicion && !empty($instalacion['archivo'])): ?>
+            <img
+                src="<?= e(url('/ambiente/imagen/' . (string) $instalacion['id'])) ?>"
+                alt="<?= e((string) $instalacion['nombre']) ?>"
+                style="max-width:320px;border-radius:var(--radius-md);margin-bottom:.8rem;"
+            >
+        <?php endif; ?>
+
+        <div class="field">
+            <label for="foto">Subir foto</label>
+            <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp,image/gif">
+            <p class="field__hint">
+                La foto se convierte a WebP y se muestra en la portada, en el catálogo
+                de ambientes y en su ficha. Se muestran con los datos del club.
+                <?php if ($esEdicion && !empty($instalacion['archivo'])): ?>
+                    <br>Si no sube una foto nueva, se conserva la actual.
+                <?php endif; ?>
+            </p>
+        </div>
+    </fieldset>
 
     <fieldset class="form__group">
         <legend>Identificación</legend>

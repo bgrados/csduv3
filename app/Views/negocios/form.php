@@ -36,13 +36,13 @@ $destacado = $destacadoPrevio !== null
     ? (string) $destacadoPrevio === '1'
     : ($esEdicion ? (int) $negocio['destacado'] === 1 : false);
 
-$accion = $esEdicion ? url('/negocios/' . (string) $negocio['id']) : url('/negocios');
+$accion = $esEdicion ? url('/directorio/' . (string) $negocio['id']) : url('/directorio');
 ?>
 
 <div class="page-head">
     <div>
         <p class="page-head__eyebrow">
-            <a href="<?= e(url('/negocios')) ?>">Negocios de la unidad</a> · registro
+            <a href="<?= e(url('/directorio')) ?>">Negocios de la unidad</a> · registro
         </p>
         <h1><?= $esEdicion ? 'Editar negocio' : 'Nuevo negocio' ?></h1>
         <p class="page-head__lead">
@@ -51,7 +51,7 @@ $accion = $esEdicion ? url('/negocios/' . (string) $negocio['id']) : url('/negoc
         </p>
     </div>
     <div class="page-head__actions">
-        <a class="btn btn--ghost" href="<?= e(url('/negocios')) ?>">Volver</a>
+        <a class="btn btn--ghost" href="<?= e(url('/directorio')) ?>">Volver</a>
     </div>
 </div>
 
@@ -154,6 +154,6 @@ $accion = $esEdicion ? url('/negocios/' . (string) $negocio['id']) : url('/negoc
 
     <div class="form__actions">
         <button type="submit" class="btn btn--primary"><?= $esEdicion ? 'Guardar cambios' : 'Registrar negocio' ?></button>
-        <a class="btn btn--ghost" href="<?= e(url('/negocios')) ?>">Cancelar</a>
+        <a class="btn btn--ghost" href="<?= e(url('/directorio')) ?>">Cancelar</a>
     </div>
 </form>

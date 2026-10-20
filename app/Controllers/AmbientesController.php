@@ -11,10 +11,12 @@ use App\Core\Logger;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use App\Core\Uploads;
 use App\Core\Validator;
 use App\Core\View;
 use App\Models\Instalacion;
 use PDOException;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -68,6 +70,8 @@ final class AmbientesController
         $datos = $this->datosFormulario($request);
         [$limpio, $errores] = $this->validar($datos, null);
 
+        $foto = $this->recibirFoto($request, $errores);
+
         if ($errores !== []) {
             remember_old_input($datos);
             Session::flash('errores', $errores);
@@ -75,7 +79,7 @@ final class AmbientesController
         }
 
         try {
-            $id = Instalacion::crear($this->registro($limpio));
+            $id = Instalacion::crear($this->registro($limpio, $foto));
         } catch (PDOException $exception) {
             if ($this->esDuplicado($exception)) {
                 remember_old_input($datos);
@@ -122,14 +126,18 @@ final class AmbientesController
         $datos = $this->datosFormulario($request);
         [$limpio, $errores] = $this->validar($datos, $instalacionId);
 
+        $foto = $this->recibirFoto($request, $errores);
+
         if ($errores !== []) {
             remember_old_input($datos);
             Session::flash('errores', $errores);
             Response::redirect(url('/ambientes/' . $instalacionId . '/editar'));
         }
 
+        $rutaAnterior = (string) ($instalacion['archivo'] ?? '');
+
         try {
-            Instalacion::actualizar($instalacionId, $this->registro($limpio));
+            Instalacion::actualizar($instalacionId, $this->registro($limpio, $foto));
         } catch (PDOException $exception) {
             if ($this->esDuplicado($exception)) {
                 remember_old_input($datos);
@@ -153,6 +161,10 @@ final class AmbientesController
             $instalacionId,
             'Ambiente actualizado: ' . (string) $limpio['nombre']
         );
+
+        if ($foto !== null && $rutaAnterior !== '') {
+            Uploads::borrar($rutaAnterior, 'ambientes/');
+        }
 
         Session::flash('exito', 'El ambiente se actualizó.');
         Response::redirect(url('/ambientes'));
@@ -257,9 +269,10 @@ final class AmbientesController
 
     /**
      * @param array<string, mixed> $limpio
+     * @param array<string, mixed>|null $foto
      * @return array<string, mixed>
      */
-    private function registro(array $limpio): array
+    private function registro(array $limpio, ?array $foto = null): array
     {
         $aforo = $limpio['aforo'] ?? null;
 
@@ -271,7 +284,46 @@ final class AmbientesController
             'aforo'             => $aforo === null ? null : (int) $aforo,
             'requiere_adelanto' => (int) ($limpio['requiere_adelanto'] ?? 0),
             'activo'            => (int) ($limpio['activo'] ?? 1),
+            'archivo'           => $foto === null ? '' : (string) $foto['ruta'],
+            'nombre_original'   => $foto === null ? '' : (string) $foto['nombre_original'],
+            'tipo_mime'         => $foto === null ? '' : (string) $foto['tipo_mime'],
+            'tamano_bytes'      => $foto === null ? 0 : (int) $foto['tamano'],
         ];
+    }
+
+    /**
+     * Recibe la foto del ambiente y la guarda en WebP.
+     *
+     * @param array<int, string> $errores
+     * @return array{ruta: string, nombre_original: string, tipo_mime: string, tamano: int}|null
+     */
+    private function recibirFoto(Request $request, array &$errores): ?array
+    {
+        $archivo = $request->file('foto');
+
+        if ($archivo === null || (int) ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+
+        try {
+            $guardado = Uploads::guardar($archivo, 'ambientes');
+        } catch (RuntimeException $exception) {
+            $errores[] = $exception->getMessage();
+            return null;
+        } catch (Throwable $exception) {
+            Logger::error('Error al subir la foto de un ambiente', ['error' => $exception->getMessage()]);
+            $errores[] = 'No se pudo guardar la foto del ambiente.';
+            return null;
+        }
+
+        if (!Uploads::esImagen((string) $guardado['tipo_mime'])) {
+            Uploads::borrar((string) $guardado['ruta'], 'ambientes/');
+            $errores[] = 'La foto debe ser una imagen (JPG, PNG o WEBP).';
+
+            return null;
+        }
+
+        return $guardado;
     }
 
     /**

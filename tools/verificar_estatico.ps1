@@ -328,7 +328,82 @@ foreach ($clase in Get-ChildItem -Path (Join-Path $raiz 'app') -Filter '*.php' -
 }
 
 # ---------------------------------------------------------------------------
-#  7. Funciones auxiliares esperadas
+#  7. Enlaces internos de las vistas contra las rutas declaradas
+# ---------------------------------------------------------------------------
+#  Un enlace a una ruta inexistente produce un 404 al pulsarlo. Se comparan
+#  los patrones de url() de las vistas con las rutas de app/routes.php.
+
+$rutasArchivo = Join-Path $raiz 'app\routes.php'
+$rutasTexto = [System.IO.File]::ReadAllText($rutasArchivo)
+$patrones = New-Object System.Collections.Generic.List[string]
+
+foreach ($m in [regex]::Matches($rutasTexto, "\`$router->(?:get|post)\(\s*'([^']+)'")) {
+    $ruta = $m.Groups[1].Value
+    $regex = '^'
+    $pos = 0
+
+    foreach ($mm in [regex]::Matches($ruta, '\{[a-zA-Z_]+\}')) {
+        $regex += [regex]::Escape($ruta.Substring($pos, $mm.Index - $pos))
+        $regex += '[^/]+'
+        $pos = $mm.Index + $mm.Length
+    }
+
+    $regex += [regex]::Escape($ruta.Substring($pos)) + '$'
+    $patrones.Add($regex)
+}
+
+if ($patrones.Count -gt 0) {
+    # Rutas que sirven archivos estaticos y no pasan por el router.
+    $estaticas = @('/manifest.webmanifest', '/sw.js', '/offline.html', '/icons', '/assets', '/favicon.ico', '/robots.txt')
+
+    foreach ($vista in Get-ChildItem -Path (Join-Path $raiz 'app\Views') -Filter '*.php' -File -Recurse) {
+        $texto = [System.IO.File]::ReadAllText($vista.FullName)
+        $relativo = $vista.FullName.Substring($raiz.Length + 1)
+
+        foreach ($m in [regex]::Matches($texto, "url\(\s*'([^']*)'")) {
+            $completo = $m.Groups[1].Value
+            $destino = ($completo -split '\?')[0]
+
+            # Las rutas concatenadas (url('/marca/' . $tipo)) no se pueden comprobar.
+            if ($destino.EndsWith('/')) {
+                continue
+            }
+
+            if (-not $destino.StartsWith('/')) {
+                continue
+            }
+
+            $esEstatica = $false
+
+            foreach ($prefijo in $estaticas) {
+                if ($destino -eq $prefijo -or $destino.StartsWith(($prefijo + '/'))) {
+                    $esEstatica = $true
+                    break
+                }
+            }
+
+            if ($esEstatica) {
+                continue
+            }
+
+            $coincide = $false
+
+            foreach ($patron in $patrones) {
+                if ($destino -match $patron) {
+                    $coincide = $true
+                    break
+                }
+            }
+
+            if (-not $coincide) {
+                $hallazgos.Add("$relativo : enlace a la ruta inexistente $destino")
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
+#  8. Funciones auxiliares esperadas
 # ---------------------------------------------------------------------------
 
 $helpers = [System.IO.File]::ReadAllText((Join-Path $raiz 'app\Core\helpers.php'))

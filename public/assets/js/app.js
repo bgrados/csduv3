@@ -336,6 +336,49 @@
         }
     }
 
+    /**
+     * Conserva la posición del scroll al cambiar de sección del panel.
+     *
+     * En el área administrativa el listado es largo: al elegir otra opción del
+     * menú no se debe volver al principio, sino quedarse donde estaba.
+     */
+    function inicializarPosicionDesplazamiento() {
+        if (!document.querySelector('[data-sidebar]')) {
+            return;
+        }
+
+        var clave = 'csduv3-scroll-' + window.location.pathname;
+        var guardada = null;
+
+        try {
+            guardada = window.sessionStorage.getItem(clave);
+        } catch (error) {
+            return;
+        }
+
+        if (guardada) {
+            window.requestAnimationFrame(function () {
+                window.scrollTo(0, parseInt(guardada, 10) || 0);
+            });
+        }
+
+        var temporizador = null;
+
+        window.addEventListener('scroll', function () {
+            if (temporizador) {
+                window.clearTimeout(temporizador);
+            }
+
+            temporizador = window.setTimeout(function () {
+                try {
+                    window.sessionStorage.setItem(clave, String(window.scrollY || 0));
+                } catch (error) {
+                    /* Sin almacenamiento de sesion: no se guarda la posicion. */
+                }
+            }, 150);
+        });
+    }
+
     function inicializarPwa() {
         registrarServiceWorker();
         prepararInstalacion();
@@ -348,6 +391,7 @@
         inicializarAlertasCerrables();
         inicializarCarruseles();
         inicializarAvisoInstalacion();
+        inicializarPosicionDesplazamiento();
         inicializarPwa();
     }
 
