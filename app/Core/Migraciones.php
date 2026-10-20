@@ -116,11 +116,11 @@ final class Migraciones
     /**
      * Aplica las migraciones pendientes.
      *
-     * @return array{aplicadas: array<int, string>, errores: array<int, string>}
+     * @return array{aplicadas: array<int, string>, agregadas: array<int, string>, errores: array<int, string>}
      */
     public static function aplicar(bool $permitirDestructivo = false): array
     {
-        $resultado = ['aplicadas' => [], 'errores' => []];
+        $resultado = ['aplicadas' => [], 'agregadas' => [], 'errores' => []];
 
         if (!Database::isAvailable()) {
             $resultado['errores'][] = 'No se pudo conectar a la base de datos.';
@@ -220,6 +220,12 @@ final class Migraciones
 
         self::$aplicadas = null;
 
+        // Al final se comprueban las columnas recientes: si alguna quedara
+        // fuera, se agrega (por si una migración se registró sin aplicarse).
+        $reparacion = self::repararColumnas();
+        $resultado['agregadas'] = $reparacion['agregadas'];
+        $resultado['errores'] = array_merge($resultado['errores'], $reparacion['errores']);
+
         return $resultado;
     }
 
@@ -287,6 +293,86 @@ final class Migraciones
         }
 
         return $faltantes;
+    }
+
+    /**
+     * Se asegura de que existan las columnas recientes.
+     *
+     * Alguna vez una migración queda registrada como aplicada aunque las
+     * columnas no llegaran a crearse (por ejemplo, si la sentencia se
+     * ignoró). Este método las vuelve a agregar: usa el mismo SQL de las
+     * migraciones y es idempotente.
+     *
+     * @return array{agregadas: array<int, string>, errores: array<int, string>}
+     */
+    public static function repararColumnas(): array
+    {
+        $resultado = ['agregadas' => [], 'errores' => []];
+
+        $faltantes = self::columnasFaltantes();
+
+        if ($faltantes === []) {
+            return $resultado;
+        }
+
+        if (!Database::isAvailable()) {
+            $resultado['errores'][] = 'No se pudo conectar a la base de datos.';
+
+            return $resultado;
+        }
+
+        try {
+            $pdo = Database::connection();
+        } catch (\Throwable $exception) {
+            $resultado['errores'][] = $exception->getMessage();
+
+            return $resultado;
+        }
+
+        $prefijo = self::prefijo();
+
+        foreach (self::COLUMNAS_RECIENTES as $tabla => $columnas) {
+            foreach ($columnas as $columna) {
+                if (!in_array($prefijo . $tabla . '.' . $columna, $faltantes, true)) {
+                    continue;
+                }
+
+                $sql = sprintf(
+                    'ALTER TABLE `%s%s` ADD COLUMN IF NOT EXISTS `%s` %s',
+                    $prefijo,
+                    $tabla,
+                    $columna,
+                    self::definicionColumna($columna)
+                );
+
+                try {
+                    $pdo->exec($sql);
+                    $resultado['agregadas'][] = $prefijo . $tabla . '.' . $columna;
+                } catch (\Throwable $exception) {
+                    $resultado['errores'][] = sprintf(
+                        'No se pudo agregar %s%s.%s: %s',
+                        $prefijo,
+                        $tabla,
+                        $columna,
+                        $exception->getMessage()
+                    );
+                }
+            }
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * Definición SQL de cada columna reciente.
+     */
+    private static function definicionColumna(string $columna): string
+    {
+        return match ($columna) {
+            'video_url' => "VARCHAR(255) NULL COMMENT 'Enlace al video (YouTube o Facebook)'",
+            'video_tipo' => "VARCHAR(20) NULL COMMENT 'youtube o facebook'",
+            default     => 'VARCHAR(255) NULL',
+        };
     }
 
     /**

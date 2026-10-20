@@ -29,6 +29,8 @@ final class MigracionesController
             'pendientes'  => Migraciones::pendientes(),
             'tablasFaltantes' => Migraciones::tablasFaltantes(),
             'columnasFaltantes' => Migraciones::columnasFaltantes(),
+            'agregadas'   => [],
+            'errores'     => [],
         ]);
     }
 
@@ -37,6 +39,34 @@ final class MigracionesController
         $pendientes = Migraciones::pendientes();
 
         if ($pendientes === []) {
+            // Aun sin migraciones pendientes puede faltar alguna columna.
+            $reparacion = Migraciones::repararColumnas();
+
+            if ($reparacion['agregadas'] !== []) {
+                Audit::log(
+                    Auth::id(),
+                    'reparar_base_datos',
+                    'migracion',
+                    null,
+                    'Columnas agregadas: ' . implode(', ', $reparacion['agregadas'])
+                );
+
+                Session::flash(
+                    'exito',
+                    'Listo: se agregaron a la base de datos ' . implode(', ', $reparacion['agregadas']) . '.'
+                );
+                Response::redirect(url('/migraciones'));
+            }
+
+            if ($reparacion['errores'] !== []) {
+                foreach ($reparacion['errores'] as $error) {
+                    Logger::error('Error al reparar la base de datos desde el panel', ['error' => $error]);
+                }
+
+                Session::flash('error', 'No se pudo actualizar la base de datos: ' . implode(' ', $reparacion['errores']));
+                Response::redirect(url('/migraciones'));
+            }
+
             Session::flash('exito', 'La base de datos ya está actualizada.');
             Response::redirect(url('/migraciones'));
         }
@@ -55,12 +85,20 @@ final class MigracionesController
             'Migraciones aplicadas: ' . (implode(', ', $resultado['aplicadas']) ?: 'ninguna')
         );
 
+        $mensajes = [];
+
         if ($resultado['aplicadas'] !== []) {
-            Session::flash(
-                'exito',
-                'Se aplicaron ' . count($resultado['aplicadas']) . ' actualización(es) de la base de datos: '
-                . implode(', ', $resultado['aplicadas']) . '.'
-            );
+            $mensajes[] = 'Se aplicaron ' . count($resultado['aplicadas']) . ' actualización(es): '
+                . implode(', ', $resultado['aplicadas']) . '.';
+        }
+
+        if ($resultado['agregadas'] !== []) {
+            $mensajes[] = 'Se agregaron las columnas que faltaban: '
+                . implode(', ', $resultado['agregadas']) . '.';
+        }
+
+        if ($mensajes !== []) {
+            Session::flash('exito', implode(' ', $mensajes));
         }
 
         if ($resultado['errores'] !== []) {

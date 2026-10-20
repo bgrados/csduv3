@@ -9,7 +9,11 @@ declare(strict_types=1);
  * @var array<int, string> $pendientes
  * @var array<int, string> $tablasFaltantes
  * @var array<int, string> $columnasFaltantes
+ * @var array<int, string> $agregadas
+ * @var array<int, string> $errores
  */
+
+$faltaAlgo = $pendientes !== [] || $tablasFaltantes !== [] || $columnasFaltantes !== [];
 
 ?>
 
@@ -28,7 +32,75 @@ declare(strict_types=1);
     </div>
 </div>
 
-<?php if ($pendientes === [] && $tablasFaltantes === [] && $columnasFaltantes === []): ?>
+<?php if (($agregadas ?? []) !== []): ?>
+    <div class="alert alert--success" role="status">
+        <p>
+            <strong>Listo.</strong>
+            Se agregaron a la base de datos: <?= e(implode(', ', $agregadas ?? [])) ?>.
+            Ya puede publicar noticias con video.
+        </p>
+    </div>
+<?php endif; ?>
+
+<?php if (($errores ?? []) !== []): ?>
+    <div class="alert alert--danger" role="alert">
+        <p>
+            <strong>No se pudo completar la actualización:</strong>
+            <?= e(implode(' ', $errores ?? [])) ?>
+        </p>
+        <p class="field__hint">
+            Copie este texto y envíelo al administrador del sistema: explica
+            exactamente qué falta.
+        </p>
+    </div>
+<?php endif; ?>
+
+<?php if ($faltaAlgo): ?>
+    <div class="alert alert--warning" role="alert">
+        <p>
+            <strong>La base de datos necesita una actualización.</strong>
+            Mientras no se aplique, algunas funciones pueden no guardar la
+            información (por ejemplo, el video de las noticias).
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Aplicar la actualización</h2>
+
+        <?php if ($pendientes !== []): ?>
+            <ul class="facts">
+                <?php foreach ($pendientes as $pendiente): ?>
+                    <li><span>Actualización</span><strong><code><?= e($pendiente) ?></code></strong></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
+        <?php if ($columnasFaltantes !== []): ?>
+            <ul class="facts">
+                <?php foreach ($columnasFaltantes as $columna): ?>
+                    <li><span>Columna que falta</span><strong><code><?= e($columna) ?></code></strong></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
+        <?php if ($tablasFaltantes !== []): ?>
+            <ul class="facts">
+                <?php foreach ($tablasFaltantes as $tabla): ?>
+                    <li><span>Tabla que falta</span><strong><code><?= e($tabla) ?></code></strong></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
+        <form method="post" action="<?= e(url('/migraciones/aplicar')) ?>">
+            <?= csrf_field() ?>
+            <button type="submit" class="btn btn--primary">Actualizar la base de datos</button>
+        </form>
+        <p class="field__hint">
+            Solo hace falta cuando el portal avisa de una actualización
+            pendiente. La operación no borra datos.
+        </p>
+    </div>
+<?php else: ?>
     <div class="alert alert--success" role="status">
         <p>
             <strong>Todo en orden.</strong>
@@ -36,55 +108,6 @@ declare(strict_types=1);
             necesita. No hay nada que hacer.
         </p>
     </div>
-<?php else: ?>
-    <?php if ($pendientes !== []): ?>
-        <div class="alert alert--warning" role="alert">
-            <p>
-                <strong>Hay <?= e((string) count($pendientes)) ?> actualización(es) pendiente(s).</strong>
-                Mientras no se apliquen, algunas funciones pueden no guardar la
-                información (por ejemplo, el video de las noticias).
-            </p>
-        </div>
-
-        <div class="card">
-            <h2>Aplicar las actualizaciones</h2>
-            <ul class="facts">
-                <?php foreach ($pendientes as $pendiente): ?>
-                    <li><span>Actualización</span><strong><code><?= e($pendiente) ?></code></strong></li>
-                <?php endforeach; ?>
-            </ul>
-            <form method="post" action="<?= e(url('/migraciones/aplicar')) ?>">
-                <?= csrf_field() ?>
-                <button type="submit" class="btn btn--primary">Actualizar la base de datos</button>
-            </form>
-            <p class="field__hint">
-                Solo hace falta cuando el portal avisa de una actualización
-                pendiente. La operación no borra datos.
-            </p>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($tablasFaltantes !== []): ?>
-        <div class="alert alert--danger" role="alert">
-            <p>
-                <strong>Faltan tablas del sistema:</strong>
-                <?= e(implode(', ', $tablasFaltantes)) ?>.
-                <?php if ($pendientes === []): ?>
-                    Póngase en contacto con el administrador del sistema.
-                <?php endif; ?>
-            </p>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($columnasFaltantes !== []): ?>
-        <div class="alert alert--warning" role="status">
-            <p>
-                <strong>Faltan columnas recientes:</strong>
-                <?= e(implode(', ', $columnasFaltantes)) ?>.
-                Se añaden con las actualizaciones de arriba.
-            </p>
-        </div>
-    <?php endif; ?>
 <?php endif; ?>
 
 <div class="card">
