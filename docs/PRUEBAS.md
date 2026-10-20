@@ -22,7 +22,7 @@ qué resultado. No se anotan resultados de pruebas que no se hayan ejecutado.
 | --- | --- | --- |
 | PHP 8.3 (`php`) | **No instalado** (no está en `PATH`, ni en XAMPP, Laragon, WAMP ni `Program Files`) | No se pudo ejecutar `php -l` ni el servidor embebido |
 | MySQL / MariaDB (`mysql`, `mariadb`) | **No instalados** | No se pudo importar el esquema ni ejecutar consultas reales |
-| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit `c76def6`) | El envío del código no constituye una prueba funcional |
+| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit `211d269`) | El envío del código no constituye una prueba funcional |
 | Node.js | Instalado (v24), usado solo para capturas headless de revisión | No es dependencia de la aplicación ni del servidor |
 | Verificación estática propia | Disponible: `tools/verificar_estatico.ps1` | Se ejecutó sobre los 80 archivos PHP de la Fase 2 y, tras el Corte 1 de Socios y el rediseño, sobre 86 archivos (excluyendo el script de servidor `tools/migrar.php`) |
 
@@ -572,6 +572,7 @@ WHERE descripcion LIKE '%99999901%'
 | Fase 2 | E1 a E4 | Correcto | Cruce de métodos, tablas y búsqueda de credenciales |
 | Corte 1 de Socios | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos (excluye `tools/migrar.php`); no sustituye a `php -l` |
 | Rediseño UV3 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos; CSS con 282/282 llaves; capturas headless de referencia a 390, 768 y 1440 px; sin pruebas en navegador real ni dispositivos |
+| Producción | Verificación HTTP (2026-10-19) | **Fallo** | Rediseño visible (tema `#063B22`, `logo.jpg`, CSS y SW v3); la base de datos no responde: portada con mantenimiento y `/alquiler` 503. Pendiente restaurar la BD y rotar la contraseña expuesta. |
 | Pendiente | Secciones 5 a 8 (incluye PS-01 a PS-35) | — | Requiere PHP 8.3 y MariaDB; las pruebas de socios requieren una base de datos de pruebas |
 
 ---

@@ -1,18 +1,24 @@
 # CONTINUAR — Estado del proyecto CSDUV3
 
-Última actualización: **identidad visual UV3 aplicada** sobre la Fase 2 y el
-corte 1 de socios. La Fase 2 y el corte siguen **pendientes de pruebas en
-servidor**; el rediseño tiene **revisión visual preliminar con capturas headless**
-y está pendiente de confirmación en navegador real y dispositivos.
+Última actualización: **rediseño UV3 desplegado en producción**. La nueva
+identidad ya se sirve en <https://csduv3.benweb.soy.pe>, pero **la base de datos
+no responde**: la portada muestra mantenimiento y `/alquiler` devuelve 503. El
+aviso de instalación ya se puede cerrar y el script de despliegue dejó de
+contener credenciales. Pendiente: restaurar la base de datos, rotar la
+contraseña expuesta y validar en navegador real y dispositivos.
 
 > El código de la Fase 2 y del corte 1 de socios está escrito y revisado de forma
 > estática, pero **no se ha ejecutado**: este equipo no tiene PHP 8.3 ni MariaDB.
 > Ninguna de las dos fases debe darse por terminada hasta ejecutar
-> [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor. El rediseño se verificó de
-> forma estática y con capturas headless a 390, 768 y 1440 px; falta comprobarlo
-> en la aplicación real, en un navegador y en dispositivos físicos. El código ya
-> está en GitHub (`main`, commit `c76def6`), pero **falta subirlo al hosting**:
-> el despliegue es manual (cPanel/FTP), no automático.
+> [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor. El rediseño está en GitHub
+> (`main`, commit `211d269`) y el cron del hosting lo despliega automáticamente.
+> La producción ya sirve la nueva identidad visual; **la base de datos no está
+> disponible** (`Database::isAvailable()` devuelve `false`), por lo que el portal
+> está en mantenimiento. El aviso de instalación se corrigió en `f659f36` y el
+> script de respaldo/despliegue ya lee las credenciales de `.env` (`211d269`).
+> **La contraseña de la base de datos estuvo expuesta en el repositorio público:
+> debe rotarse en cPanel y actualizarse en `.env`.** Falta validar en navegador
+> real y dispositivos.
 
 ---
 
@@ -23,10 +29,10 @@ y está pendiente de confirmación en navegador real y dispositivos.
 | Proyecto | Sistema integral de gestión del Club Social Deportivo Unidad Vecinal N.º 3 |
 | Carpeta local | Directorio raíz del proyecto |
 | Repositorio | <https://github.com/bgrados/csduv3> (público, rama `main`) |
-| Hosting previsto | BanaHosting · Bana-Professional-Deluxe-SSD |
-| URL prevista | El subdominio HTTPS que se defina en el hosting |
+| Hosting | BanaHosting · Bana-Professional-Deluxe-SSD |
+| URL de producción | <https://csduv3.benweb.soy.pe> |
 | PHP | 8.3 |
-| Base de datos | MariaDB · base `TU_BASE_DE_DATOS` / usuario `TU_USUARIO_BD` |
+| Base de datos | MariaDB de producción (cPanel); credenciales solo en `.env` |
 | Prefijo de tablas | `csduv3_` |
 | Tablas del esquema | 40 |
 | Zona horaria | `America/Lima` |
@@ -296,9 +302,14 @@ adjuntos y fotografía) o con la **junta directiva**, según la prioridad del cl
 - El módulo de caja es un registro financiero administrativo, no contabilidad
   tributaria completa.
 - El corte 1 de socios se publicó en `main` (commit `c54b7e3`) y el rediseño
-  visual se publicó en GitHub en el commit `c76def6`, ambos con autorización
-  expresa. **El rediseño todavía no está desplegado en el hosting**: la
-  producción sigue sirviendo la versión anterior. El proyecto no tiene CI/CD;
-  el despliegue es manual por cPanel/FTP (ver
-  [docs/DESPLIEGUE_BANAHOSTING.md](docs/DESPLIEGUE_BANAHOSTING.md), sección 11).
-  Falta subir los archivos y validar en la aplicación real.
+  visual en `c76def6`, ambos con autorización expresa. El rediseño se desplegó
+  en producción mediante el cron del hosting y la identidad nueva ya está
+  visible. **La base de datos no está disponible** (`Database::isAvailable()`
+  devuelve `false`): la portada muestra mantenimiento y `/alquiler` responde 503.
+  El aviso de instalación se corrigió en `f659f36` y el script de despliegue
+  ahora lee las credenciales de `.env` (`211d269`). **La contraseña de la base de
+  datos estuvo expuesta en el repositorio público: debe rotarse en cPanel y
+  actualizarse en `.env`.** El commit `a07324c` (operador) eliminó el
+  `.htaccess` raíz para corregir un 403; las rutas sensibles comprobadas
+  responden 403/404, pero conviene confirmar el DocumentRoot y mantener las
+  protecciones. Falta restaurar la base de datos y validar en la aplicación real.
