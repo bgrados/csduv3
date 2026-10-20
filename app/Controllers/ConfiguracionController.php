@@ -63,14 +63,30 @@ final class ConfiguracionController
             return;
         }
 
-        $configuracion = Configuracion::mapaCacheado();
+        try {
+            $configuracion = Configuracion::mapaCacheado();
 
-        View::display('configuracion/index', [
-            'titulo'        => 'Configuración',
-            'configuracion' => $configuracion,
-            'marcas'        => self::MARCAS,
-            'campos'        => self::CAMPOS,
-        ]);
+            View::display('configuracion/index', [
+                'titulo'        => 'Configuración',
+                'configuracion' => $configuracion,
+                'marcas'        => self::MARCAS,
+                'campos'        => self::CAMPOS,
+            ]);
+        } catch (Throwable $exception) {
+            Logger::error('Error al mostrar la configuracion', [
+                'error' => $exception->getMessage(),
+                'archivo' => $exception->getFile(),
+                'linea' => $exception->getLine(),
+            ]);
+
+            Session::flash(
+                'error',
+                'No se pudo mostrar la configuración: ' . $exception->getMessage()
+                . ' (' . basename($exception->getFile()) . ':' . $exception->getLine() . ')'
+            );
+
+            Response::redirect(url('/panel'));
+        }
     }
 
     /**
@@ -136,7 +152,17 @@ final class ConfiguracionController
                 $valor = $valor === '1' ? '1' : '0';
             }
 
-            Configuracion::guardar($clave, $valor, $tipo, $grupo);
+            try {
+                Configuracion::guardar($clave, $valor, $tipo, $grupo);
+            } catch (Throwable $exception) {
+                Logger::error('No se pudo guardar un parametro', [
+                    'clave' => $clave,
+                    'error' => $exception->getMessage(),
+                ]);
+                Session::flash('error', 'No se pudo guardar «' . $clave . '»: ' . $exception->getMessage());
+
+                Response::redirect(url('/configuracion'));
+            }
         }
 
         Configuracion::limpiarCache();

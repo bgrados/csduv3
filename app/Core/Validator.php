@@ -186,10 +186,16 @@ final class Validator
                     return false;
                 }
                 return true;
+            case 'url':
+                if ($hasValue && filter_var((string) $value, FILTER_VALIDATE_URL) === false) {
+                    $this->addError($field, sprintf('El campo %s debe ser un enlace valido (http o https).', $label));
+                    return false;
+                }
+                return true;
+
 
             case 'date':
-                if ($hasValue && !$this->isDate((string) $value, $parameter)) {
-                    $this->addError($field, sprintf('El campo %s debe ser una fecha válida.', $label));
+                if ($hasValue && !$this->isDate((string) $value, $parameter)) {                    $this->addError($field, sprintf('El campo %s debe ser una fecha válida.', $label));
                     return false;
                 }
                 return true;
