@@ -49,6 +49,16 @@ $eventos = is_array($eventos ?? null) ? $eventos : [];
 $partidos = is_array($partidos ?? null) ? $partidos : [];
 $visibles = is_array($instalaciones ?? null) ? array_slice($instalaciones, 0, 6) : [];
 
+$imagenNegocio = static function (array $negocio): string {
+    $id = (int) ($negocio['id'] ?? 0);
+
+    if ($id > 0 && !empty($negocio['archivo'])) {
+        return url('/negocios/imagen/' . (string) $id);
+    }
+
+    return asset((string) ($negocio['archivo'] ?? ''));
+};
+
 $portada = $noticias[0] ?? null;
 $resto = array_slice($noticias, 1);
 $destacados = array_merge($resto, $galeria);
@@ -207,7 +217,7 @@ $categoriasNegocio = [
                     <a class="revista__seccion-enlace" href="<?= e(url('/negocios')) ?>">Directorio completo &rarr;</a>
                 </div>
 
-                <?php if ($negocios === []): ?>
+                <?php if ($negociosCarrusel === []): ?>
                     <div class="card">
                         <p class="muted">
                             El club está preparando el directorio de comercios y servicios de la
@@ -217,8 +227,13 @@ $categoriasNegocio = [
                 <?php else: ?>
                     <div class="carrusel" data-carrusel>
                         <div class="carrusel__pista" data-carrusel-pista>
-                            <?php foreach ($negocios as $negocio): ?>
+                            <?php foreach ($negociosCarrusel as $negocio): ?>
                                 <article class="carrusel__tarjeta carrusel__tarjeta--negocio">
+                                    <?php if (!empty($negocio['archivo'])): ?>
+                                        <span class="carrusel__imagen">
+                                            <img src="<?= e($imagenNegocio($negocio)) ?>" alt="<?= e((string) $negocio['nombre']) ?>" loading="lazy">
+                                        </span>
+                                    <?php endif; ?>
                                     <p class="carrusel__kicker">
                                         <?= e($categoriasNegocio[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?>
                                     </p>

@@ -728,6 +728,7 @@ code {
 .carrusel__datos { margin: .2rem 0 0; padding-left: 1rem; font-size: .78rem; color: var(--color-text-soft); }
 
 .carrusel__tarjeta--negocio { border-left: 3px solid var(--color-primary); }
+.carrusel__tarjeta--negocio .carrusel__imagen { aspect-ratio: 3 / 2; }
 
 .carrusel__controles { display: flex; gap: .35rem; justify-content: flex-end; margin-top: .3rem; }
 

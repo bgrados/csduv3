@@ -61,7 +61,6 @@ use App\Core\Icons;
                 <?php if (!empty($negocio['archivo'])): ?>
                     <img class="negocio__logo" src="<?= e(url('/negocios/imagen/' . (string) $negocio['id'])) ?>" alt="<?= e((string) $negocio['nombre']) ?>" loading="lazy">
                 <?php endif; ?>
-
                 <p class="card__label"><?= e($categorias[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?></p>
                 <h2 class="negocio__nombre"><?= e((string) $negocio['nombre']) ?></h2>
 

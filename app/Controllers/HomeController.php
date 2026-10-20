@@ -103,6 +103,10 @@ final class HomeController
             $negocios = $this->negociosDeEjemplo();
         }
 
+        // El carrusel de la portada muestra 5 negocios: primero los destacados
+        // y después el resto, en el orden que definió el club.
+        $negociosCarrusel = array_slice($negocios, 0, 5);
+
         View::display('home/index', [
             'titulo'         => 'Inicio',
             'dbDisponible'   => $dbDisponible,
@@ -111,6 +115,7 @@ final class HomeController
             'noticias'       => $noticias,
             'galeria'        => $galeria,
             'negocios'       => $negocios,
+            'negociosCarrusel' => $negociosCarrusel,
             'eventos'        => $eventos,
             'partidos'       => $partidos,
             'contenidoEjemplo' => $conEjemplo,
@@ -226,40 +231,68 @@ final class HomeController
      */
     private function negociosDeEjemplo(): array
     {
-        return [
+        $ejemplos = [
             [
-                'id'          => 'ejemplo-negocio-1',
-                'nombre'      => 'Panadería San Martín',
+                'nombre'      => 'DEMO- Panadería San Martín',
                 'categoria'   => 'comercio',
                 'descripcion' => 'Pan y pastelería del barrio. Datos de ejemplo.',
                 'telefono'    => '999 000 001',
                 'web'         => 'https://uv3-platform.vercel.app/',
                 'direccion'   => 'Av. Siempre Viva 742',
                 'horario'     => 'Lunes a sábado, 7:00 a 19:00',
-                'ejemplo'     => true,
+                'archivo'     => 'assets/img/demo/negocios/panaderia-san-martin.webp',
             ],
             [
-                'id'          => 'ejemplo-negocio-2',
-                'nombre'      => 'Farmacia Vida',
+                'nombre'      => 'DEMO- Farmacia Vida',
                 'categoria'   => 'salud',
                 'descripcion' => 'Atención primaria y medicamentos. Datos de ejemplo.',
                 'telefono'    => '999 000 002',
                 'web'         => 'https://uv3-platform.vercel.app/',
                 'direccion'   => 'Jirón Unión 120',
                 'horario'     => 'Lunes a sábado, 8:00 a 20:00',
-                'ejemplo'     => true,
+                'archivo'     => 'assets/img/demo/negocios/farmacia-vida.webp',
             ],
             [
-                'id'          => 'ejemplo-negocio-3',
-                'nombre'      => 'Librería La Plaza',
+                'nombre'      => 'DEMO- Librería La Plaza',
                 'categoria'   => 'comercio',
                 'descripcion' => 'Libros y papelería. Datos de ejemplo.',
                 'telefono'    => '999 000 003',
                 'web'         => 'https://uv3-platform.vercel.app/',
                 'direccion'   => 'Calle Las Begonias 15',
                 'horario'     => 'Lunes a sábado, 9:00 a 18:00',
-                'ejemplo'     => true,
+                'archivo'     => 'assets/img/demo/negocios/libreria-la-plaza.webp',
+            ],
+            [
+                'nombre'      => 'DEMO- Peluquería Estilo',
+                'categoria'   => 'servicio',
+                'descripcion' => 'Cuidado personal. Datos de ejemplo.',
+                'telefono'    => '999 000 004',
+                'web'         => 'https://uv3-platform.vercel.app/',
+                'direccion'   => 'Av. Los Álamos 233',
+                'horario'     => 'Martes a sábado, 9:00 a 19:00',
+                'archivo'     => 'assets/img/demo/negocios/peluqueria-estilo.webp',
+            ],
+            [
+                'nombre'      => 'DEMO- Café Vecinal',
+                'categoria'   => 'comercio',
+                'descripcion' => 'Café de la unidad. Datos de ejemplo.',
+                'telefono'    => '999 000 005',
+                'web'         => 'https://uv3-platform.vercel.app/',
+                'direccion'   => 'Plaza Mayor, local 4',
+                'horario'     => 'Todos los días, 7:00 a 21:00',
+                'archivo'     => 'assets/img/demo/negocios/cafe-vecinal.webp',
             ],
         ];
+
+        $negocios = [];
+
+        foreach ($ejemplos as $indice => $negocio) {
+            $negocio['id'] = 'ejemplo-negocio-' . $indice;
+            $negocio['destacado'] = $indice < 3 ? 1 : 0;
+            $negocio['ejemplo'] = true;
+            $negocios[] = $negocio;
+        }
+
+        return $negocios;
     }
 }
