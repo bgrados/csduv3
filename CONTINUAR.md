@@ -444,6 +444,7 @@ vigencia). El adelanto es el `porcentaje_adelanto` de la configuración
 | Contacto | Teléfono, WhatsApp, correo, dirección, Facebook e Instagram |
 | Portada | Titular y bajada editables, y si se muestra el contenido de ejemplo |
 | Alquileres y avisos | Porcentaje de adelanto, días mínimos de anticipación, aviso de mantenimiento |
+| Notificaciones por correo | Correo que recibe los avisos de las reservas confirmadas, correo remitente y boton «Guardar y enviar un correo de prueba» |
 | Marca | Logotipo, favicon y foto de portada (subida y restauración de la original) |
 
 Los valores se guardan en `csduv3_configuracion` y **sustituyen de inmediato** a

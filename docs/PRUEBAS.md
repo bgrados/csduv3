@@ -1077,6 +1077,9 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | CF-08 | Abrir `/marca/logo` y `/marca/favicon` | 200 con la imagen y su tipo de contenido correcto |
 | CF-09 | Activar el aviso de mantenimiento | El portal público muestra el aviso arriba del todo |
 | CF-10 | Subir una foto de 4000×3000 | Queda en WebP, con un ancho máximo de 2000 px y un peso menor que el original |
+| CF-11 | Guardar el correo de avisos en «Notificaciones por correo» | Queda guardado en `csduv3_configuracion` con la clave `correo_notificaciones` |
+| CF-12 | Pulsar «Guardar y enviar un correo de prueba» | Llega un correo con el estilo del club; si el servidor no acepta el correo, se avisa con un mensaje claro y no se rompe nada |
+| CF-13 | Confirmar una reserva desde el portal o desde el panel | Se envía el aviso al club con el código, ambiente, fecha, horario, solicitante, precio, adelanto y pagado; si el solicitante dejó su correo, también recibe la confirmación |
 
 ### 13.5 Noticias y portada
 
