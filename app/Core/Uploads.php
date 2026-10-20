@@ -18,6 +18,12 @@ final class Uploads
     /** Tamaño máximo por defecto: 5 MB. */
     public const TAMANO_MAXIMO = 5242880;
 
+    /** Ancho máximo de una imagen antes de convertirla a WebP. */
+    public const ANCHO_MAXIMO = 2000;
+
+    /** Calidad de la conversión a WebP. */
+    public const CALIDAD_WEBP = 78;
+
     /** Extensiones admitidas y su tipo de contenido esperado. */
     public const TIPOS = [
         'pdf'  => 'application/pdf',
@@ -154,12 +160,110 @@ final class Uploads
 
         @chmod($destino, 0640);
 
+        // Las imágenes se convierten a WebP y se redimensionan para que pesen
+        // menos. Si el servidor no tiene GD con WebP, o si la conversión no
+        // ahorra peso, se conserva el archivo original.
+        $procesada = self::procesarImagen($destino, $extension, $tamano);
+
+        if ($procesada !== null) {
+            @unlink($destino);
+
+            return [
+                'ruta'            => $carpeta . '/' . $procesada['nombre'],
+                'nombre_original' => $original,
+                'tipo_mime'       => 'image/webp',
+                'tamano'          => $procesada['tamano'],
+            ];
+        }
+
         return [
             'ruta'            => $carpeta . '/' . $nombre,
             'nombre_original' => $original,
             'tipo_mime'       => $mime,
             'tamano'          => $tamano,
         ];
+    }
+
+    /**
+     * Convierte una imagen a WebP y la redimensiona.
+     *
+     * Si el resultado no es más ligero que el original, devuelve `null` y el
+     * archivo original se conserva.
+     *
+     * @return array{nombre: string, tamano: int}|null
+     */
+    public static function procesarImagen(string $ruta, string $extension, int $tamanoOriginal = 0): ?array
+    {
+        if (!function_exists('imagewebp') || !function_exists('getimagesize')) {
+            return null;
+        }
+
+        // Los GIF animados se conservan: GD no conserva la animación.
+        if ($extension === 'gif') {
+            return null;
+        }
+
+        $info = @getimagesize($ruta);
+
+        if ($info === false || empty($info[0]) || empty($info[1])) {
+            return null;
+        }
+
+        $ancho = (int) $info[0];
+        $alto = (int) $info[1];
+        $tipo = (int) $info[2];
+
+        $origen = match ($tipo) {
+            IMAGETYPE_JPEG => function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($ruta) : false,
+            IMAGETYPE_PNG  => function_exists('imagecreatefrompng') ? @imagecreatefrompng($ruta) : false,
+            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($ruta) : false,
+            default        => false,
+        };
+
+        if ($origen === false) {
+            return null;
+        }
+
+        $maximo = self::ANCHO_MAXIMO;
+
+        if ($ancho > $maximo) {
+            $nuevoAncho = $maximo;
+            $nuevoAlto = (int) max(1, round($alto * ($maximo / $ancho)));
+            $redimensionada = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
+
+            if ($redimensionada !== false) {
+                imagealphablending($redimensionada, false);
+                imagesavealpha($redimensionada, true);
+                $transparent = imagecolorallocatealpha($redimensionada, 0, 0, 0, 127);
+                imagefilledrectangle($redimensionada, 0, 0, $nuevoAncho, $nuevoAlto, $transparent);
+                imagecopyresampled($redimensionada, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $ancho, $alto);
+                imagedestroy($origen);
+                $origen = $redimensionada;
+            }
+        }
+
+        $nombre = preg_replace('/\.[A-Za-z0-9]+$/', '.webp', basename($ruta)) ?: 'imagen.webp';
+        $destino = dirname($ruta) . DIRECTORY_SEPARATOR . $nombre;
+
+        if (!imagewebp($origen, $destino, self::CALIDAD_WEBP)) {
+            imagedestroy($origen);
+
+            return null;
+        }
+
+        imagedestroy($origen);
+        @chmod($destino, 0640);
+
+        $tamanoNuevo = (int) filesize($destino);
+
+        // Si la conversión no ahorra peso, se conserva el original.
+        if ($tamanoOriginal > 0 && $tamanoNuevo >= $tamanoOriginal) {
+            @unlink($destino);
+
+            return null;
+        }
+
+        return ['nombre' => $nombre, 'tamano' => $tamanoNuevo];
     }
 
     /**

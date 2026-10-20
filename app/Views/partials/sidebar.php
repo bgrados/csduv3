@@ -144,6 +144,13 @@ $enlaces[] = [
                     </a>
                 </li>
             <?php endif; ?>
+            <?php if (can('configuracion.gestionar')): ?>
+                <li>
+                    <a class="sidebar__link<?= is_current('/configuracion') ? ' is-active' : '' ?>" href="<?= e(url('/configuracion')) ?>"<?= is_current('/configuracion') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('administracion', 'icon', 20) ?><span>Configuración</span>
+                    </a>
+                </li>
+            <?php endif; ?>
             <?php if (can('auditoria.ver')): ?>
                 <li>
                     <a class="sidebar__link<?= is_current('/auditoria') ? ' is-active' : '' ?>" href="<?= e(url('/auditoria')) ?>"<?= is_current('/auditoria') ? ' aria-current="page"' : '' ?>>

@@ -10,8 +10,9 @@ declare(strict_types=1);
  * @var array<string, mixed>|null $usuarioActual
  */
 
-$tituloPagina = ($titulo ?? 'Inicio') . ' · ' . config('app.short_name');
-$nombreClub = (string) config('app.name');
+$tituloPagina = ($titulo ?? 'Inicio') . ' · ' . club('siglas', (string) config('app.short_name'));
+$nombreClub = club('nombre_club', (string) config('app.name'));
+$siglasClub = club('siglas', (string) config('app.short_name'));
 $entorno = (string) config('app.env');
 $usuarioActual = auth();
 $debeCambiarPassword = $usuarioActual !== null && (int) ($usuarioActual['debe_cambiar_password'] ?? 0) === 1;
@@ -69,7 +70,7 @@ $enPerfil = str_contains($rutaActual, '/perfil');
             <p>
                 <?= e($nombreClub) ?> ·
                 Sistema de gestión institucional ·
-                <?= e((string) config('app.short_name')) ?>
+                <?= e($siglasClub) ?>
             </p>
             <p class="footer__meta">
                 PHP <?= e(PHP_VERSION) ?> · zona horaria <?= e(date_default_timezone_get()) ?> ·

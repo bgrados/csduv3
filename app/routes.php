@@ -7,6 +7,7 @@ use App\Controllers\AuditoriaController;
 use App\Controllers\AuthController;
 use App\Controllers\CalendarioController;
 use App\Controllers\CajaController;
+use App\Controllers\ConfiguracionController;
 use App\Controllers\DeportesController;
 use App\Controllers\DiagnosticoController;
 use App\Controllers\DirectivaController;
@@ -15,6 +16,7 @@ use App\Controllers\EleccionesController;
 use App\Controllers\GaleriaController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
+use App\Controllers\MarcaController;
 use App\Controllers\NegociosController;
 use App\Controllers\PortalAlquilerController;
 use App\Controllers\PortalGaleriaController;
@@ -75,6 +77,8 @@ $router->get('/galeria/imagen/{id}', [PortalGaleriaController::class, 'imagen'])
 
 $router->get('/negocios', [PortalNegociosController::class, 'index']);
 $router->get('/negocios/imagen/{id}', [PortalNegociosController::class, 'imagen']);
+
+$router->get('/marca/{tipo}', [MarcaController::class, 'mostrar']);
 
 // ===========================================================================
 //  Acceso del personal
@@ -632,6 +636,28 @@ $router->post('/directorio/{id}/estado', [NegociosController::class, 'estado'], 
 $router->post('/directorio/{id}/eliminar', [NegociosController::class, 'eliminar'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('documentos.gestionar'),
+]);
+
+// --- Configuración del club --------------------------------------------------
+
+$router->get('/configuracion', [ConfiguracionController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('configuracion.gestionar'),
+]);
+
+$router->post('/configuracion', [ConfiguracionController::class, 'guardar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('configuracion.gestionar'),
+]);
+
+$router->post('/configuracion/marca/{tipo}', [ConfiguracionController::class, 'subirMarca'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('configuracion.gestionar'),
+]);
+
+$router->post('/configuracion/marca/{tipo}/restaurar', [ConfiguracionController::class, 'restaurarMarca'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('configuracion.gestionar'),
 ]);
 
 // --- Caja -------------------------------------------------------------------

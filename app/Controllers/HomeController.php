@@ -30,12 +30,12 @@ final class HomeController
 {
     /** Fotos de ejemplo incluidas en el repositorio, para la maqueta. */
     private const FOTOS_EJEMPLO = [
-        ['archivo' => 'assets/img/demo/asamblea-socios.jpg', 'titulo' => 'Asamblea general de socios', 'categoria' => 'reunion'],
-        ['archivo' => 'assets/img/demo/campeonato-fulbito.jpg', 'titulo' => 'Campeonato interno de fulbito', 'categoria' => 'campeonato'],
-        ['archivo' => 'assets/img/demo/junta-directiva.jpg', 'titulo' => 'Junta directiva del periodo', 'categoria' => 'directiva'],
-        ['archivo' => 'assets/img/demo/encuentros-deportivos.jpg', 'titulo' => 'Encuentros deportivos de la unidad', 'categoria' => 'deportiva'],
-        ['archivo' => 'assets/img/demo/actividad-socios.jpg', 'titulo' => 'Actividad de la comunidad', 'categoria' => 'socios'],
-        ['archivo' => 'assets/img/demo/mantenimiento-instalaciones.jpg', 'titulo' => 'Mantenimiento de las instalaciones', 'categoria' => 'instalacion'],
+        ['archivo' => 'assets/img/demo/asamblea-socios.webp', 'titulo' => 'Asamblea general de socios', 'categoria' => 'reunion'],
+        ['archivo' => 'assets/img/demo/campeonato-fulbito.webp', 'titulo' => 'Campeonato interno de fulbito', 'categoria' => 'campeonato'],
+        ['archivo' => 'assets/img/demo/junta-directiva.webp', 'titulo' => 'Junta directiva del periodo', 'categoria' => 'directiva'],
+        ['archivo' => 'assets/img/demo/encuentros-deportivos.webp', 'titulo' => 'Encuentros deportivos de la unidad', 'categoria' => 'deportiva'],
+        ['archivo' => 'assets/img/demo/actividad-socios.webp', 'titulo' => 'Actividad de la comunidad', 'categoria' => 'socios'],
+        ['archivo' => 'assets/img/demo/mantenimiento-instalaciones.webp', 'titulo' => 'Mantenimiento de las instalaciones', 'categoria' => 'instalacion'],
     ];
 
     public function index(Request $request): void

@@ -12,8 +12,12 @@ declare(strict_types=1);
  * @var string|null $titulo
  */
 
-$tituloPagina = ($titulo ?? 'Inicio') . ' · ' . config('app.short_name');
-$nombreClub = (string) config('app.name');
+$tituloPagina = ($titulo ?? 'Inicio') . ' · ' . club('siglas', (string) config('app.short_name'));
+$nombreClub = club('nombre_club', (string) config('app.name'));
+$siglasClub = club('siglas', (string) config('app.short_name'));
+$logoClub = marca_url('logo', 'assets/img/logo.jpg');
+$faviconClub = marca_url('favicon', 'assets/img/favicon.svg');
+$enMantenimiento = club('mantenimiento', '0') === '1';
 $entorno = (string) config('app.env');
 $usuarioActual = auth();
 $rutaActual = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
@@ -51,11 +55,11 @@ $aria = static function (string $prefijo) use ($esActiva): string {
     <meta name="theme-color" content="#063B22">
     <meta name="description" content="Portal público del <?= e($nombreClub) ?>: consulta de ambientes, tarifas, disponibilidad, solicitudes de alquiler y torneos.">
     <title><?= e($tituloPagina) ?></title>
-    <link rel="icon" href="<?= e(asset((string) config('app.favicon'))) ?>" type="image/svg+xml">
+    <link rel="icon" href="<?= e($faviconClub) ?>" type="image/svg+xml">
     <link rel="manifest" href="<?= e(url('/manifest.webmanifest')) ?>">
     <link rel="apple-touch-icon" href="<?= e(url('/icons/icon-192.png')) ?>">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="<?= e((string) config('app.short_name')) ?>">
+    <meta name="apple-mobile-web-app-title" content="<?= e($siglasClub) ?>">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="<?= e(asset('assets/css/app.css')) ?>">
 </head>
@@ -68,12 +72,18 @@ $aria = static function (string $prefijo) use ($esActiva): string {
     </p>
 <?php endif; ?>
 
+<?php if ($enMantenimiento): ?>
+    <p class="env-banner env-banner--alerta" role="status">
+        El portal está temporalmente en mantenimiento. Vuelva a intentarlo en unos minutos.
+    </p>
+<?php endif; ?>
+
 <header class="site-header">
     <div class="site-header__inner">
         <a class="site-brand" href="<?= e(url('/')) ?>">
-            <img src="<?= e(asset((string) config('app.logo'))) ?>" alt="" width="44" height="44">
+            <img src="<?= e($logoClub) ?>" alt="" width="44" height="44">
             <span class="site-brand__text">
-                <strong><?= e((string) config('app.short_name')) ?></strong>
+                <strong><?= e($siglasClub) ?></strong>
                 <small><?= e($nombreClub) ?></small>
             </span>
         </a>
@@ -106,16 +116,39 @@ $aria = static function (string $prefijo) use ($esActiva): string {
     <div class="site-footer__inner">
         <div>
             <strong><?= e($nombreClub) ?></strong>
-            <p class="muted">Sistema de gestión institucional · <?= e((string) config('app.short_name')) ?></p>
+            <p class="muted">Sistema de gestión institucional · <?= e($siglasClub) ?></p>
+            <?php
+            $telefonoClub = club('telefono', '');
+            $correoClub = club('email_institucional', '');
+            $direccionClub = club('direccion', '');
+            $whatsappClub = club('whatsapp', '');
+            ?>
+            <?php if ($telefonoClub !== '' || $correoClub !== '' || $direccionClub !== ''): ?>
+                <p class="site-footer__contacto">
+                    <?php if ($direccionClub !== ''): ?><?= e($direccionClub) ?><br><?php endif; ?>
+                    <?php if ($telefonoClub !== ''): ?>Tel. <?= e($telefonoClub) ?><?php endif; ?>
+                    <?php if ($telefonoClub !== '' && $correoClub !== ''): ?> · <?php endif; ?>
+                    <?php if ($correoClub !== ''): ?><?= e($correoClub) ?><?php endif; ?>
+                    <?php if ($whatsappClub !== ''): ?><br>WhatsApp: <?= e($whatsappClub) ?><?php endif; ?>
+                </p>
+            <?php endif; ?>
         </div>
         <div class="site-footer__links">
             <a href="<?= e(url('/alquiler')) ?>">Ambientes y tarifas</a>
             <a href="<?= e(url('/alquiler/disponibilidad')) ?>">Disponibilidad</a>
+            <a href="<?= e(url('/alquiler/reservar')) ?>">Reservar ahora</a>
             <a href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
             <a href="<?= e(url('/torneos')) ?>">Torneos</a>
             <a href="<?= e(url('/galeria')) ?>">Galería del club</a>
             <a href="<?= e(url('/negocios')) ?>">Negocios de la unidad</a>
             <a href="https://uv3-platform.vercel.app/" target="_blank" rel="noopener">Portal de la Unidad Vecinal</a>
+            <?php $facebookClub = club('facebook', ''); $instagramClub = club('instagram', ''); ?>
+            <?php if ($facebookClub !== ''): ?>
+                <a href="<?= e($facebookClub) ?>" target="_blank" rel="noopener">Facebook</a>
+            <?php endif; ?>
+            <?php if ($instagramClub !== ''): ?>
+                <a href="<?= e($instagramClub) ?>" target="_blank" rel="noopener">Instagram</a>
+            <?php endif; ?>
         </div>
     </div>
     <p class="site-footer__meta">

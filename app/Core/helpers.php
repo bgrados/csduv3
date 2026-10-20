@@ -269,6 +269,39 @@ if (!function_exists('usuario_nombre')) {
     }
 }
 
+if (!function_exists('club')) {
+    /**
+     * Valor de un parámetro institucional guardado en la base de datos.
+     *
+     * Si la base de datos no está disponible, devuelve el valor por defecto
+     * indicado (normalmente el de la configuración de la aplicación).
+     */
+    function club(string $clave, string $porDefecto = ''): string
+    {
+        $valor = \App\Models\Configuracion::cached($clave, '');
+
+        return $valor === '' ? $porDefecto : $valor;
+    }
+}
+
+if (!function_exists('marca_url')) {
+    /**
+     * URL pública de una imagen de marca (logo, favicon o portada).
+     *
+     * Si el club no subió ninguna, se usa la imagen estática de la aplicación.
+     */
+    function marca_url(string $tipo, string $porDefecto = ''): string
+    {
+        $archivo = club('marca_' . $tipo, '');
+
+        if ($archivo === '') {
+            return $porDefecto === '' ? '' : asset($porDefecto);
+        }
+
+        return url('/marca/' . $tipo . '?v=' . substr(md5($archivo), 0, 8));
+    }
+}
+
 if (!function_exists('dinero')) {
     /**
      * Formatea un importe en la moneda configurada.

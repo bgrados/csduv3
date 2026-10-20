@@ -105,24 +105,43 @@ $categoriasNegocio = [
 
     <div class="revista__cuerpo">
         <div class="revista__principal">
-            <?php if ($portada !== null): ?>
+            <?php
+            $marcaPortada = club('marca_portada', '');
+            $imagenPortada = $portada !== null ? $imagen($portada) : '';
+            $titularPortada = $portada !== null ? (string) $portada['titulo'] : '';
+            $bajadaPortada = $portada !== null
+                ? (string) ($portada['resumen'] ?? ($portada['descripcion'] ?? ''))
+                : '';
+
+            if ($marcaPortada !== '') {
+                $imagenPortada = url('/marca/portada?v=' . substr(md5($marcaPortada), 0, 8));
+                $titularPortada = club('portada_titulo', $titularPortada);
+                $bajadaPortada = club('portada_resumen', $bajadaPortada);
+            }
+            ?>
+
+            <?php if ($portada !== null || $imagenPortada !== ''): ?>
                 <article class="portada">
                     <a class="portada__imagen" href="<?= e(url('/galeria')) ?>">
-                        <img src="<?= e($imagen($portada)) ?>" alt="<?= e((string) $portada['titulo']) ?>">
+                        <img src="<?= e($imagenPortada) ?>" alt="<?= e($titularPortada) ?>">
                     </a>
                     <div class="portada__texto">
                         <p class="portada__kicker">
-                            <?= e(\App\Models\Foto::CATEGORIAS[(string) $portada['categoria']] ?? (string) $portada['categoria']) ?>
-                            <?php if (!empty($portada['fecha_foto'])): ?>
-                                · <?= e(fecha_legible((string) $portada['fecha_foto'])) ?>
+                            <?php if ($portada !== null): ?>
+                                <?= e(\App\Models\Foto::CATEGORIAS[(string) $portada['categoria']] ?? (string) $portada['categoria']) ?>
+                                <?php if (!empty($portada['fecha_foto'])): ?>
+                                    · <?= e(fecha_legible((string) $portada['fecha_foto'])) ?>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                Portada
                             <?php endif; ?>
-                            <?php if ($ejemplos($portada)): ?>
+                            <?php if ($portada !== null && $ejemplos($portada)): ?>
                                 <span class="badge badge--soft">Ejemplo</span>
                             <?php endif; ?>
                         </p>
-                        <h2 class="portada__titular"><?= e((string) $portada['titulo']) ?></h2>
+                        <h2 class="portada__titular"><?= e($titularPortada) ?></h2>
                         <p class="portada__entradilla">
-                            <?= e((string) ($portada['resumen'] ?? ($portada['descripcion'] ?? 'Fotografía de la actividad del club.'))) ?>
+                            <?= e($bajadaPortada !== '' ? $bajadaPortada : 'Fotografía de la actividad del club.') ?>
                         </p>
                         <a class="btn btn--primary btn--sm" href="<?= e(url('/galeria')) ?>">Ver la galería completa</a>
                     </div>

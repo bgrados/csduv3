@@ -89,7 +89,7 @@ foreach (['fotos', 'negocios'] as $tabla) {
 $carpetaDestino = storage_path('uploads/demo');
 $origen = $appPath . '/public/assets/img/demo';
 
-$archivos = glob($origen . '/*.jpg') ?: [];
+$archivos = glob($origen . '/*.webp') ?: [];
 sort($archivos);
 
 if ($quitar) {
@@ -149,7 +149,7 @@ foreach ($archivos as $indice => $archivo) {
         'resumen' => 'Contenido de demostración para revisar el diseño de la portada.',
     ];
 
-    $nombre = 'demo-noticia-' . ($indice + 1) . '.jpg';
+    $nombre = 'demo-noticia-' . ($indice + 1) . '.webp';
     $destino = $carpetaDestino . DIRECTORY_SEPARATOR . $nombre;
 
     if (!copy($archivo, $destino)) {
@@ -166,7 +166,7 @@ foreach ($archivos as $indice => $archivo) {
                  `tipo_mime`, `tamano_bytes`, `fecha_foto`, `visible`, `destacado`, `orden`)
              VALUES
                 (:titulo, :resumen, :descripcion, :categoria, :archivo, :nombre_original,
-                 \'image/jpeg\', :tamano, :fecha, 1, :destacado, :orden)'
+                 \'image/webp\', :tamano, :fecha, 1, :destacado, :orden)'
         , $prefijo, 'fotos')
     )->execute([
         'titulo'          => $noticia['titulo'],

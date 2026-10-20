@@ -43,6 +43,39 @@ final class Response
         exit;
     }
 
+    /**
+     * Entrega un archivo del disco al navegador.
+     */
+    public static function archivo(string $rutaAbsoluta, string $cache = 'private, no-store'): never
+    {
+        if (!is_file($rutaAbsoluta)) {
+            abort(404, 'El archivo solicitado no existe.');
+        }
+
+        $mime = 'application/octet-stream';
+        $info = @getimagesize($rutaAbsoluta);
+
+        if ($info !== false && !empty($info['mime'])) {
+            $mime = (string) $info['mime'];
+        } elseif (function_exists('mime_content_type')) {
+            $detectado = @mime_content_type($rutaAbsoluta);
+
+            if (is_string($detectado) && $detectado !== '') {
+                $mime = $detectado;
+            }
+        }
+
+        if (!headers_sent()) {
+            header('Content-Type: ' . $mime);
+            header('Content-Length: ' . (string) filesize($rutaAbsoluta));
+            header('Cache-Control: ' . $cache);
+            header('X-Content-Type-Options: nosniff');
+        }
+
+        readfile($rutaAbsoluta);
+        exit;
+    }
+
     public static function noContent(): never
     {
         if (!headers_sent()) {
