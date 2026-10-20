@@ -336,10 +336,59 @@ los permisos que ya define `02_datos_iniciales.sql`.
 - El calendario es **interno**: las actividades no se publican en el portal
   público (el campo `visible` queda preparado para una fase posterior).
 
+### 2.8 Fase 4 (reservas), galería, negocios y portal de la unidad
+
+**Reservas con tarifa, adelanto y pago**
+
+| Función | Estado |
+| --- | --- |
+| Alta y edición de reservas con tarifa vigente, precio acordado y adelanto | Implementado |
+| Conversión de una solicitud del portal en reserva (precio y adelanto sugeridos) | Implementado |
+| Registro de pagos (adelanto, saldo y devolución) con asiento en caja | Implementado |
+| Bloqueo de horarios con transacción y `SELECT … FOR UPDATE` | Implementado |
+| Cancelación con motivo, sin borrar el registro | Implementado |
+| Estados: pendiente, confirmada, finalizada y cancelada | Implementado |
+
+Archivos: `app/Controllers/ReservasController.php`, `app/Models/Reserva.php`
+(ampliado), `app/Models/ReservaPago.php` y `app/Views/reservas/`.
+
+**Galería de fotos y directorio de negocios**
+
+| Función | Estado |
+| --- | --- |
+| Subir y publicar fotos (reuniones, campeonatos, directiva, socios) | Implementado |
+| Bloque tipo «periódico» con las fotos en la portada | Implementado |
+| Directorio de negocios de la unidad, todo editable, con su enlace | Implementado |
+| Portal público `/galeria` y `/negocios` | Implementado |
+| Enlace al portal de la Unidad Vecinal (`https://uv3-platform.vercel.app/`) | Implementado |
+
+Archivos: `app/Models/Foto.php`, `app/Models/Negocio.php`,
+`app/Controllers/{GaleriaController,NegociosController,PortalGaleriaController,PortalNegociosController}.php`,
+`app/Views/{galeria,negocios}/` y `app/Core/Uploads.php` (subida de archivos
+centralizada: extensión, contenido real y tamaño).
+
+**Migración aplicada:** `database/migrations/0002_galeria_negocios.sql` crea las
+tablas `csduv3_fotos` y `csduv3_negocios` y carga el parámetro
+`porcentaje_adelanto`. El script de despliegue (`tools/desplegar-servidor.sh`)
+ejecuta `php tools/migrar.php` después de cada `git pull`, así que se aplicó
+sola. Las mismas tablas están en `database/01_esquema.sql` para las instalaciones
+nuevas.
+
+**Decisiones y límites del alcance**
+
+- El **porcentaje de adelanto** por defecto es el 50 % del precio acordado y se
+  puede cambiar en la tabla `csduv3_configuracion` (clave `porcentaje_adelanto`).
+  El importe siempre es editable al crear la reserva.
+- La galería y el directorio usan los permisos `documentos.ver` y
+  `documentos.gestionar`: no se crean permisos nuevos.
+- Las fotos y los logotipos se guardan en `storage/uploads` y se sirven por el
+  controlador; nunca son archivos públicos.
+- El directorio publica **solo** los negocios marcados como visibles; cada uno
+  puede llevar su propio enlace.
+
 ---
 
 ## 3. Pruebas realizadas
-
 Ejecutadas con **PHP 8.3.35 portable** (descargado al directorio temporal del
 equipo, fuera del repositorio) y con la verificación estática del proyecto
 (ver [docs/PRUEBAS.md](docs/PRUEBAS.md)):
@@ -430,7 +479,7 @@ no se hayan obtenido.
 | Fase | Contenido |
 | --- | --- |
 | 3 | Socios (corte 1), junta directiva y elecciones — **implementados** |
-| 4 | Reservas, calendario y pagos (incluye cerrar la condición de carrera) — calendario implementado |
+| 4 | Reservas y pagos (condición de carrera **cerrada** con transacción y bloqueo) y calendario — implementados |
 | 5 | Caja, ingresos, egresos e informes financieros — **implementado** (corte 1) |
 | 6 | Deportes: modalidades adicionales, estadísticas por jugador y tabla por sets |
 | 7 | Documentos, auditoría, reportes y mejoras de experiencia — documentos implementados |
@@ -464,9 +513,12 @@ adicionales de torneo**, según la prioridad del club.
   movimientos, resultados, cuotas, categorías, cargos y tarifas los carga la
   institución. Solo existen los catálogos técnicos y los datos ficticios de
   desarrollo con prefijo `DEMO-`.
-- La solicitud del portal público **no confirma** ninguna reserva.
-- La comprobación de solapamiento no usa transacción ni `FOR UPDATE`: la condición
-  de carrera se cierra en la Fase 4.
+- La solicitud del portal público **no confirma** ninguna reserva: solo el club
+  la convierte, y esa conversión es la que bloquea el horario.
+- La comprobación de solapamiento de **reservas** usa transacción y
+  `SELECT … FOR UPDATE`: dos reservas simultáneas no ocupan la misma franja.
+  Entre **solicitudes** el solapamiento no se bloquea, solo se marca
+  `conflicto_detectado` para revisarlo.
 - Los comprobantes del módulo de alquileres serán **documentos internos**, no
   comprobantes electrónicos autorizados por SUNAT.
 - El registro de resultados electorales es **administrativo**, no un sistema de

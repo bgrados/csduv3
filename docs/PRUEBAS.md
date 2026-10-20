@@ -979,7 +979,64 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 
 ---
 
-## 13. Registro de resultados
+## 13. Pruebas de reservas, galería y negocios
+
+> **Estado: pendientes de ejecución.** El código pasa `php -l`, la verificación
+> estática, la prueba de enrutamiento y el render de sus vistas, pero **no se ha
+> escrito nada en la base de datos** salvo la migración `0002` (que solo crea
+> tablas).
+>
+> **Nunca ejecutar estas pruebas contra producción.**
+
+### 13.1 Reservas
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| RS-01 | `GET /reservas` con `alquileres.ver` | 200; listado con código, sede, fecha, solicitante, precio, pagado y estado |
+| RS-02 | Crear una reserva con tarifa vigente | 302 con «La reserva quedó registrada»; el precio y el adelanto se sugieren con la tarifa de la sede; el código tiene el formato `RES-AAAA-####` |
+| RS-03 | Reserva a un horario ya ocupado | Se rechaza con «Ese horario ya está reservado. Revise la agenda de la instalación.» y **no** se crea la reserva |
+| RS-04 | Dos reservas simultáneas al mismo horario (dos `curl` en paralelo) | Solo una se crea: la comprobación se hace dentro de una transacción con `SELECT … FOR UPDATE` |
+| RS-05 | Validaciones: hora de fin anterior a la de inicio, precio negativo, adelanto mayor que el precio | Cada caso se rechaza con un mensaje en español y no se inserta la fila |
+| RS-06 | Registrar un pago de S/ 150,00 con medio «Efectivo» | 302 con «El pago quedó registrado y anotado en caja»; aparece en el historial de pagos, el monto pagado de la reserva sube y en `csduv3_movimientos` hay un ingreso con la referencia de la reserva |
+| RS-07 | Pagar más que el saldo pendiente | Se rechaza con «El pago supera el saldo pendiente de la reserva…» y no se registra nada |
+| RS-08 | Registrar un pago con fecha futura | Se rechaza con «No se pueden registrar pagos con fecha futura.» |
+| RS-09 | Cancelar una reserva con motivo | Queda `estado = 'cancelada'` con su motivo; no se borra; ya no admite pagos |
+| RS-10 | Convertir una solicitud en reserva | Desde la ficha de la solicitud, «Convertir en reserva» abre el formulario con los datos cargados; al guardar, la solicitud queda «atendida» con la nota del código de reserva |
+| RS-11 | Editar una reserva cancelada o finalizada | Se rechaza con «Una reserva cancelada o finalizada no se puede editar.» |
+
+### 13.2 Galería de fotos
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| GA-01 | `GET /fotos` con `documentos.ver` | 200; listado con miniatura, título, categoría, fecha y tamaño; estado vacío sin fotos |
+| GA-02 | Subir una imagen JPG válida | 302 con «La foto quedó registrada»; la imagen queda en `storage/uploads/fotos/…` y se ve en la miniatura |
+| GA-03 | Subir un archivo que no es imagen (`.pdf`) | Se rechaza con «El archivo debe ser una imagen (JPG, PNG o WEBP).» |
+| GA-04 | Publicar y ocultar una foto | El botón cambia a «Publicada» u «Oculta»; solo las publicadas aparecen en `/galeria` y en la portada |
+| GA-05 | Abrir `/galeria` sin sesión | 200 con la galería pública; la foto destacada ocupa el bloque principal y las demás en la retícula |
+| GA-06 | Eliminar una foto | Se elimina el registro y el archivo del disco |
+
+### 13.3 Directorio de negocios
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| NE-01 | `GET /directorio` con `documentos.ver` | 200; listado con nombre, categoría, contacto, enlace y estado |
+| NE-02 | Registrar un negocio con enlace `https://…` | 302 con «El negocio quedó registrado»; el enlace se guarda y se muestra como «Abrir enlace» |
+| NE-03 | Registrar un enlace sin `http://` o `https://` | Se rechaza con «El enlace debe empezar por http:// o https://» |
+| NE-04 | Marcar un negocio como visible | Aparece en `/negocios` (público) y en la portada, con su botón «Visitar el negocio» |
+| NE-05 | Ocultar un negocio | Desaparece del portal público; el registro se conserva |
+| NE-06 | Editar y eliminar un negocio | Los cambios se guardan; al eliminarlo se borra también su logotipo del disco |
+
+### 13.4 Enlaces del portal público
+
+| N.º | Comprobación | Resultado esperado |
+| --- | --- | --- |
+| EN-1 | Barra de navegación de la portada | Enlaces a Inicio, Ambientes, Disponibilidad, Solicitar, Torneos, Galería, Negocios y «Portal UV3» |
+| EN-2 | Enlace «Portal UV3» | Abre `https://uv3-platform.vercel.app/` en una pestaña nueva (`target="_blank"`) |
+| EN-3 | Pie de página | Incluye Galería del club, Negocios de la unidad y el portal de la Unidad Vecinal |
+
+---
+
+## 14. Registro de resultados
 
 | Fecha | Prueba | Resultado | Observaciones |
 | --- | --- | --- | --- |
@@ -992,18 +1049,22 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | Ambientes y torneos | `php -l` + verificación estática + R3-R7 | Correcto | 102 archivos de `app/` sin errores de sintaxis; 109 archivos PHP con 0 hallazgos; 16 rutas correctas; 11 vistas renderizadas; fixture correcto de 2 a 8 equipos; `tools/migrar.php` corregido |
 | Ambientes y torneos | Despliegue en producción (`f1de87d`) | Correcto | `/torneos` 200 con estado vacío «Todavía no hay torneos publicados»; `/torneos/1` 404; `/ambientes`, `/deportes` y `/deportes/torneos/nuevo` 302 a `/ingresar` (la ruta existe y exige sesión); `/`, `/alquiler` e `/ingresar` 200; service worker `csduv3-publica-v4`; menú público con «Torneos» |
 | Caja, directiva, elecciones, calendario y documentos | `php -l` + verificación estática + R8-R9 | Correcto | 135 archivos de `app/` sin errores de sintaxis; 142 archivos PHP con 0 hallazgos; 41 rutas correctas; 20 vistas renderizadas sin advertencias |
-| Pendiente | Secciones 5 a 12 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09) | — | Requiere **MariaDB** y una sesión de administrador; las pruebas de escritura requieren una base de datos de pruebas |
+| Reservas, galería y negocios | `php -l` + verificación estática + enrutamiento y render | Correcto | 153 archivos de `app/` sin errores de sintaxis; 160 archivos PHP con 0 hallazgos; 30 rutas nuevas comprobadas; 13 vistas renderizadas sin advertencias; migración `0002` revisada |
+| Despliegue de reservas, galería y negocios (`522a985`) | Verificación HTTP | Correcto | `/galeria` 200, `/negocios` 200, `/reservas`, `/fotos` y `/directorio` 302 a `/ingresar`; la portada muestra «El club en imágenes», «Negocios de la unidad» y el enlace al portal UV3; 0 errores PHP en las páginas públicas |
+| Pendiente | Secciones 5 a 13 (PS-01 a PS-35, AM-01 a AM-14, TO-01 a TO-21, CX-01 a CX-13, DI-01 a DI-08, EL-01 a EL-08, CA-01 a CA-06, DO-01 a DO-09, RS-01 a RS-11, GA-01 a GA-06, NE-01 a NE-06, EN-1 a EN-3) | - | Requiere **MariaDB** y una sesion de administrador; las pruebas de escritura requieren una base de datos de pruebas |
 | Pendiente | Rotación de la contraseña de la base de datos | — | Sigue expuesta en el historial público de Git: rotar en cPanel y actualizar `.env` |
 
 ---
 
-## 14. Limitaciones conocidas
+## 15. Limitaciones conocidas
 
-La comprobación de solapamiento de horarios **no usa transacción ni
-`SELECT ... FOR UPDATE`**. Dos envíos exactamente simultáneos podrían crear dos
-solicitudes para el mismo horario; la marca `conflicto_detectado` ayuda a
-detectarlo. Cerrar esa condición de carrera con una transacción y bloqueo queda
-como tarea obligatoria de la Fase 4.
+La comprobación de solapamiento de **reservas** sí usa transacción y
+`SELECT … FOR UPDATE` sobre el índice por instalación y fecha: dos peticiones
+simultáneas no reservan la misma franja (véanse RS-03 y RS-04). Lo que sigue
+abierto es el solapamiento entre **solicitudes** del portal público, que no
+bloquea nada: se marca `conflicto_detectado` para que el personal lo revise
+con prioridad. La creación de la reserva es la que bloquea el horario de
+verdad.
 
 La baja de socio registra el historial y el cambio de estado dentro de una
 transacción, pero **no vuelve a comprobar el estado dentro de la transacción ni
