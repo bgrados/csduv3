@@ -150,8 +150,44 @@ if ($informes === []) {
 
 informar();
 
-if ($pendientes === [] && $informes === []) {
-    informar('Todo en orden: puede continuar usando el sistema.');
+// --- Columnas que agregan las migraciones recientes ------------------------
+
+$columnasEsperadas = [
+    'fotos' => ['video_url', 'video_tipo'],
+];
+
+Informar('Columnas recientes   :');
+
+$columnasFaltantes = [];
+
+foreach ($columnasEsperadas as $tabla => $columnas) {
+    foreach ($columnas as $columna) {
+        $existe = (int) $pdo->query(sprintf(
+            "SELECT COUNT(*) FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = '%s%s' AND column_name = '%s'",
+            $prefijo,
+            $tabla,
+            $columna
+        ))->fetchColumn();
+
+        if ($existe === 0) {
+            $columnasFaltantes[] = $prefijo . $tabla . '.' . $columna;
+            Informar(sprintf('  FALTA  %s%s.%s', $prefijo, $tabla, $columna));
+            continue;
+        }
+
+        Informar(sprintf('  OK     %s%s.%s', $prefijo, $tabla, $columna));
+    }
+}
+
+if ($columnasFaltantes !== []) {
+    Informar('Aplique las migraciones pendientes para que el sistema use esas columnas.');
+}
+
+Informar();
+
+if ($pendientes === [] && $informes === [] && $columnasFaltantes === []) {
+    Informar('Todo en orden: puede continuar usando el sistema.');
     exit(0);
 }
 

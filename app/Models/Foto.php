@@ -14,6 +14,9 @@ final class Foto extends Model
 {
     protected static string $table = 'fotos';
 
+    /** Estado de las columnas del video (se comprueba una vez por petición). */
+    private static ?bool $columnasVideo = null;
+
     public const CATEGORIAS = [
         'reunion'      => 'Reunión',
         'campeonato'  => 'Campeonato',
@@ -161,7 +164,7 @@ final class Foto extends Model
      */
     public static function crear(array $datos): int
     {
-        return self::insertar([
+        $valores = [
             'titulo'          => (string) $datos['titulo'],
             'resumen'         => self::vacioANulo($datos['resumen'] ?? null),
             'descripcion'     => self::vacioANulo($datos['descripcion'] ?? null),
@@ -173,11 +176,16 @@ final class Foto extends Model
             'fecha_foto'      => self::vacioANulo($datos['fecha_foto'] ?? null),
             'visible'         => (int) ($datos['visible'] ?? 1) === 1 ? 1 : 0,
             'destacado'       => (int) ($datos['destacado'] ?? 0) === 1 ? 1 : 0,
-            'video_url'       => self::vacioANulo($datos['video_url'] ?? null),
-            'video_tipo'      => self::vacioANulo($datos['video_tipo'] ?? null),
             'orden'           => (int) ($datos['orden'] ?? 1),
             'subido_por'      => self::enteroANulo($datos['subido_por'] ?? null),
-        ]);
+        ];
+
+        if (self::tieneColumnasVideo()) {
+            $valores['video_url'] = self::vacioANulo($datos['video_url'] ?? null);
+            $valores['video_tipo'] = self::vacioANulo($datos['video_tipo'] ?? null);
+        }
+
+        return self::insertar($valores);
     }
 
     /**
@@ -185,43 +193,41 @@ final class Foto extends Model
      */
     public static function actualizar(int $id, array $datos): void
     {
+        $columnas = [
+            'titulo'          => (string) $datos['titulo'],
+            'resumen'         => self::vacioANulo($datos['resumen'] ?? null),
+            'descripcion'     => self::vacioANulo($datos['descripcion'] ?? null),
+            'categoria'       => (string) $datos['categoria'],
+            'archivo'         => self::vacioANulo($datos['archivo'] ?? null),
+            'nombre_original' => self::vacioANulo($datos['nombre_original'] ?? null),
+            'tipo_mime'       => self::vacioANulo($datos['tipo_mime'] ?? null),
+            'tamano_bytes'    => self::enteroANulo($datos['tamano_bytes'] ?? null),
+            'fecha_foto'      => self::vacioANulo($datos['fecha_foto'] ?? null),
+            'visible'         => (int) ($datos['visible'] ?? 1) === 1 ? 1 : 0,
+            'destacado'       => (int) ($datos['destacado'] ?? 0) === 1 ? 1 : 0,
+            'orden'           => (int) ($datos['orden'] ?? 1),
+        ];
+
+        if (self::tieneColumnasVideo()) {
+            $columnas['video_url'] = self::vacioANulo($datos['video_url'] ?? null);
+            $columnas['video_tipo'] = self::vacioANulo($datos['video_tipo'] ?? null);
+        }
+
+        $asignaciones = [];
+        $parametros = ['id' => $id];
+
+        foreach ($columnas as $columna => $valor) {
+            $asignaciones[] = sprintf('`%s` = :%s', $columna, $columna);
+            $parametros[$columna] = $valor;
+        }
+
         self::run(
             sprintf(
-                'UPDATE `%s`
-                 SET `titulo` = :titulo,
-                     `resumen` = :resumen,
-                     `descripcion` = :descripcion,
-                     `categoria` = :categoria,
-                     `archivo` = :archivo,
-                     `nombre_original` = :nombre_original,
-                     `tipo_mime` = :tipo_mime,
-                     `tamano_bytes` = :tamano_bytes,
-                     `fecha_foto` = :fecha_foto,
-                     `visible` = :visible,
-                     `destacado` = :destacado,
-                     `video_url` = :video_url,
-                     `video_tipo` = :video_tipo,
-                     `orden` = :orden
-                 WHERE `id` = :id',
-                self::table()
+                'UPDATE `%s` SET %s WHERE `id` = :id',
+                self::table(),
+                implode(', ', $asignaciones)
             ),
-            [
-                'titulo'          => (string) $datos['titulo'],
-                'resumen'         => self::vacioANulo($datos['resumen'] ?? null),
-                'descripcion'     => self::vacioANulo($datos['descripcion'] ?? null),
-                'categoria'       => (string) $datos['categoria'],
-                'archivo'         => self::vacioANulo($datos['archivo'] ?? null),
-                'nombre_original' => self::vacioANulo($datos['nombre_original'] ?? null),
-                'tipo_mime'       => self::vacioANulo($datos['tipo_mime'] ?? null),
-                'tamano_bytes'    => self::enteroANulo($datos['tamano_bytes'] ?? null),
-                'fecha_foto'      => self::vacioANulo($datos['fecha_foto'] ?? null),
-                'visible'         => (int) ($datos['visible'] ?? 1) === 1 ? 1 : 0,
-                'destacado'       => (int) ($datos['destacado'] ?? 0) === 1 ? 1 : 0,
-                'video_url'       => self::vacioANulo($datos['video_url'] ?? null),
-                'video_tipo'      => self::vacioANulo($datos['video_tipo'] ?? null),
-                'orden'           => (int) ($datos['orden'] ?? 1),
-                'id'              => $id,
-            ]
+            $parametros
         );
     }
 
@@ -232,6 +238,10 @@ final class Foto extends Model
      */
     public static function listarVideos(int $limite = 4): array
     {
+        if (!self::tieneColumnasVideo()) {
+            return [];
+        }
+
         $limite = max(1, min(12, $limite));
 
         $sql = sprintf(
@@ -244,6 +254,33 @@ final class Foto extends Model
         );
 
         return self::fetchAll($sql);
+    }
+
+    /**
+     * ¿La tabla ya tiene las columnas del video?
+     *
+     * Si la migración todavía no se aplicó, las noticias se siguen guardando
+     * (sin video) en lugar de fallar con un error de base de datos.
+     */
+    public static function tieneColumnasVideo(): bool
+    {
+        if (self::$columnasVideo !== null) {
+            return self::$columnasVideo;
+        }
+
+        try {
+            $statement = self::db()->prepare(
+                'SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :tabla AND COLUMN_NAME = :columna'
+            );
+            $statement->execute(['tabla' => self::table(), 'columna' => 'video_url']);
+
+            self::$columnasVideo = (int) $statement->fetchColumn() > 0;
+        } catch (\Throwable) {
+            self::$columnasVideo = false;
+        }
+
+        return self::$columnasVideo;
     }
 
     public static function cambiarVisible(int $id, bool $visible): void

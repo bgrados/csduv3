@@ -113,6 +113,7 @@ los módulos **Ambientes y tarifas** (`/ambientes`) y **Deportes y torneos**
 | --- | --- |
 | `crear_admin.php` | **Solo consola.** Crea el primer administrador. Se elimina tras usarlo |
 | `diagnostico_reservas.php` | **Solo consola.** Revisa solicitudes y reservas, prueba la conversión y el cambio de estado, y borra lo que prueba |
+| `ultimos_errores.php` | **Solo consola.** Muestra las últimas líneas del registro de la aplicación y del despliegue |
 | `migrar.php` | Aplica las migraciones pendientes (`database/migrations/`) |
 | `verificar_migraciones.php` | Indica qué migraciones faltan por aplicar |
 | `instalar_demo_fotos.php` | Carga o quita las fotos de ejemplo |

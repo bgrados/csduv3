@@ -80,6 +80,11 @@ echo "Running migrations..." >> "$LOG_FILE"
 MIGRATION_STATUS=$?
 echo "Migration exit code: $MIGRATION_STATUS" >> "$LOG_FILE"
 
+if [ "$MIGRATION_STATUS" -ne 0 ]; then
+    echo "ERROR: las migraciones NO se aplicaron. La aplicacion puede fallar hasta que se corrija." >> "$LOG_FILE"
+    echo "ERROR: revise las lineas anteriores del log y ejecute: $PHP_BIN tools/migrar.php" >> "$LOG_FILE"
+fi
+
 # Comprobación de que las tablas de los módulos nuevos existen. El propio
 # aplicador de migraciones las verifica y deja el resultado en el log.
 echo "Migration summary:" >> "$LOG_FILE"

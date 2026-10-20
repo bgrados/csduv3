@@ -106,14 +106,26 @@ final class NoticiasController
                 'subido_por'      => (int) Auth::id(),
             ]);
         } catch (Throwable $exception) {
-            Logger::error('Error al registrar una foto', ['error' => $exception->getMessage()]);
+            Logger::error('Error al registrar una foto', [
+                'error' => $exception->getMessage(),
+                'video' => (string) ($limpio['video_url'] ?? ''),
+            ]);
             Uploads::borrar((string) ($archivo['ruta'] ?? ''), 'fotos/');
             remember_old_input($datos);
-            Session::flash('error', 'No se pudo registrar la noticia.');
+            Session::flash('error', 'No se pudo registrar la noticia. Revise el registro del servidor (storage/logs) para ver el detalle.');
             Response::redirect(url('/noticias/nuevo'));
         }
 
         Audit::log(Auth::id(), 'crear_foto', 'foto', $id, 'Foto publicada: ' . (string) $limpio['titulo']);
+
+        if (trim((string) ($limpio['video_url'] ?? '')) !== '' && !Foto::tieneColumnasVideo()) {
+            Session::flash(
+                'error',
+                'La noticia se guardó, pero el video no: falta aplicar la migración 0006 '
+                . '(php8.3 tools/migrar.php en el Terminal del hosting).'
+            );
+            Response::redirect(url('/noticias/' . (string) $id . '/editar'));
+        }
 
         Session::flash('exito', 'La noticia quedó registrada.');
         Response::redirect(url('/noticias'));
@@ -185,6 +197,15 @@ final class NoticiasController
         }
 
         Audit::log(Auth::id(), 'editar_foto', 'foto', $fotoId, 'Foto actualizada: ' . (string) $limpio['titulo']);
+
+        if (trim((string) ($limpio['video_url'] ?? '')) !== '' && !Foto::tieneColumnasVideo()) {
+            Session::flash(
+                'error',
+                'La noticia se guardó, pero el video no: falta aplicar la migración 0006 '
+                . '(php8.3 tools/migrar.php en el Terminal del hosting).'
+            );
+            Response::redirect(url('/noticias/' . (string) $fotoId . '/editar'));
+        }
 
         Session::flash('exito', 'La noticia se actualizó.');
         Response::redirect(url('/noticias'));
