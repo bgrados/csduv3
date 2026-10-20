@@ -1,11 +1,12 @@
 # CONTINUAR — Estado del proyecto CSDUV3
 
-Última actualización: **Fase 2 implementada** (autenticación, roles, portal público
-de alquileres y aplicación instalable). **Pendiente de pruebas en servidor.**
+Última actualización: **Fase 3, corte 1 (padrón de socios) implementado**. La Fase 2
+y este corte están **pendientes de pruebas en servidor.**
 
-> El código de la Fase 2 está escrito y revisado de forma estática, pero **no se ha
-> ejecutado**: este equipo no tiene PHP 8.3 ni MariaDB. No debe darse la fase por
-> terminada hasta ejecutar [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor.
+> El código de la Fase 2 y del corte 1 de socios está escrito y revisado de forma
+> estática, pero **no se ha ejecutado**: este equipo no tiene PHP 8.3 ni MariaDB.
+> Ninguna de las dos fases debe darse por terminada hasta ejecutar
+> [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor.
 
 ---
 
@@ -101,23 +102,68 @@ de alquileres y aplicación instalable). **Pendiente de pruebas en servidor.**
 - Migración aditiva para instalaciones de la Fase 1:
   `database/migrations/0001_solicitudes_alquiler.sql`.
 
+### 2.3 Fase 3 — Socios (corte 1)
+
+**Alcance implementado**
+
+| Función | Estado |
+| --- | --- |
+| Listado paginado con búsqueda y filtros por estado y categoría | Implementado |
+| Alta con código correlativo sugerido y validación en el servidor | Implementado |
+| Unicidad del código y del par tipo de documento / número | Implementado |
+| Ficha individual y edición | Implementado |
+| Baja lógica con historial en `csduv3_socios_bajas` | Implementado |
+| Categorías: listar, crear y activar/desactivar | Implementado |
+| Exportación CSV, documentos adjuntos y fotografía | Pendiente (corte 2) |
+
+**Archivos**
+
+| Archivo | Función |
+| --- | --- |
+| `app/Models/Socio.php` | Consultas del padrón, unicidad, alta, edición y baja transaccional |
+| `app/Models/CategoriaSocio.php` | Categorías configurables y su uso por el padrón |
+| `app/Controllers/SociosController.php` | Listado, alta, ficha, edición, baja y categorías |
+| `app/Views/socios/index.php` | Listado con búsqueda, filtros y paginación |
+| `app/Views/socios/form.php` | Formulario de alta y edición |
+| `app/Views/socios/ver.php` | Ficha individual y registro de baja |
+| `app/Views/socios/categorias.php` | Gestión mínima de categorías |
+| `app/routes.php` | Rutas de socios con permisos por operación |
+| `app/Views/partials/sidebar.php` | Enlace «Socios» habilitado |
+| `app/Controllers/PanelController.php` | El indicador de socios enlaza al padrón |
+
+**Decisiones**
+
+- **No se agregó ninguna migración**: las tablas `socios`, `categorias_socio`,
+  `socios_bajas` y `socios_documentos` ya existían en `01_esquema.sql`.
+- **No se crearon permisos nuevos**: se usan `socios.ver`, `socios.crear`,
+  `socios.editar` y `socios.baja`, ya presentes en `02_datos_iniciales.sql`.
+- Un socio **nunca se elimina**: la baja registra fecha, motivo y si es renuncia.
+- Las categorías **no se precargan**: las define el club según su estatuto.
+- La auditoría registra códigos y nombres de categoría, **no** documentos ni otros
+  datos personales.
+
 ---
 
 ## 3. Pruebas realizadas
 
 Ejecutadas como **verificación estática** (ver [docs/PRUEBAS.md](docs/PRUEBAS.md)):
 
-- `tools/verificar_estatico.ps1`: **80 archivos PHP, 0 hallazgos**.
+- `tools/verificar_estatico.ps1`: **86 archivos PHP, 0 hallazgos**.
 - Cruce de métodos de modelos y núcleo citados por los controladores: correcto.
 - Lista de tablas del diagnóstico (40) coincide con el esquema: correcto.
 - 40 tablas definidas, sin nombres duplicados y sin `DROP`: correcto.
 - Sin credenciales reales en el código ni en la documentación: correcto.
 - `.htaccess` de denegación en `app/`, `config/`, `database/`, `docs/`, `storage/` y `tools/`: correcto.
+- Rutas de socios: las rutas estáticas (`/socios/nuevo`, `/socios/categorias`) se
+  declaran antes de `/socios/{id}`; cada operación exige su permiso en el servidor.
+- Revisión manual de las consultas nuevas: todas usan parámetros vinculados y los
+  valores `LIMIT`/`OFFSET` se acotan antes de interpolarse.
 
 **No ejecutadas:** sintaxis con `php -l`, carga de la aplicación, conexión a
-MariaDB, autenticación, permisos, portal público y PWA, porque **PHP y MariaDB no
-están instalados en este equipo**. No se declaran resultados que no se hayan
-obtenido. La verificación estática **no** es equivalente a `php -l`.
+MariaDB, autenticación, permisos, portal público, PWA y módulo de socios, porque
+**PHP y MariaDB no están instalados en este equipo**. No se declaran resultados
+que no se hayan obtenido. La verificación estática **no** es equivalente a
+`php -l`.
 
 ---
 
@@ -131,6 +177,9 @@ obtenido. La verificación estática **no** es equivalente a `php -l`.
    (y la migración si ya existía la Fase 1).
 4. Ejecutar `php tools/crear_admin.php` y luego **eliminarlo**.
 5. Ejecutar las secciones 4 a 7 de [docs/PRUEBAS.md](docs/PRUEBAS.md).
+6. Probar el corte 1 de socios: alta con código sugerido, rechazo de códigos y
+   documentos duplicados, búsqueda y filtros, ficha, edición, baja con historial
+   y gestión de categorías.
 
 ### 4.2 Decisiones pendientes del club
 
@@ -148,7 +197,7 @@ obtenido. La verificación estática **no** es equivalente a `php -l`.
 
 | Fase | Contenido |
 | --- | --- |
-| 3 | Socios y junta directiva |
+| 3 | Socios (corte 1 implementado) y junta directiva |
 | 4 | Instalaciones, reservas, calendario y pagos (incluye cerrar la condición de carrera) |
 | 5 | Caja, ingresos, egresos e informes financieros |
 | 6 | Deportes, torneos, equipos, fixture y clasificación |
@@ -159,10 +208,14 @@ obtenido. La verificación estática **no** es equivalente a `php -l`.
 
 ## 5. Siguiente paso recomendado
 
-Autorizar el inicio de la **Fase 3** (socios y junta directiva) **después** de
-ejecutar las pruebas de la Fase 2 en un servidor con PHP 8.3 y MariaDB. Si se
-prefiere validar primero, el orden es: instalar PHP/MariaDB → importar → primer
-administrador → ejecutar las pruebas → recién entonces continuar.
+El corte 1 de socios ya está implementado. Antes de continuar:
+
+1. Ejecutar en un servidor con PHP 8.3 y MariaDB las pruebas pendientes de la
+   Fase 2 y del corte 1 de socios.
+2. Corregir lo que aparezca en esas pruebas.
+
+Después, continuar con el **corte 2 de socios** (exportación CSV, documentos
+adjuntos y fotografía) o con la **junta directiva**, según la prioridad del club.
 
 ---
 

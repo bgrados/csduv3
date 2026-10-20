@@ -96,7 +96,7 @@ final class PanelController
                 'valor'   => (string) Socio::contarActivos(),
                 'detalle' => Socio::contarPendientes() . ' con registro pendiente',
                 'icono'   => 'socios',
-                'url'     => null,
+                'url'     => url('/socios'),
                 'tono'    => 'neutro',
             ];
         }

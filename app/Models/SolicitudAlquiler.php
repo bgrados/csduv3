@@ -64,8 +64,12 @@ final class SolicitudAlquiler extends Model
         }
 
         if ($busqueda !== null && $busqueda !== '') {
-            $condiciones[] = '(s.`codigo` LIKE :q OR s.`solicitante_nombre` LIKE :q OR s.`solicitante_telefono` LIKE :q OR s.`solicitante_email` LIKE :q)';
-            $params['q'] = '%' . $busqueda . '%';
+            $condiciones[] = '(s.`codigo` LIKE :q1 OR s.`solicitante_nombre` LIKE :q2 OR s.`solicitante_telefono` LIKE :q3 OR s.`solicitante_email` LIKE :q4)';
+            $like = '%' . $busqueda . '%';
+            $params['q1'] = $like;
+            $params['q2'] = $like;
+            $params['q3'] = $like;
+            $params['q4'] = $like;
         }
 
         $filtro = $condiciones === [] ? '' : 'WHERE ' . implode(' AND ', $condiciones);
@@ -100,8 +104,12 @@ final class SolicitudAlquiler extends Model
         }
 
         if ($busqueda !== null && $busqueda !== '') {
-            $condiciones[] = '(`codigo` LIKE :q OR `solicitante_nombre` LIKE :q OR `solicitante_telefono` LIKE :q OR `solicitante_email` LIKE :q)';
-            $params['q'] = '%' . $busqueda . '%';
+            $condiciones[] = '(`codigo` LIKE :q1 OR `solicitante_nombre` LIKE :q2 OR `solicitante_telefono` LIKE :q3 OR `solicitante_email` LIKE :q4)';
+            $like = '%' . $busqueda . '%';
+            $params['q1'] = $like;
+            $params['q2'] = $like;
+            $params['q3'] = $like;
+            $params['q4'] = $like;
         }
 
         $filtro = $condiciones === [] ? '' : 'WHERE ' . implode(' AND ', $condiciones);

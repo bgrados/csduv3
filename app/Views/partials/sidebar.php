@@ -57,9 +57,11 @@ $enlaces[] = [
         <p class="sidebar__section">Institucional</p>
         <ul class="sidebar__list">
             <?php if (can('socios.ver')): ?>
-                <li><span class="sidebar__link is-disabled" aria-disabled="true">
-                    <?= Icons::render('socios', 'icon', 20) ?><span>Socios</span><span class="badge badge--soft">Fase 3</span>
-                </span></li>
+                <li>
+                    <a class="sidebar__link<?= is_current('/socios') ? ' is-active' : '' ?>" href="<?= e(url('/socios')) ?>">
+                        <?= Icons::render('socios', 'icon', 20) ?><span>Socios</span>
+                    </a>
+                </li>
             <?php endif; ?>
             <?php if (can('directiva.ver')): ?>
                 <li><span class="sidebar__link is-disabled" aria-disabled="true">

@@ -15,11 +15,11 @@ final class Usuario extends Model
     public static function findByLogin(string $login): ?array
     {
         $sql = sprintf(
-            'SELECT * FROM `%s` WHERE `usuario` = :login OR `email` = :login LIMIT 1',
+            'SELECT * FROM `%s` WHERE `usuario` = :login OR `email` = :correo LIMIT 1',
             self::table()
         );
 
-        return self::fetchOne($sql, ['login' => $login]);
+        return self::fetchOne($sql, ['login' => $login, 'correo' => $login]);
     }
 
     /** @return array<string, mixed>|null */
@@ -76,8 +76,12 @@ final class Usuario extends Model
         $filtro = '';
 
         if ($busqueda !== null && $busqueda !== '') {
-            $filtro = 'WHERE (u.`nombres` LIKE :q OR u.`apellidos` LIKE :q OR u.`usuario` LIKE :q OR u.`email` LIKE :q)';
-            $params['q'] = '%' . $busqueda . '%';
+            $filtro = 'WHERE (u.`nombres` LIKE :q1 OR u.`apellidos` LIKE :q2 OR u.`usuario` LIKE :q3 OR u.`email` LIKE :q4)';
+            $like = '%' . $busqueda . '%';
+            $params['q1'] = $like;
+            $params['q2'] = $like;
+            $params['q3'] = $like;
+            $params['q4'] = $like;
         }
 
         $sql = sprintf(
@@ -103,8 +107,12 @@ final class Usuario extends Model
         $filtro = '';
 
         if ($busqueda !== null && $busqueda !== '') {
-            $filtro = 'WHERE (`nombres` LIKE :q OR `apellidos` LIKE :q OR `usuario` LIKE :q OR `email` LIKE :q)';
-            $params['q'] = '%' . $busqueda . '%';
+            $filtro = 'WHERE (`nombres` LIKE :q1 OR `apellidos` LIKE :q2 OR `usuario` LIKE :q3 OR `email` LIKE :q4)';
+            $like = '%' . $busqueda . '%';
+            $params['q1'] = $like;
+            $params['q2'] = $like;
+            $params['q3'] = $like;
+            $params['q4'] = $like;
         }
 
         $sql = sprintf('SELECT COUNT(*) FROM `%s` %s', self::table(), $filtro);

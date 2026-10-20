@@ -9,6 +9,7 @@ use App\Controllers\HomeController;
 use App\Controllers\PanelController;
 use App\Controllers\PortalAlquilerController;
 use App\Controllers\RolesController;
+use App\Controllers\SociosController;
 use App\Controllers\SolicitudesController;
 use App\Controllers\UsuariosController;
 use App\Core\Router;
@@ -128,6 +129,61 @@ $router->get('/roles', [RolesController::class, 'index'], [
 $router->post('/roles/permisos', [RolesController::class, 'actualizarPermisos'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('roles.gestionar'),
+]);
+
+// --- Socios ----------------------------------------------------------------
+//
+// Las rutas estáticas se declaran antes de '/socios/{id}' para que «nuevo» y
+// «categorias» no sean interpretadas como identificadores.
+
+$router->get('/socios', [SociosController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.ver'),
+]);
+
+$router->get('/socios/nuevo', [SociosController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.crear'),
+]);
+
+$router->post('/socios', [SociosController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.crear'),
+]);
+
+$router->get('/socios/categorias', [SociosController::class, 'categorias'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.ver'),
+]);
+
+$router->post('/socios/categorias', [SociosController::class, 'crearCategoria'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.editar'),
+]);
+
+$router->post('/socios/categorias/{id}/estado', [SociosController::class, 'cambiarCategoriaActivo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.editar'),
+]);
+
+$router->get('/socios/{id}', [SociosController::class, 'ver'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.ver'),
+]);
+
+$router->get('/socios/{id}/editar', [SociosController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.editar'),
+]);
+
+$router->post('/socios/{id}', [SociosController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.editar'),
+]);
+
+$router->post('/socios/{id}/baja', [SociosController::class, 'baja'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('socios.baja'),
 ]);
 
 // --- Solicitudes del portal público ---------------------------------------

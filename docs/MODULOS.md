@@ -7,7 +7,7 @@ cuando sus operaciones funcionan sobre la base de datos y están probadas.
 | Módulo | Fase | Estado |
 | --- | --- | --- |
 | Panel principal | 2 (base) / 5 (indicadores completos) | **Implementado — pendiente de pruebas en servidor** |
-| Socios | 3 | Pendiente |
+| Socios | 3 | **Corte 1 implementado — pendiente de pruebas en servidor** |
 | Junta directiva y elecciones | 3 | Pendiente |
 | Instalaciones, tarifas y reservas | 4 | Pendiente |
 | Solicitudes del portal público | 2 | **Implementado — pendiente de pruebas en servidor** |
@@ -21,8 +21,9 @@ cuando sus operaciones funcionan sobre la base de datos y están probadas.
 
 > «Pendiente de pruebas en servidor» significa que el código está escrito y
 > revisado de forma estática, pero **no se ha ejecutado** todavía: el equipo de
-> desarrollo no tiene PHP ni MariaDB. Ninguna funcionalidad de la Fase 2 debe
-> considerarse terminada hasta ejecutar las pruebas de [PRUEBAS.md](PRUEBAS.md).
+> desarrollo no tiene PHP ni MariaDB. Ninguna funcionalidad de la Fase 2 ni del
+> corte 1 de socios debe considerarse terminada hasta ejecutar las pruebas de
+> [PRUEBAS.md](PRUEBAS.md).
 
 ---
 
@@ -83,6 +84,18 @@ primeros pasos del club.
 - Un socio nunca se elimina de la base de datos: se registra su baja.
 - Permisos: `socios.ver`, `socios.crear`, `socios.editar`, `socios.baja`,
   `socios.exportar`, `socios.documentos`.
+
+**Estado del corte 1** (implementado, pendiente de pruebas en servidor)
+
+- Listado paginado con búsqueda por código, documento, nombres o apellidos y
+  filtros por estado y categoría.
+- Alta con sugerencia de código correlativo y validación en el servidor.
+- Unicidad del código y del par tipo de documento / número de documento.
+- Ficha individual, edición y baja lógica con historial en
+  `csduv3_socios_bajas`.
+- Gestión mínima de categorías: listar, crear y activar/desactivar.
+- **Pendiente (corte 2):** exportación CSV, documentos adjuntos y fotografía;
+  vinculación entre usuario y socio; consulta de cuotas o pagos.
 
 ---
 

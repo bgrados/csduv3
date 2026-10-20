@@ -23,8 +23,12 @@ final class Auditoria extends Model
         $condiciones = [];
 
         if ($busqueda !== null && $busqueda !== '') {
-            $condiciones[] = '(a.`descripcion` LIKE :q OR a.`accion` LIKE :q OR u.`nombres` LIKE :q OR u.`apellidos` LIKE :q)';
-            $params['q'] = '%' . $busqueda . '%';
+            $condiciones[] = '(a.`descripcion` LIKE :q1 OR a.`accion` LIKE :q2 OR u.`nombres` LIKE :q3 OR u.`apellidos` LIKE :q4)';
+            $like = '%' . $busqueda . '%';
+            $params['q1'] = $like;
+            $params['q2'] = $like;
+            $params['q3'] = $like;
+            $params['q4'] = $like;
         }
 
         if ($accion !== null && $accion !== '') {
@@ -57,8 +61,12 @@ final class Auditoria extends Model
         $condiciones = [];
 
         if ($busqueda !== null && $busqueda !== '') {
-            $condiciones[] = '(a.`descripcion` LIKE :q OR a.`accion` LIKE :q OR u.`nombres` LIKE :q OR u.`apellidos` LIKE :q)';
-            $params['q'] = '%' . $busqueda . '%';
+            $condiciones[] = '(a.`descripcion` LIKE :q1 OR a.`accion` LIKE :q2 OR u.`nombres` LIKE :q3 OR u.`apellidos` LIKE :q4)';
+            $like = '%' . $busqueda . '%';
+            $params['q1'] = $like;
+            $params['q2'] = $like;
+            $params['q3'] = $like;
+            $params['q4'] = $like;
         }
 
         if ($accion !== null && $accion !== '') {
