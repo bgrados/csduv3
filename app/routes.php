@@ -2,15 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Controllers\AmbientesController;
 use App\Controllers\AuditoriaController;
 use App\Controllers\AuthController;
+use App\Controllers\DeportesController;
 use App\Controllers\DiagnosticoController;
 use App\Controllers\HomeController;
 use App\Controllers\PanelController;
 use App\Controllers\PortalAlquilerController;
+use App\Controllers\PortalTorneosController;
 use App\Controllers\RolesController;
 use App\Controllers\SociosController;
 use App\Controllers\SolicitudesController;
+use App\Controllers\TarifasController;
+use App\Controllers\TorneosController;
 use App\Controllers\UsuariosController;
 use App\Core\Router;
 use App\Middleware\AuthMiddleware;
@@ -48,6 +53,9 @@ $router->get('/alquiler/solicitud', [PortalAlquilerController::class, 'formulari
 $router->post('/alquiler/solicitud', [PortalAlquilerController::class, 'registrar']);
 $router->get('/alquiler/solicitud/recibida/{codigo}', [PortalAlquilerController::class, 'recibida']);
 $router->get('/alquiler/ambiente/{id}', [PortalAlquilerController::class, 'ambiente']);
+
+$router->get('/torneos', [PortalTorneosController::class, 'index']);
+$router->get('/torneos/{id}', [PortalTorneosController::class, 'ver']);
 
 // ===========================================================================
 //  Acceso del personal
@@ -211,6 +219,130 @@ $router->post('/solicitudes/{id}/atender', [SolicitudesController::class, 'atend
 $router->post('/solicitudes/{id}/rechazar', [SolicitudesController::class, 'rechazar'], [
     [AuthMiddleware::class, 'handle'],
     PermissionMiddleware::requiere('alquileres.gestionar'),
+]);
+
+// --- Ambientes y tarifas ---------------------------------------------------
+
+$router->get('/ambientes', [AmbientesController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiereAlguno(['alquileres.ver', 'alquileres.tarifas']),
+]);
+
+$router->get('/ambientes/nuevo', [AmbientesController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->post('/ambientes', [AmbientesController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->get('/ambientes/{id}/editar', [AmbientesController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->post('/ambientes/{id}', [AmbientesController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->post('/ambientes/{id}/estado', [AmbientesController::class, 'cambiarEstado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->get('/ambientes/{id}/tarifas', [TarifasController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiereAlguno(['alquileres.ver', 'alquileres.tarifas']),
+]);
+
+$router->get('/ambientes/{id}/tarifas/nueva', [TarifasController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->post('/ambientes/{id}/tarifas', [TarifasController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->get('/ambientes/{id}/tarifas/{tarifaId}/editar', [TarifasController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->post('/ambientes/{id}/tarifas/{tarifaId}', [TarifasController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+$router->post('/ambientes/{id}/tarifas/{tarifaId}/estado', [TarifasController::class, 'cambiarEstado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('alquileres.tarifas'),
+]);
+
+// --- Deportes y torneos ----------------------------------------------------
+
+$router->get('/deportes', [DeportesController::class, 'index'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.ver'),
+]);
+
+$router->get('/deportes/torneos/nuevo', [TorneosController::class, 'nuevo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->post('/deportes/torneos', [TorneosController::class, 'crear'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->get('/deportes/torneos/{id}', [TorneosController::class, 'ver'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.ver'),
+]);
+
+$router->get('/deportes/torneos/{id}/editar', [TorneosController::class, 'editar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->post('/deportes/torneos/{id}', [TorneosController::class, 'actualizar'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->post('/deportes/torneos/{id}/estado', [TorneosController::class, 'cambiarEstado'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->post('/deportes/torneos/{id}/equipos', [TorneosController::class, 'agregarEquipo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->post('/deportes/torneos/{id}/equipos/{equipoId}/eliminar', [TorneosController::class, 'eliminarEquipo'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->post('/deportes/torneos/{id}/fixture', [TorneosController::class, 'generarFixture'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->get('/deportes/encuentros/{id}/editar', [TorneosController::class, 'editarEncuentro'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
+]);
+
+$router->post('/deportes/encuentros/{id}', [TorneosController::class, 'actualizarEncuentro'], [
+    [AuthMiddleware::class, 'handle'],
+    PermissionMiddleware::requiere('deportes.gestionar'),
 ]);
 
 // --- Auditoría -------------------------------------------------------------

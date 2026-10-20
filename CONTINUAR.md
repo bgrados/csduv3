@@ -1,24 +1,26 @@
 # CONTINUAR — Estado del proyecto CSDUV3
 
-Última actualización: **rediseño UV3 desplegado en producción**. La nueva
-identidad ya se sirve en <https://csduv3.benweb.soy.pe>, pero **la base de datos
-no responde**: la portada muestra mantenimiento y `/alquiler` devuelve 503. El
-aviso de instalación ya se puede cerrar y el script de despliegue dejó de
-contener credenciales. Pendiente: restaurar la base de datos, rotar la
-contraseña expuesta y validar en navegador real y dispositivos.
+Última actualización: **base de datos de producción recuperada y módulos de
+ambientes y torneos implementados**. El portal vuelve a responder en
+<https://csduv3.benweb.soy.pe> (portada, `/alquiler`, `/ingresar` y `/panel`
+devuelven 200 y ya no hay aviso de mantenimiento). Sobre esa base se escribieron
+los módulos **Ambientes y tarifas** (`/ambientes`) y **Deportes y torneos**
+(`/deportes`, más el portal público `/torneos`).
 
-> El código de la Fase 2 y del corte 1 de socios está escrito y revisado de forma
-> estática, pero **no se ha ejecutado**: este equipo no tiene PHP 8.3 ni MariaDB.
-> Ninguna de las dos fases debe darse por terminada hasta ejecutar
-> [docs/PRUEBAS.md](docs/PRUEBAS.md) en un servidor. El rediseño está en GitHub
-> (`main`, commit `211d269`) y el cron del hosting lo despliega automáticamente.
-> La producción ya sirve la nueva identidad visual; **la base de datos no está
-> disponible** (`Database::isAvailable()` devuelve `false`), por lo que el portal
-> está en mantenimiento. El aviso de instalación se corrigió en `f659f36` y el
-> script de respaldo/despliegue ya lee las credenciales de `.env` (`211d269`).
-> **La contraseña de la base de datos estuvo expuesta en el repositorio público:
-> debe rotarse en cPanel y actualizarse en `.env`.** Falta validar en navegador
-> real y dispositivos.
+> El código está verificado con **PHP 8.3.35 portable** (`php -l` sobre 102
+> archivos de `app/`, prueba de enrutamiento y render real de las 11 vistas
+> nuevas) y la verificación estática pasa **sin hallazgos**. Sigue **sin**
+> ejecutarse contra MariaDB y **sin** sesión de administrador: no hay PHP ni
+> MariaDB instalados de forma permanente en este equipo y no se dispone de
+> credenciales de acceso al panel. Por eso los módulos nuevos **no se dan por
+> terminados** hasta ejecutar [docs/PRUEBAS.md](docs/PRUEBAS.md) en el servidor.
+>
+> **Pendiente que bloquea el uso real:**
+> 1. Crear la cuenta de administrador en el hosting (`php tools/crear_admin.php`
+>    desde el Terminal de cPanel; FileZilla no ejecuta PHP).
+> 2. **Rotar la contraseña de la base de datos**, que estuvo expuesta en el
+>    historial público de Git, y actualizar `.env`.
+> 3. Ejecutar los casos `AM-*` y `TO-*` de [docs/PRUEBAS.md](docs/PRUEBAS.md).
 
 ---
 
@@ -190,18 +192,123 @@ verde `#009F39`) a todas las pantallas existentes. La propuesta completa está e
 
 **Alcance:** se aplicó el diseño a **todas las pantallas que ya existen** (portal,
 acceso, panel, socios, solicitudes, usuarios, roles, auditoría, diagnóstico y
-errores). **No se implementaron módulos de negocio nuevos**: junta directiva,
-elecciones y los módulos de las fases 4 a 7 siguen deshabilitados.
+errores). Los módulos de negocio nuevos son los descritos en 2.5 y 2.6; la junta
+directiva, las elecciones y los demás módulos de las fases 4 a 7 siguen
+deshabilitados.
+
+### 2.5 Ambientes y tarifas (módulo nuevo)
+
+Administración de los espacios que el club alquila y de sus tarifas. **No se
+agregó ninguna migración ni se creó ningún permiso nuevo**: se usan las tablas
+`instalaciones`, `tarifas` y `tipos_evento` del esquema y los permisos
+`alquileres.ver` y `alquileres.tarifas`.
+
+| Función | Estado |
+| --- | --- |
+| Listado con búsqueda y filtro por estado, con nº de tarifas y tarifas vigentes | Implementado |
+| Alta y edición de ambientes (nombre, tipo, descripción, ubicación, aforo, adelanto, estado) | Implementado |
+| Activar y desactivar ambientes | Implementado |
+| Alta y edición de tarifas (tipo de uso, monto PEN, horario, vigencia, estado) | Implementado |
+| Activar y desactivar tarifas | Implementado |
+| Publicación automática en el portal: solo ambientes **activos** con **al menos una tarifa vigente** | Implementado |
+| Permisos comprobados en el servidor en cada ruta | Implementado |
+
+**Archivos**
+
+| Archivo | Función |
+| --- | --- |
+| `app/Controllers/AmbientesController.php` | Listado, alta, edición y estado de ambientes |
+| `app/Controllers/TarifasController.php` | Listado, alta, edición y estado de tarifas |
+| `app/Models/Instalacion.php` | Consultas, CRUD y conteo de tarifas vigentes |
+| `app/Models/Tarifa.php` | Consultas, CRUD y tarifas vigentes por instalación |
+| `app/Models/TipoEvento.php` | Tipos de uso activos e inactivos |
+| `app/Views/ambientes/{index,form}.php` | Listado y formulario de ambientes |
+| `app/Views/tarifas/{index,form}.php` | Listado y formulario de tarifas |
+| `app/routes.php` | Rutas `/ambientes` con permisos por operación |
+
+**Decisiones**
+
+- El nombre del ambiente es **único** (lo garantiza `uq_instalaciones_nombre`).
+- Las tarifas se miden en **soles (PEN)**; el campo `moneda` queda fijo en `PEN`.
+- Una tarifa con solo una de las dos horas, o con `hora_fin` anterior a
+  `hora_inicio`, se rechaza en el servidor.
+- Los tipos de uso inactivos se muestran en el formulario pero no se pueden
+  elegir de nuevo.
+
+### 2.6 Deportes y torneos (módulo nuevo)
+
+Organización de torneos de fútbol fulbito y de las demás disciplinas, con
+inscripción de equipos, fixture automático, programación de partidos, resultados
+y tabla de posiciones. **No se agregó ninguna migración ni ningún permiso
+nuevo**: se usan las tablas `deportes`, `deporte_puntos`, `torneos`,
+`torneo_equipos`, `jornadas` y `encuentros` del esquema y los permisos
+`deportes.ver` y `deportes.gestionar`.
+
+| Función | Estado |
+| --- | --- |
+| Listado de torneos con búsqueda y filtros por disciplina y estado | Implementado |
+| Alta y edición de torneo (disciplina, nombre, categoría, modalidad, reglamento, fechas, estado) | Implementado |
+| Cambio de estado del torneo (planificado, en curso, finalizado, anulado) | Implementado |
+| Inscripción de equipos con abreviatura, delegado y teléfono | Implementado |
+| Fixture automático de todos contra todos, con jornada semanal y exe para número impar de equipos | Implementado |
+| Programación de fecha, hora y sede de cada encuentro | Implementado |
+| Registro de resultados y tabla de posiciones según las reglas de la disciplina | Implementado |
+| Portal público de torneos (`/torneos`, `/torneos/{id}`) sin sesión | Implementado |
+| Límite de 64 equipos por torneo | Implementado |
+
+**Archivos**
+
+| Archivo | Función |
+| --- | --- |
+| `app/Controllers/TorneosController.php` | Torneos, equipos, fixture, partidos y resultados |
+| `app/Controllers/DeportesController.php` | Listado administrativo de torneos y disciplinas |
+| `app/Controllers/PortalTorneosController.php` | Portal público de torneos |
+| `app/Models/Torneo.php` | Consultas, fixture y posiciones |
+| `app/Models/TorneoEquipo.php` | Equipos inscritos y control de cruces existentes |
+| `app/Models/Encuentro.php` | Partidos programados y resultados |
+| `app/Models/Jornada.php` | Jornadas o fechas del torneo |
+| `app/Models/Deporte.php` | Disciplinas activas e inactivas |
+| `app/Models/DeportePunto.php` | Reglas de puntuación por disciplina |
+| `app/Views/torneos/*` | Formulario, detalle administrativo, encuentro, portal y estado sin base de datos |
+| `app/Views/deportes/index.php` | Listado administrativo de torneos |
+| `app/routes.php` | Rutas `/deportes` y `/torneos` con permisos por operación |
+
+**Decisiones y límites del alcance**
+
+- Solo se implementa la modalidad **todos contra todos**
+  (`Torneo::MODALIDADES`). Las demás modalidades quedan para una fase posterior.
+- Los equipos **no** se pueden agregar ni eliminar cuando ya existe un fixture:
+  hay que regenerarlo (lo que borra los resultados registrados).
+- Un torneo **anulado** no admite equipos, fixture ni resultados (tampoco
+  falseando la URL); para volver a usarlo hay que cambiarle el estado.
+- Las **estadísticas por jugador** (`encuentro_estadisticas`) y la **tabla por
+  sets** (vóley) **no** están implementadas: la tabla de posiciones trabaja con
+  puntos (3/1/0 por defecto; 2 puntos por victoria en básquet).
+- El portal público muestra los torneos que **no** están anulados.
 
 ---
 
 ## 3. Pruebas realizadas
 
-Ejecutadas como **verificación estática** (ver [docs/PRUEBAS.md](docs/PRUEBAS.md)):
+Ejecutadas con **PHP 8.3.35 portable** (descargado al directorio temporal del
+equipo, fuera del repositorio) y con la verificación estática del proyecto
+(ver [docs/PRUEBAS.md](docs/PRUEBAS.md)):
 
-- `tools/verificar_estatico.ps1`: **87 archivos PHP revisados**; los 2 hallazgos
-  corresponden únicamente a `tools/migrar.php` (script de servidor, fuera del
-  alcance y no modificado). Excluyendo ese archivo: **86 archivos, 0 hallazgos**.
+- `php -l` sobre los **102 archivos PHP de `app/`**: **sin errores de sintaxis**.
+- Verificación estática `tools/verificar_estatico.ps1`: **109 archivos PHP
+  revisados, 0 hallazgos** (se corrigió `tools/migrar.php`, que estaba roto).
+- Prueba de enrutamiento real contra el `Router` del proyecto: las 16 rutas
+  nuevas y modificadas (`/ambientes…`, `/deportes…`, `/deportes/encuentros/{id}`,
+  `/torneos`, `/torneos/{id}`) resuelven al controlador y al método correctos,
+  sin ambigüedad por el orden de declaración.
+- Render real de las **11 vistas nuevas** con datos de muestra: todas se
+  renderizan sin advertencias ni variables indefinidas.
+- Algoritmo de fixture comprobado con 2 a 8 equipos: sin cruces repetidos y con
+  el número exacto de partidos (`n(n-1)/2`), con bye cuando el número de
+  equipos es impar.
+- Comprobación de los parámetros vinculados de las consultas nuevas: no se
+  repite ningún marcador con nombre (obligatorio con
+  `PDO::ATTR_EMULATE_PREPARES = false`).
 - Cruce de métodos de modelos y núcleo citados por los controladores: correcto.
 - Lista de tablas del diagnóstico (40) coincide con el esquema: correcto.
 - 40 tablas definidas, sin nombres duplicados y sin `DROP`: correcto.
@@ -215,30 +322,41 @@ Ejecutadas como **verificación estática** (ver [docs/PRUEBAS.md](docs/PRUEBAS.
   y portal) a 390, 768 y 1440 px: sin desbordamiento horizontal de página; la
   tabla conserva su scroll interno; el menú público se reorganiza en móvil. **No
   sustituye** la revisión de la aplicación real.
+- En producción, antes de este despliegue: portada, `/alquiler`, `/ingresar` y
+  `/panel` respondían **200** y sin aviso de mantenimiento.
 
-**No ejecutadas:** sintaxis con `php -l`, carga de la aplicación, conexión a
-MariaDB, autenticación, permisos, portal público, PWA, módulo de socios y
-revisión en navegador real/dispositivos físicos, porque **PHP y MariaDB no están
-instalados en este equipo**. No se declaran resultados que no se hayan obtenido.
-La verificación estática **no** es equivalente a `php -l`.
+**No ejecutadas:** conexión a MariaDB, escritura en base de datos,
+autenticación, comprobación de permisos en ejecución, alta de socios, alta de
+ambientes, generación de fixture y registro de resultados, revisión en
+navegador real y en dispositivos físicos. La revisión estática y el render con
+datos de muestra **no** sustituyen esas pruebas. No se declaran resultados que
+no se hayan obtenido.
 
 ---
 
 ## 4. Pendiente
 
-### 4.1 Inmediato (bloquea dar la Fase 2 por terminada)
+### 4.1 Inmediato (bloquea el uso real del sistema)
 
-1. Instalar PHP 8.3 y MariaDB en el equipo de desarrollo (o usar Laragon/XAMPP).
-2. Crear `.env` a partir de `.env.example`.
-3. Importar `database/01_esquema.sql` y `database/02_datos_iniciales.sql`
-   (y la migración si ya existía la Fase 1).
-4. Ejecutar `php tools/crear_admin.php` y luego **eliminarlo**.
-5. Ejecutar las secciones 5 a 8 de [docs/PRUEBAS.md](docs/PRUEBAS.md).
-6. Probar el corte 1 de socios: alta con código sugerido, rechazo de códigos y
+1. **Crear la cuenta de administrador** desde el Terminal del hosting:
+   `php tools/crear_admin.php` (después de crear `.env` si aún no existe). Si ya
+   hay un administrador activo, usar `--permitir-otro`. **Eliminar el script del
+   servidor** cuando exista la cuenta.
+2. **Rotar la contraseña de la base de datos** en cPanel y actualizar `.env`: la
+   contraseña anterior estuvo expuesta en el historial público de Git.
+3. Ejecutar en el servidor los casos `AM-*` y `TO-*` de
+   [docs/PRUEBAS.md](docs/PRUEBAS.md) (ambientes, tarifas, torneo, fixture,
+   resultados y posiciones).
+4. Ejecutar las secciones 5 a 8 de [docs/PRUEBAS.md](docs/PRUEBAS.md) para la
+   Fase 2 y el corte 1 de socios.
+5. Probar el corte 1 de socios: alta con código sugerido, rechazo de códigos y
    documentos duplicados, búsqueda y filtros, ficha, edición, baja con historial
    y gestión de categorías.
-7. Revisar el diseño en un navegador real: móvil (360–430 px), tablet
+6. Revisar el diseño en un navegador real: móvil (360–430 px), tablet
    (768–1024 px) y escritorio (1280 px o más), además de la instalación PWA.
+7. Instalar PHP 8.3 y MariaDB de forma permanente en el equipo de desarrollo
+   (o usar Laragon/XAMPP) para poder repetir las pruebas sin depender del
+   hosting.
 
 ### 4.2 Decisiones pendientes del club
 
@@ -246,22 +364,25 @@ La verificación estática **no** es equivalente a `php -l`.
   (amarillo y verde). Falta que el club confirme la versión oficial y, si es
   posible, entregue el archivo en alta resolución para impresión y formatos
   grandes.
-- **Ambientes y tarifas de alquiler**: el portal no los inventa; se cargan en la
-  base de datos.
+- **Ambientes y tarifas de alquiler**: ya se pueden cargar desde el panel
+  (`/ambientes`); el club define los nombres, los precios y la vigencia.
 - **Categorías de socio y cuotas**: no se precargan.
 - **Cargos de la junta directiva**: no se precargan; dependen del estatuto.
 - **Duración del mandato**: `anios_mandato` queda en `4` como valor inicial editable.
 - **Correo institucional del club**: la portada muestra el valor configurado o el
   estado vacío.
+- **Alcance de los torneos**: hoy solo «todos contra todos». Falta decidir si el
+  club necesita otras modalidades (grupos, eliminación, ida y vuelta) y si las
+  disciplinas por sets (vóley) deben tener su propia tabla de posiciones.
 
 ### 4.3 Fases siguientes
 
 | Fase | Contenido |
 | --- | --- |
 | 3 | Socios (corte 1 implementado) y junta directiva |
-| 4 | Instalaciones, reservas, calendario y pagos (incluye cerrar la condición de carrera) |
+| 4 | Reservas, calendario y pagos (incluye cerrar la condición de carrera) |
 | 5 | Caja, ingresos, egresos e informes financieros |
-| 6 | Deportes, torneos, equipos, fixture y clasificación |
+| 6 | Deportes: modalidades adicionales, estadísticas por jugador y tabla por sets |
 | 7 | Documentos, auditoría, reportes y mejoras de experiencia |
 | 8 | Pruebas integrales, revisión de seguridad y despliegue |
 
@@ -269,18 +390,19 @@ La verificación estática **no** es equivalente a `php -l`.
 
 ## 5. Siguiente paso recomendado
 
-El corte 1 de socios ya está implementado y el rediseño visual está aplicado.
-Antes de continuar:
+El corte 1 de socios, los módulos de ambientes y de torneos y el rediseño visual
+ya están implementados. Antes de continuar con módulos nuevos:
 
-1. Revisar el rediseño en la aplicación real, en un navegador (móvil, tablet y
-   escritorio), y ajustar lo que se detecte. Las capturas headless a 390, 768 y
-   1440 px ya se revisaron.
-2. Ejecutar en un servidor con PHP 8.3 y MariaDB las pruebas pendientes de la
-   Fase 2 y del corte 1 de socios.
+1. Crear la cuenta de administrador y rotar la contraseña de la base de datos.
+2. Ejecutar en el servidor las pruebas pendientes (`AM-*` y `TO-*` de
+   [docs/PRUEBAS.md](docs/PRUEBAS.md)) con un torneo de fútbol fulbito de prueba.
 3. Corregir lo que aparezca en esas pruebas.
+4. Revisar el rediseño en la aplicación real, en un navegador (móvil, tablet y
+   escritorio). Las capturas headless a 390, 768 y 1440 px ya se revisaron.
 
 Después, continuar con el **corte 2 de socios** (exportación CSV, documentos
-adjuntos y fotografía) o con la **junta directiva**, según la prioridad del club.
+adjuntos y fotografía), con la **junta directiva** o con las **modalidades
+adicionales de torneo**, según la prioridad del club.
 
 ---
 
@@ -304,12 +426,20 @@ adjuntos y fotografía) o con la **junta directiva**, según la prioridad del cl
 - El corte 1 de socios se publicó en `main` (commit `c54b7e3`) y el rediseño
   visual en `c76def6`, ambos con autorización expresa. El rediseño se desplegó
   en producción mediante el cron del hosting y la identidad nueva ya está
-  visible. **La base de datos no está disponible** (`Database::isAvailable()`
-  devuelve `false`): la portada muestra mantenimiento y `/alquiler` responde 503.
+  visible. **La base de datos volvió a estar disponible**: la portada, `/alquiler`,
+  `/ingresar` y `/panel` responden 200 y el portal ya no muestra mantenimiento.
   El aviso de instalación se corrigió en `f659f36` y el script de despliegue
   ahora lee las credenciales de `.env` (`211d269`). **La contraseña de la base de
   datos estuvo expuesta en el repositorio público: debe rotarse en cPanel y
   actualizarse en `.env`.** El commit `a07324c` (operador) eliminó el
   `.htaccess` raíz para corregir un 403; las rutas sensibles comprobadas
   responden 403/404, pero conviene confirmar el DocumentRoot y mantener las
-  protecciones. Falta restaurar la base de datos y validar en la aplicación real.
+  protecciones.
+- Los módulos de ambientes y torneos se escribieron **sin migración** porque las
+  tablas ya existían en `01_esquema.sql`; no se modificó ningún dato de
+  producción.
+- El fixture automático **no** es un torneo oficial ni-genera datos reales de
+  personas: los equipos los inscribe el club. Los resultados que se registran
+  son los que la organización declara.
+- La tabla de posiciones de los torneos es **administrativa**: no es un sistema
+  de Competencia certificada ni valida identidad de los participantes.

@@ -78,9 +78,11 @@ $enlaces[] = [
         <p class="sidebar__section">Operación</p>
         <ul class="sidebar__list">
             <?php if (can('alquileres.ver') || can('alquileres.tarifas')): ?>
-                <li><span class="sidebar__link is-disabled" aria-disabled="true">
-                    <?= Icons::render('alquileres', 'icon', 20) ?><span>Ambientes y reservas</span><span class="badge badge--soft">Fase 4</span>
-                </span></li>
+                <li>
+                    <a class="sidebar__link<?= is_current('/ambientes') ? ' is-active' : '' ?>" href="<?= e(url('/ambientes')) ?>"<?= is_current('/ambientes') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('alquileres', 'icon', 20) ?><span>Ambientes y tarifas</span>
+                    </a>
+                </li>
             <?php endif; ?>
             <?php if (can('caja.ver')): ?>
                 <li><span class="sidebar__link is-disabled" aria-disabled="true">
@@ -88,9 +90,11 @@ $enlaces[] = [
                 </span></li>
             <?php endif; ?>
             <?php if (can('deportes.ver')): ?>
-                <li><span class="sidebar__link is-disabled" aria-disabled="true">
-                    <?= Icons::render('deportes', 'icon', 20) ?><span>Deportes</span><span class="badge badge--soft">Fase 6</span>
-                </span></li>
+                <li>
+                    <a class="sidebar__link<?= is_current('/deportes') ? ' is-active' : '' ?>" href="<?= e(url('/deportes')) ?>"<?= is_current('/deportes') ? ' aria-current="page"' : '' ?>>
+                        <?= Icons::render('deportes', 'icon', 20) ?><span>Deportes y torneos</span>
+                    </a>
+                </li>
             <?php endif; ?>
             <?php if (can('calendario.ver') || can('documentos.ver')): ?>
                 <li><span class="sidebar__link is-disabled" aria-disabled="true">

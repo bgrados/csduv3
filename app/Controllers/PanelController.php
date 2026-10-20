@@ -9,12 +9,14 @@ use App\Core\Database;
 use App\Core\Logger;
 use App\Core\Request;
 use App\Core\View;
+use App\Models\Deporte;
 use App\Models\Instalacion;
 use App\Models\Movimiento;
 use App\Models\Permiso;
 use App\Models\Reserva;
 use App\Models\Socio;
 use App\Models\SolicitudAlquiler;
+use App\Models\Torneo;
 use App\Models\Usuario;
 
 /**
@@ -101,6 +103,17 @@ final class PanelController
             ];
         }
 
+        if (Auth::can('deportes.ver')) {
+            $datos['indicadores'][] = [
+                'titulo'  => 'Torneos en curso',
+                'valor'   => (string) Torneo::contarEnCurso(),
+                'detalle' => 'de ' . Torneo::contar() . ' organizados',
+                'icono'   => 'deportes',
+                'url'     => url('/deportes'),
+                'tono'    => 'neutro',
+            ];
+        }
+
         if (Auth::can('caja.ver')) {
             $resumen = Movimiento::resumenPeriodo(date('Y-m-01'), date('Y-m-t'));
 
@@ -140,9 +153,18 @@ final class PanelController
         if (Auth::can('alquileres.tarifas') && Instalacion::contarActivas() === 0) {
             $datos['pasos'][] = [
                 'titulo' => 'Publique los ambientes y sus tarifas',
-                'detalle' => 'Los ambientes sin tarifa vigente no se muestran en el portal público. La administración de ambientes se habilita en la Fase 4.',
-                'url'    => null,
-                'accion' => null,
+                'detalle' => 'Cree cada ambiente y agregue al menos una tarifa vigente. Los ambientes sin tarifa no se muestran en el portal público.',
+                'url'    => url('/ambientes/nuevo'),
+                'accion' => 'Crear ambiente',
+            ];
+        }
+
+        if (Auth::can('deportes.gestionar') && Deporte::contarActivos() > 0 && Torneo::contar() === 0) {
+            $datos['pasos'][] = [
+                'titulo' => 'Organice el primer torneo',
+                'detalle' => 'Inscriba los equipos y genere el fixture de fútbol fulbito o de la disciplina que corresponda.',
+                'url'    => url('/deportes/torneos/nuevo'),
+                'accion' => 'Crear torneo',
             ];
         }
 

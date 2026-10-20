@@ -3,16 +3,22 @@
 Este documento registra **qué se ha probado realmente**, con qué herramienta y con
 qué resultado. No se anotan resultados de pruebas que no se hayan ejecutado.
 
-> **Resumen de la Fase 2.** El código de la Fase 2 está escrito y **verificado de
-> forma estática** (no es PHP ejecutándose). Las pruebas de ejecución siguen
-> pendientes porque el equipo de desarrollo no tiene PHP 8.3 ni MariaDB. Por eso la
-> Fase 2 figura como «implementada — pendiente de pruebas en servidor» y no como
-> terminada.
+> **Resumen de la Fase 2.** El código de la Fase 2 está escrito y verificado con
+> `php -l` (PHP 8.3.35 portable) y con la verificación estática del proyecto. Las
+> pruebas de **ejecución contra la base de datos** siguen pendientes porque el
+> equipo de desarrollo no tiene MariaDB. Por eso la Fase 2 figura como
+> «implementada — pendiente de pruebas en servidor» y no como terminada.
 
 > **Resumen del Corte 1 de Socios.** El padrón (listado, alta, ficha, edición,
-> baja lógica y categorías) también está escrito y verificado de forma estática.
-> Sus pruebas de ejecución están en la sección 8 y siguen pendientes por la misma
-> razón: no hay PHP 8.3 ni MariaDB en el equipo de desarrollo.
+> baja lógica y categorías) está escrito y verificado de forma estática. Sus
+> pruebas de ejecución están en la sección 8 y siguen pendientes por la misma
+> razón: no hay MariaDB en el equipo de desarrollo.
+
+> **Resumen de los módulos de ambientes y torneos.** Los módulos de ambientes y
+> tarifas (sección 9) y de deportes y torneos (sección 10) están escritos,
+> pasan `php -l`, la verificación estática, la prueba de enrutamiento y el
+> render de sus 11 vistas. **No se han ejecutado contra la base de datos**: los
+> casos `AM-*` y `TO-*` siguen pendientes.
 
 ---
 
@@ -20,15 +26,16 @@ qué resultado. No se anotan resultados de pruebas que no se hayan ejecutado.
 
 | Herramienta | Estado en el equipo de desarrollo | Consecuencia |
 | --- | --- | --- |
-| PHP 8.3 (`php`) | **No instalado** (no está en `PATH`, ni en XAMPP, Laragon, WAMP ni `Program Files`) | No se pudo ejecutar `php -l` ni el servidor embebido |
+| PHP 8.3 (`php`) | **Portable, descargado al directorio temporal** (PHP 8.3.35 NTS x64). No está instalado de forma permanente ni en el `PATH` | Se pudo ejecutar `php -l`, la prueba de enrutamiento y el render de vistas; **no** se pudo levantar el servidor embebido con PHP embebido ni MySQL |
 | MySQL / MariaDB (`mysql`, `mariadb`) | **No instalados** | No se pudo importar el esquema ni ejecutar consultas reales |
-| Git | Código publicado en `bgrados/csduv3` (rama `main`, commit `211d269`) | El envío del código no constituye una prueba funcional |
+| Git | Código publicado en `bgrados/csduv3` (rama `main`) | El envío del código no constituye una prueba funcional |
 | Node.js | Instalado (v24), usado solo para capturas headless de revisión | No es dependencia de la aplicación ni del servidor |
-| Verificación estática propia | Disponible: `tools/verificar_estatico.ps1` | Se ejecutó sobre los 80 archivos PHP de la Fase 2 y, tras el Corte 1 de Socios y el rediseño, sobre 86 archivos (excluyendo el script de servidor `tools/migrar.php`) |
+| Verificación estática propia | Disponible: `tools/verificar_estatico.ps1` | Se ejecutó sobre los **109 archivos PHP** del proyecto, con **0 hallazgos** |
 
-> **Importante:** mientras PHP no esté instalado, las pruebas de ejecución quedan
-> pendientes. La solución recomendada es instalar PHP 8.3 en el equipo (o usar
-> Laragon/XAMPP) y ejecutar las secciones 5 a 8.
+> **Importante:** con PHP portable se comprobó la sintaxis, el enrutamiento y el
+> render de las vistas, pero **sin base de datos no se puede probar ninguna
+> escritura**. Las pruebas de ejecución quedan pendientes: se necesita PHP 8.3 y
+> MariaDB (en el equipo o en el hosting) para ejecutar las secciones 5 a 10.
 
 ---
 
@@ -57,14 +64,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/verificar_estatico.ps1
 
 | Métrica | Valor |
 | --- | --- |
-| Archivos PHP revisados | 80 |
+| Archivos PHP revisados | 109 |
 | Hallazgos | 0 |
 
-> La última ejecución, sobre el árbol con el Corte 1 de Socios y el rediseño UV3,
-> revisó **86 archivos PHP con 0 hallazgos** al excluir `tools/migrar.php`, un
-> script de servidor que tiene 2 hallazgos preexistentes (no empieza con `<?php`
-> y no declara `strict_types`) y que no se modifica por estar fuera del alcance de
-> la aplicación. Sigue sin sustituir a `php -l`.
+> La última ejecución, sobre el árbol con los módulos de ambientes y de torneos,
+> revisó **109 archivos PHP con 0 hallazgos**. Los 2 hallazgos preexistentes de
+> `tools/migrar.php` (el archivo no empezaba por `<?php` y no declaraba
+> `strict_types`, y estaba mal generado) se corrigieron: el script se reescribió
+> y ahora lee las credenciales de `.env` a través de la configuración de la
+> aplicación, divide el archivo SQL en sentencias y se niega a ejecutar
+> migraciones destructivas sin `--permitir-destructivo`.
+>
+> La verificación estática **no** sustituye a `php -l`; aquí se ejecutaron
+> **ambas** (ver 2.1).
 
 Además se ejecutaron estas comprobaciones de texto:
 
@@ -75,8 +87,25 @@ Además se ejecutaron estas comprobaciones de texto:
 | E3 | El esquema sigue sin `DROP` ni `TRUNCATE` destructivo | Búsqueda de texto | **Correcto** |
 | E4 | No hay credenciales reales nuevas | Búsqueda de contraseñas y tokens | **Correcto** |
 
-> La verificación estática **no** demuestra que el código se ejecute sin errores:
-> solo detecta errores frecuentes. La validación real es la de la sección 4.
+### 2.1 Comprobaciones ejecutadas con PHP 8.3.35 portable
+
+Herramienta: binario `php.exe` descargado al directorio temporal del equipo
+(fuera del repositorio). **No sustituye a una base de datos real**: sirve para
+detectar errores de sintaxis, de enrutamiento y de render.
+
+| N.º | Prueba | Método | Resultado |
+| --- | --- | --- | --- |
+| R1 | Sintaxis de todos los archivos de la aplicación | `php -l` sobre los **102 archivos** de `app/` | **Correcto.** Sin errores de sintaxis |
+| R2 | Sintaxis de las herramientas | `php -l` sobre `tools/*.php` | **Correcto.** Incluido `tools/migrar.php`, reescrito |
+| R3 | Enrutamiento de las rutas nuevas y modificadas | Instancia real de `App\Core\Router` con `app/routes.php` y comparación de la primera ruta que coincide con 16 URLs (`/ambientes`, `/ambientes/{id}/tarifas…`, `/deportes`, `/deportes/torneos…`, `/deportes/encuentros/{id}`, `/torneos`, `/torneos/{id}`) | **Correcto.** Cada URL resuelve al controlador y al método esperados; el orden de declaración no genera ambigüedad |
+| R4 | Render de las vistas nuevas | `View::render()` con datos de muestra sobre las 11 vistas (`ambientes/index`, `ambientes/form`, `tarifas/index`, `tarifas/form`, `deportes/index`, `torneos/form`, `torneos/ver`, `torneos/encuentro_form`, `torneos/index`, `torneos/ver_publico`, `torneos/no_disponible`) | **Correcto.** Todas renderizan sin advertencias ni variables indefinidas |
+| R5 | Algoritmo de fixture | Reproducción del algoritmo de `Torneo::generarFixture()` con 2 a 8 equipos | **Correcto.** Sin cruces repetidos y con el número exacto de partidos (`n(n-1)/2`); con bye cuando el número de equipos es impar |
+| R6 | División de sentencias SQL | `dividirEnSentencias()` sobre `0001_solicitudes_alquiler.sql` (2 sentencias) y `01_esquema.sql` (45 sentencias) | **Correcto.** Ningún comentario queda en las sentencias |
+| R7 | Marcadores PDO repetidos | Revisión de las consultas nuevas: con `PDO::ATTR_EMULATE_PREPARES = false` no se repite ningún marcador con nombre | **Correcto.** Se corrigió `TorneoEquipo::tieneEncuentros()` (`:id` duplicado → `:local` / `:visitante`) |
+
+> Estas comprobaciones **no** demuestran que el código funcione contra la base
+> de datos: solo detectan errores frecuentes. La validación real es la de las
+> secciones 5 a 10.
 
 ---
 
@@ -103,16 +132,17 @@ Fecha de ejecución: sesión de trabajo de la Fase 1 (33 archivos PHP).
 
 | Prueba | Motivo | Cómo ejecutarla |
 | --- | --- | --- |
-| Sintaxis PHP (`php -l`) | PHP no instalado | Sección 4.1 |
-| Importación del esquema SQL | Sin MariaDB | Sección 4.2 |
-| Carga de páginas, PDO y sesiones | Sin PHP ni base de datos | Sección 5 |
-| Autenticación, permisos y CSRF en ejecución | Fase 2 sin servidor | Sección 5 |
-| Portal público de alquileres | Fase 2 sin servidor | Sección 6 |
+| Sintaxis PHP (`php -l`) | **Ejecutada** con PHP 8.3.35 portable (sección 2.1) | Sección 5.1 (repetible en el servidor) |
+| Importación del esquema SQL | Sin MariaDB | Sección 5.2 |
+| Carga de páginas, PDO y sesiones | Sin base de datos | Sección 5 |
+| Autenticación, permisos y CSRF en ejecución | Sin base de datos | Sección 5 |
+| Portal público de alquileres | Sin base de datos | Sección 6 |
 | Aplicación instalable (PWA) | Requiere HTTPS o `localhost` | Sección 7 |
-| Padrón de socios y categorías (Corte 1) | Sin PHP ni MariaDB en el equipo | Sección 8 |
+| Padrón de socios y categorías (Corte 1) | Sin MariaDB en el equipo | Sección 8 |
+| Ambientes y tarifas (alta, edición, publicación) | Sin MariaDB en el equipo | Sección 9 |
+| Torneos, equipos, fixture, resultados y posiciones | Sin MariaDB en el equipo | Sección 10 |
 | Reservas superpuestas (condición de carrera) | Fase 4 | — |
 | Cálculo de pagos y saldos | Fases 4 y 5 | — |
-| Fixture y clasificación | Fase 6 | — |
 
 ---
 
@@ -130,11 +160,21 @@ Get-ChildItem -Recurse -Filter *.php app,public,config,tools | ForEach-Object { 
 
 Debe mostrar «No syntax errors detected» en todos los archivos.
 
+> Esta comprobación **ya se ejecutó** con PHP 8.3.35 portable sobre los 102
+> archivos de `app/` y sobre `tools/` (sección 2.1). Conviene repetirla en el
+> servidor, con la versión de PHP del hosting.
+
 ### 5.2 Instalación
 
 1. Importar `database/01_esquema.sql` y `database/02_datos_iniciales.sql`.
    - Si venía de la Fase 1: ejecutar además
      `database/migrations/0001_solicitudes_alquiler.sql`.
+   - **Los módulos de ambientes y de torneos no requieren migración**: usan
+     tablas que ya están en `01_esquema.sql` (`instalaciones`, `tarifas`,
+     `tipos_evento`, `deportes`, `deporte_puntos`, `torneos`, `torneo_equipos`,
+     `jornadas` y `encuentros`).
+   - Para aplicar migraciones pendientes de forma ordenada y sin repetir:
+     `php tools/migrar.php` (o `php tools/migrar.php --estado` para solo listar).
 2. Comprobar el número de tablas:
 
    ```sql
@@ -153,7 +193,8 @@ Debe mostrar «No syntax errors detected» en todos los archivos.
    ```
 
 4. Crear el primer administrador: `php tools/crear_admin.php` y luego **eliminar**
-   ese archivo del servidor.
+   ese archivo del servidor. Si ya existe un administrador activo, añadir
+   `--permitir-otro`.
 
 ### 5.3 Aplicación (base)
 
@@ -205,6 +246,8 @@ Debe mostrar «No syntax errors detected» en todos los archivos.
 | URL-2 | `POST /usuarios/{id}/estado` con un rol sin `usuarios.gestionar` | 403 |
 | URL-3 | `POST /solicitudes/{id}/rechazar` con un rol sin `alquileres.gestionar` | 403 |
 | URL-4 | `GET /auditoria` con un rol sin `auditoria.ver` | 403 |
+| URL-5 | `GET /ambientes` o `POST /ambientes/{id}/tarifas` con un rol sin `alquileres.tarifas` ni `alquileres.ver` | 403 |
+| URL-6 | `GET /deportes`, `POST /deportes/torneos/{id}/fixture` o `POST /deportes/encuentros/{id}` con un rol sin `deportes.ver` | 403 |
 
 ---
 
@@ -245,7 +288,7 @@ Debe mostrar «No syntax errors detected» en todos los archivos.
 
 > **Estado: todos los casos de esta sección están pendientes de ejecución.** No se
 > ha ejecutado ninguno: el equipo de desarrollo no tiene PHP 8.3 ni MariaDB. Los
-> resultados se anotarán en la sección 9 cuando se ejecuten en un servidor de
+> resultados se anotarán en la sección 11 cuando se ejecuten en un servidor de
 > pruebas.
 >
 > **Nunca ejecutar estas pruebas contra producción.**
@@ -563,7 +606,279 @@ WHERE descripcion LIKE '%99999901%'
 
 ---
 
-## 9. Registro de resultados
+## 9. Pruebas de Ambientes y tarifas (módulo nuevo)
+
+> **Estado: todos los casos de esta sección están pendientes de ejecución.** El
+> código pasa `php -l`, la verificación estática, la prueba de enrutamiento y el
+> render de las vistas, pero **no se ha escrito nada en la base de datos**.
+>
+> **Nunca ejecutar estas pruebas contra producción.**
+
+### 9.0 Preparación común
+
+**Usuarios de prueba**
+
+| Usuario | Rol | Permisos |
+| --- | --- | --- |
+| `admin.prueba` | Administrador del sistema | Todos |
+| `alquileres.prueba` | Responsable de alquileres | `alquileres.ver`, `alquileres.gestionar`, `alquileres.tarifas` |
+| `consulta.prueba` | Consulta | Solo `alquileres.ver` |
+| `sin.alquileres` | Responsable de deportes | Ninguno de `alquileres.*` |
+
+**Datos ficticios**: ambientes «AMB-PRUEBA-1» (Salón de prueba), «AMB-PRUEBA-2»
+(Losa de prueba) y tarifas «TAR-PRUEBA-1» (S/ 150.00, 08:00–12:00, sin
+vigencia). Los nombres de ambiente son únicos: si ya existe uno con ese
+nombre, se usa otro.
+
+**Comprobación previa**
+
+```sql
+SELECT COUNT(*) FROM csduv3_instalaciones;
+SELECT COUNT(*) FROM csduv3_tarifas;
+SELECT COUNT(*) FROM csduv3_auditoria;
+```
+
+### 9.1 Acceso y permisos
+
+**AM-01 · Acceso con permiso**
+- **Precondiciones:** sesión como `admin.prueba`.
+- **Pasos:** `GET /ambientes`; desde el menú «Ambientes y tarifas»; `GET /ambientes/{id}/tarifas`.
+- **Resultado esperado:** 200; enlace del menú activo; botón «Nuevo ambiente»; la columna de tarifas muestra el total y cuántas están vigentes; sin errores SQL ni en `storage/logs`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-02 · Acceso sin permiso**
+- **Precondiciones:** sesión como `sin.alquileres`.
+- **Pasos:** `GET /ambientes`, `GET /ambientes/{id}/tarifas`, `GET /ambientes/nuevo`.
+- **Resultado esperado:** 403 «No tiene permisos para acceder a esta sección.»; el menú no muestra el enlace; se registra `acceso_denegado` en `csduv3_auditoria`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-03 · Acceso sin sesión**
+- **Pasos:** abrir `GET /ambientes` y `GET /ambientes/nuevo` sin cookie de sesión.
+- **Resultado esperado:** redirección 302 a `/ingresar`; no se muestra ningún dato.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-04 · Rol de solo lectura**
+- **Precondiciones:** sesión como `consulta.prueba` (solo `alquileres.ver`).
+- **Pasos:** 1) `GET /ambientes` y `GET /ambientes/{id}/tarifas`. 2) `GET /ambientes/nuevo` y `GET /ambientes/{id}/editar`. 3) POST directos a `/ambientes`, `/ambientes/{id}`, `/ambientes/{id}/estado` y `/ambientes/{id}/tarifas` con token CSRF válido.
+- **Resultado esperado:** el listado y las tarifas se ven sin botones de alta, edición ni activación; las peticiones de escritura responden 403 y no modifican la base.
+- **¿Requiere BD de pruebas?** Sí.
+
+### 9.2 Ambientes
+
+**AM-05 · Listado vacío y con datos**
+- **Pasos:** `GET /ambientes` sin ambientes; luego con al menos uno.
+- **Resultado esperado:** estado vacío coherente cuando no hay registros; con datos, tabla con nombre, tipo, ubicación, aforo, estado y nº de tarifas; el filtro por estado y la búsqueda devuelven lo esperado.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-06 · Alta válida**
+- **Pasos:** `GET /ambientes/nuevo`; nombre «AMB-PRUEBA-1», tipo «salon», descripción y ubicación ficticias, aforo 50, «requiere adelanto» marcado, activo; enviar.
+- **Resultado esperado:** redirección al listado con «El ambiente quedó registrado.»; la fila existe en `csduv3_instalaciones` con `activo = 1` y `requiere_adelanto = 1`; auditoría `crear_ambiente`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-07 · Nombre duplicado**
+- **Pasos:** crear otro ambiente con el mismo nombre y con el nombre en mayúsculas.
+- **Resultado esperado:** se rechaza con «Ya existe un ambiente con ese nombre.»; no se inserta ninguna fila.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-08 · Validaciones del formulario**
+- **Pasos:** enviar con nombre de 2 caracteres, tipo `xyz`, aforo `0`, aforo `5001` y aforo `abc` (POST directo).
+- **Resultado esperado:** cada caso vuelve al formulario con el error correspondiente en español; ninguna fila se inserta ni se modifica.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-09 · Edición y activación**
+- **Pasos:** 1) Editar el ambiente y cambiar nombre, ubicación, aforo y descripción. 2) Desactivarlo desde el botón de estado. 3) Volver a activarlo.
+- **Resultado esperado:** los cambios se guardan con aviso «El ambiente se actualizó.»; al desactivar aparece «El ambiente quedó inactivo.» y deja de publicarse; al activar vuelve a publicarse; auditoría `editar_ambiente`, `desactivar_ambiente` y `activar_ambiente`.
+- **¿Requiere BD de pruebas?** Sí.
+
+### 9.3 Tarifas
+
+**AM-10 · Alta válida**
+- **Pasos:** `GET /ambientes/{id}/tarifas/nueva`; nombre «TAR-PRUEBA-1», tipo de uso, monto `150.00`, hora de inicio `08:00`, hora de fin `12:00`, sin vigencia, activa; enviar.
+- **Resultado esperado:** redirección al listado de tarifas con «La tarifa quedó registrada.»; la fila existe en `csduv3_tarifas` con `moneda = 'PEN'`, `hora_inicio = '08:00:00'`, `hora_fin = '12:00:00'` y `vigente_desde`/`vigente_hasta` nulos; auditoría `crear_tarifa`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-11 · Validaciones de la tarifa**
+- **Pasos:** enviar con: 1) hora de inicio `25:00`; 2) hora de fin `07:00` (anterior a la de inicio); 3) solo una de las dos horas; 4) monto `-5`; 5) monto `abc`; 6) vigencia final anterior a la inicial; 7) nombre de un carácter.
+- **Resultado esperado:** cada caso se rechaza en el servidor con un mensaje en español («La hora de inicio no es válida.», «La hora de fin debe ser posterior a la hora de inicio.», «Indique ambas horas o deje ambas vacías.», «El monto debe ser un importe válido mayor o igual a cero.», etc.); no se inserta ninguna fila.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-12 · Edición y activación de tarifas**
+- **Pasos:** editar el monto, activar y desactivar la tarifa.
+- **Resultado esperado:** los cambios se guardan; desactivar deja de contar como tarifa vigente; auditoría `editar_tarifa`, `desactivar_tarifa` y `activar_tarifa`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-13 · Publicación en el portal público**
+- **Pasos:** 1) Con el ambiente activo y la tarifa vigente, abrir `/alquiler` sin sesión. 2) Poner la vigencia de la tarifa en el pasado o desactivarla. 3) Desactivar el ambiente.
+- **Resultado esperado:** 1) el ambiente aparece con su tarifa y monto; 2) si no hay ninguna tarifa vigente, el ambiente deja de aparecer; 3) un ambiente inactivo nunca aparece; nunca se inventan ambientes ni precios.
+- **¿Requiere BD de pruebas?** Sí.
+
+**AM-14 · Auditoría**
+- **Pasos:** revisar `csduv3_auditoria` tras AM-06, AM-09, AM-10 y AM-12.
+- **Resultado esperado:** aparecen `crear_ambiente`, `editar_ambiente`, `activar_ambiente`, `desactivar_ambiente`, `crear_tarifa`, `editar_tarifa`, `activar_tarifa` y `desactivar_tarifa` con el usuario actor y descripciones que no incluyen datos personales.
+- **¿Requiere BD de pruebas?** Sí.
+
+---
+
+## 10. Pruebas de Deportes y torneos (módulo nuevo)
+
+> **Estado: todos los casos de esta sección están pendientes de ejecución.** El
+> código pasa `php -l`, la verificación estática, la prueba de enrutamiento y el
+> render de las vistas, pero **no se ha escrito nada en la base de datos**.
+>
+> **Nunca ejecutar estas pruebas contra producción.**
+
+### 10.0 Preparación común
+
+**Disciplinas**: las crea `02_datos_iniciales.sql` (Fútbol, Sapo, Básquet y
+Vóley, todas activas). No hay que crear ninguna para estas pruebas.
+
+**Usuarios de prueba**
+
+| Usuario | Rol | Permisos |
+| --- | --- | --- |
+| `admin.prueba` | Administrador del sistema | Todos |
+| `deportes.prueba` | Responsable de deportes | `deportes.ver`, `deportes.gestionar` |
+| `consulta.prueba` | Consulta | Solo `deportes.ver` |
+| `sin.deportes` | Tesorería | Ninguno de `deportes.*` |
+
+**Datos ficticios**: torneo «TOR-PRUEBA-1» de fútbol fulbito, con equipos
+«EQ-PRUEBA-1» a «EQ-PRUEBA-4».
+
+**Comprobación previa**
+
+```sql
+SELECT COUNT(*) FROM csduv3_torneos;
+SELECT COUNT(*) FROM csduv3_torneo_equipos;
+SELECT COUNT(*) FROM csduv3_encuentros;
+SELECT COUNT(*) FROM csduv3_jornadas;
+```
+
+### 10.1 Acceso y permisos
+
+**TO-01 · Acceso con permiso**
+- **Precondiciones:** sesión como `deportes.prueba`.
+- **Pasos:** `GET /deportes`; `GET /deportes/torneos/{id}`.
+- **Resultado esperado:** 200; enlace «Deportes y torneos» activo en el menú; botones de gestión visibles; sin errores SQL.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-02 · Acceso sin permiso**
+- **Precondiciones:** sesión como `sin.deportes`.
+- **Pasos:** `GET /deportes`, `GET /deportes/torneos/nuevo`, `GET /deportes/torneos/{id}`.
+- **Resultado esperado:** 403; el menú no muestra el enlace; auditoría `acceso_denegado`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-03 · Acceso sin sesión**
+- **Pasos:** abrir `GET /deportes` y `GET /deportes/torneos/nuevo` sin cookie.
+- **Resultado esperado:** 302 a `/ingresar`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-04 · Rol de solo lectura**
+- **Precondiciones:** sesión como `consulta.prueba` (solo `deportes.ver`).
+- **Pasos:** 1) `GET /deportes` y `GET /deportes/torneos/{id}`. 2) `GET /deportes/torneos/nuevo` y `GET /deportes/torneos/{id}/editar`. 3) POST directos a `/deportes/torneos`, `/deportes/torneos/{id}`, `/deportes/torneos/{id}/equipos`, `/deportes/torneos/{id}/fixture` y `/deportes/encuentros/{id}` con token CSRF válido.
+- **Resultado esperado:** puede consultar el torneo, el fixture y las posiciones; no ve botones de alta, edición, inscripción ni regeneración; las peticiones de escritura responden 403 y no modifican la base.
+- **¿Requiere BD de pruebas?** Sí.
+
+### 10.2 Torneos
+
+**TO-05 · Listado, búsqueda y filtros**
+- **Pasos:** `GET /deportes`; `GET /deportes?q=PRUEBA`; `GET /deportes?deporte_id={id}`; `GET /deportes?estado=en_curso`.
+- **Resultado esperado:** el listado muestra nombre, disciplina, estado, fechas, nº de equipos y nº de partidos; la búsqueda y los filtros se combinan; un estado desconocido se trata como «sin filtro».
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-06 · Alta válida**
+- **Pasos:** `GET /deportes/torneos/nuevo`; disciplina Fútbol, nombre «TOR-PRUEBA-1», categoría «Fulbito», modalidad «Todos contra todos», reglamento y observaciones ficticios, fecha de inicio, estado «Planificado»; enviar.
+- **Resultado esperado:** redirección a la ficha del torneo con «El torneo quedó creado.»; la fila existe en `csduv3_torneos` con `modalidad = 'todos_contra_todos'`; auditoría `crear_torneo`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-07 · Validaciones del torneo**
+- **Pasos:** enviar con nombre de 2 caracteres, `deporte_id=999999`, `modalidad=grupos`, `estado=xyz` y `fecha_fin` anterior a `fecha_inicio`.
+- **Resultado esperado:** cada caso se rechaza con un mensaje en español; no se inserta ninguna fila.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-08 · Edición y cambio de estado**
+- **Pasos:** 1) Editar el nombre y las fechas. 2) Cambiar el estado a «En curso» con el selector del detalle. 3) Pasarlo a «Anulado» y volver a «Planificado».
+- **Resultado esperado:** los cambios se guardan con aviso; el estado del torneo se actualiza desde la ficha; auditoría `editar_torneo` y `cambiar_estado_torneo`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-09 · Torneo inexistente**
+- **Pasos:** abrir `GET /deportes/torneos/999999` y `GET /deportes/encuentros/999999/editar`.
+- **Resultado esperado:** 404 con el mensaje «El torneo indicado no existe.» / «El encuentro indicado no existe.»; nunca un error 500.
+- **¿Requiere BD de pruebas?** Sí.
+
+### 10.3 Equipos
+
+**TO-10 · Inscripción de equipos**
+- **Pasos:** inscribir «EQ-PRUEBA-1» con abreviatura «EQ1» y un delegado ficticio; repetir con el mismo nombre; repetir con el nombre en mayúsculas.
+- **Resultado esperado:** el primero se inscribe con «El equipo quedó inscrito.»; los duplicados se rechazan con «Ya existe un equipo con ese nombre en el torneo.»; auditoría `crear_equipo_torneo`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-11 · Límite de equipos y bloqueo tras el fixture**
+- **Pasos:** 1) Con el fixture ya generado, intentar inscribir otro equipo y eliminar uno existente (POST directo). 2) Intentar superar 64 equipos.
+- **Resultado esperado:** 1) se rechaza con «El fixture ya fue generado. Regenérelo para incorporar nuevos equipos.» y «No se pueden eliminar equipos después de generar el fixture…»; 2) se rechaza con «Se alcanzó el máximo de 64 equipos para este torneo.»
+- **¿Requiere BD de pruebas?** Sí.
+
+### 10.4 Fixture
+
+**TO-12 · Generación con número par de equipos**
+- **Precondiciones:** torneo con 4 equipos y sin partidos.
+- **Pasos:** `GET /deportes/torneos/{id}`; elegir la fecha de la primera jornada y pulsar «Generar fixture».
+- **Resultado esperado:** aviso «Se generaron 6 partidos…»; en `csduv3_encuentros` hay 6 filas y en `csduv3_jornadas` 3; cada equipo juega 3 partidos; **no hay dos equipos repetidos en un mismo cruce**; todas las filas están en estado «Programado».
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-13 · Generación con número impar de equipos**
+- **Precondiciones:** torneo con 3 equipos.
+- **Pasos:** generar el fixture.
+- **Resultado esperado:** se generan 3 partidos en 3 jornadas; cada equipo juega 2 partidos; en cada jornada hay un equipo con bye (sin partido).
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-14 · Fixture con pocos equipos y con fixture existente**
+- **Pasos:** 1) Generar el fixture con un solo equipo. 2) Con el fixture ya generado, volver a generar **sin** la casilla de reemplazo (POST directo con `reemplazar` ausente).
+- **Resultado esperado:** 1) se rechaza con «Inscriba al menos dos equipos antes de generar el fixture.»; 2) se rechaza con «El torneo ya tiene un fixture. Confirme que desea reemplazarlo.» y no se borra ningún partido.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-15 · Regeneración con confirmación**
+- **Precondiciones:** torneo con fixture y al menos un resultado registrado.
+- **Pasos:** usar «Regenerar fixture» con la confirmación del navegador.
+- **Resultado esperado:** aviso «Se generaron 6 partidos…»; los partidos anteriores y sus resultados desaparecen (también las estadísticas de encuentro por `ON DELETE CASCADE`); las jornadas se renumeran sin duplicar la numeración; auditoría `generar_fixture`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-16 · Torneo anulado**
+- **Pasos:** anular el torneo e intentar: inscribir equipo, eliminar equipo, generar el fixture y registrar un resultado (POST directos).
+- **Resultado esperado:** todas las operaciones se rechazan con «Un torneo anulado no admite modificaciones.» y no se modifica la base; el torneo desaparece del portal público.
+- **¿Requiere BD de pruebas?** Sí.
+
+### 10.5 Resultados y posiciones
+
+**TO-17 · Registro de un resultado**
+- **Pasos:** editar un encuentro, poner marcador `2 – 0` y estado «Jugado».
+- **Resultado esperado:** el fixture muestra «2 – 0» y la insignia «Jugado»; la tabla de posiciones suma 3 puntos al ganador, 0 al perdedor y actualiza goles a favor, en contra y diferencia; auditoría `actualizar_encuentro`.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-18 · Marcador cero y estado sin resultado**
+- **Pasos:** 1) Registrar un partido `0 – 0` como «Jugado». 2) Dejar otro partido en «Programado» con marcadores vacíos. 3) Intentar marcar «Jugado» sin marcadores (POST directo).
+- **Resultado esperado:** 1) el 0–0 se guarda (no se convierte en «sin resultado») y computa 1 punto a cada equipo; 2) el partido sin resultado no suma a la tabla; 3) se rechaza con «Para marcar el encuentro como jugado o walkover debe registrar ambos marcadores.»
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-19 · Validaciones del encuentro**
+- **Pasos:** enviar con fecha vacía, hora `25:00`, marcador `-1`, marcador `1000` y estado `xyz`.
+- **Resultado esperado:** cada caso se rechaza con un mensaje en español; no se modifica el encuentro.
+- **¿Requiere BD de pruebas?** Sí.
+
+### 10.6 Portal público de torneos
+
+**TO-20 · Listado y detalle públicos**
+- **Pasos:** sin sesión, abrir `/torneos` y `/torneos/{id}`.
+- **Resultado esperado:** `/torneos` muestra los torneos que no están anulados, con su disciplina, estado, fechas, nº de equipos y nº de partidos; `/torneos/{id}` muestra el fixture agrupado por jornada y la tabla de posiciones; no se muestran las observaciones internas ni datos de usuarios.
+- **¿Requiere BD de pruebas?** Sí.
+
+**TO-21 · Torneo anulado en el portal**
+- **Pasos:** anular el torneo y abrir `/torneos/{id}`.
+- **Resultado esperado:** 404 «El torneo solicitado no está disponible.»; no aparece en el listado.
+- **¿Requiere BD de pruebas?** Sí.
+
+---
+
+## 11. Registro de resultados
 
 | Fecha | Prueba | Resultado | Observaciones |
 | --- | --- | --- | --- |
@@ -572,12 +887,14 @@ WHERE descripcion LIKE '%99999901%'
 | Fase 2 | E1 a E4 | Correcto | Cruce de métodos, tablas y búsqueda de credenciales |
 | Corte 1 de Socios | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos (excluye `tools/migrar.php`); no sustituye a `php -l` |
 | Rediseño UV3 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos; CSS con 282/282 llaves; capturas headless de referencia a 390, 768 y 1440 px; sin pruebas en navegador real ni dispositivos |
-| Producción | Verificación HTTP (2026-10-19) | **Fallo** | Rediseño visible (tema `#063B22`, `logo.jpg`, CSS y SW v3); la base de datos no responde: portada con mantenimiento y `/alquiler` 503. Pendiente restaurar la BD y rotar la contraseña expuesta. |
-| Pendiente | Secciones 5 a 8 (incluye PS-01 a PS-35) | — | Requiere PHP 8.3 y MariaDB; las pruebas de socios requieren una base de datos de pruebas |
+| Producción | Verificación HTTP | Correcto | Rediseño visible (tema `#063B22`, `logo.jpg`, CSS y SW v3). **La base de datos volvió a responder**: portada, `/alquiler`, `/ingresar` y `/panel` con 200 y sin aviso de mantenimiento |
+| Ambientes y torneos | `php -l` + verificación estática + R3-R7 | Correcto | 102 archivos de `app/` sin errores de sintaxis; 109 archivos PHP con 0 hallazgos; 16 rutas correctas; 11 vistas renderizadas; fixture correcto de 2 a 8 equipos; `tools/migrar.php` corregido |
+| Pendiente | Secciones 5 a 10 (incluye PS-01 a PS-35, AM-01 a AM-14 y TO-01 a TO-21) | — | Requiere **MariaDB** y una sesión de administrador; las pruebas de escritura requieren una base de datos de pruebas |
+| Pendiente | Rotación de la contraseña de la base de datos | — | Sigue expuesta en el historial público de Git: rotar en cPanel y actualizar `.env` |
 
 ---
 
-## 10. Limitaciones conocidas
+## 12. Limitaciones conocidas
 
 La comprobación de solapamiento de horarios **no usa transacción ni
 `SELECT ... FOR UPDATE`**. Dos envíos exactamente simultáneos podrían crear dos
@@ -597,3 +914,15 @@ plantillas) y con capturas headless de una vista de referencia a 390, 768 y
 1440 px. **No se validó en un navegador real ni en dispositivos físicos**; esa
 revisión queda pendiente y debe hacerse sobre un servidor de pruebas, nunca
 sobre producción.
+
+El módulo de torneos solo implementa la modalidad **todos contra todos** y la
+tabla de posiciones trabaja con **puntos** (3/1/0 por defecto; 2 puntos por
+victoria en básquet). **No** hay tabla por sets (vóley) ni estadísticas por
+jugador (`csduv3_encuentro_estadisticas` queda sin uso): el esquema las admite,
+pero el módulo no las escribe. Cualquier disciplina que no use puntos requiere
+una fase posterior.
+
+El módulo de ambientes y tarifas no **crea** los ambientes ni sus precios: el
+club los carga. El portal público solo muestra los ambientes **activos** con al
+menos una **tarifa vigente**; no se inventan datos ni se muestran precios de
+referencia.

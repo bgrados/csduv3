@@ -19,7 +19,7 @@ $usuarioActual = auth();
 $rutaActual = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
 $rutaActual = is_string($rutaActual) && $rutaActual !== '' ? $rutaActual : '/';
 
-$prefijosNav = ['/alquiler/disponibilidad', '/alquiler/solicitud', '/alquiler'];
+$prefijosNav = ['/alquiler/disponibilidad', '/alquiler/solicitud', '/alquiler', '/torneos'];
 $rutaActiva = $rutaActual === '/' ? '/' : null;
 
 foreach ($prefijosNav as $prefijo) {
@@ -49,7 +49,7 @@ $aria = static function (string $prefijo) use ($esActiva): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#063B22">
-    <meta name="description" content="Portal público del <?= e($nombreClub) ?>: consulta de ambientes, tarifas, disponibilidad y solicitudes de alquiler.">
+    <meta name="description" content="Portal público del <?= e($nombreClub) ?>: consulta de ambientes, tarifas, disponibilidad, solicitudes de alquiler y torneos.">
     <title><?= e($tituloPagina) ?></title>
     <link rel="icon" href="<?= e(asset((string) config('app.favicon'))) ?>" type="image/svg+xml">
     <link rel="manifest" href="<?= e(url('/manifest.webmanifest')) ?>">
@@ -83,6 +83,7 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <a class="site-nav__link<?= $activa('/alquiler') ?>" href="<?= e(url('/alquiler')) ?>"<?= $aria('/alquiler') ?>>Ambientes</a>
             <a class="site-nav__link<?= $activa('/alquiler/disponibilidad') ?>" href="<?= e(url('/alquiler/disponibilidad')) ?>"<?= $aria('/alquiler/disponibilidad') ?>>Disponibilidad</a>
             <a class="site-nav__link<?= $activa('/alquiler/solicitud') ?>" href="<?= e(url('/alquiler/solicitud')) ?>"<?= $aria('/alquiler/solicitud') ?>>Solicitar</a>
+            <a class="site-nav__link<?= $activa('/torneos') ?>" href="<?= e(url('/torneos')) ?>"<?= $aria('/torneos') ?>>Torneos</a>
 
             <?php if ($usuarioActual === null): ?>
                 <a class="btn btn--ghost btn--sm site-nav__cta" href="<?= e(url('/ingresar')) ?>">Ingresar</a>
@@ -108,6 +109,7 @@ $aria = static function (string $prefijo) use ($esActiva): string {
             <a href="<?= e(url('/alquiler')) ?>">Ambientes y tarifas</a>
             <a href="<?= e(url('/alquiler/disponibilidad')) ?>">Disponibilidad</a>
             <a href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
+            <a href="<?= e(url('/torneos')) ?>">Torneos</a>
         </div>
     </div>
     <p class="site-footer__meta">
@@ -119,7 +121,7 @@ $aria = static function (string $prefijo) use ($esActiva): string {
 <div class="install-banner" data-install-banner hidden>
     <div>
         <strong>Instale el portal en su teléfono</strong>
-        <p>Acceda más rápido a ambientes y solicitudes, incluso sin conexión a la página informativa.</p>
+        <p>Acceda más rápido a ambientes, solicitudes y torneos, incluso sin conexión a la página informativa.</p>
     </div>
     <div class="install-banner__actions">
         <button type="button" class="btn btn--primary btn--sm" data-install-app>Instalar</button>

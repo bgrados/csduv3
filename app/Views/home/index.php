@@ -24,13 +24,14 @@ $visibles = array_slice($instalaciones, 0, 6);
         <p class="page-head__eyebrow">Portal público</p>
         <h1><?= e((string) config('app.name')) ?></h1>
         <p class="hero__lead">
-            Consulte los ambientes disponibles, las tarifas publicadas por el club y la
-            disponibilidad por fecha. Envíe su solicitud de alquiler desde el teléfono,
-            sin necesidad de crear una cuenta.
+            Consulte los ambientes disponibles, las tarifas publicadas por el club, la
+            disponibilidad por fecha y los torneos en curso. Envíe su solicitud de alquiler
+            desde el teléfono, sin necesidad de crear una cuenta.
         </p>
         <div class="hero__actions">
             <a class="btn btn--primary" href="<?= e(url('/alquiler')) ?>">Ver ambientes y tarifas</a>
             <a class="btn btn--ghost" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
+            <a class="btn btn--ghost" href="<?= e(url('/torneos')) ?>">Ver torneos</a>
         </div>
     </div>
 </section>

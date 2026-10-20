@@ -18,4 +18,12 @@ final class TipoEvento extends Model
             sprintf('SELECT * FROM `%s` WHERE `activo` = 1 ORDER BY `nombre` ASC', self::table())
         );
     }
+
+    /** @return array<int, array<string, mixed>> */
+    public static function todos(): array
+    {
+        return self::fetchAll(
+            sprintf('SELECT * FROM `%s` ORDER BY `activo` DESC, `nombre` ASC', self::table())
+        );
+    }
 }
