@@ -23,7 +23,7 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
     </div>
     <div class="page-head__actions">
         <a class="btn btn--ghost" href="<?= e(url('/alquiler/disponibilidad')) ?>">Consultar disponibilidad</a>
-        <a class="btn btn--primary" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar alquiler</a>
+        <a class="btn btn--primary" href="<?= e(url('/alquiler/reservar')) ?>">Reservar ahora</a>
     </div>
 </div>
 
@@ -94,7 +94,10 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
                 <?php endif; ?>
 
                 <p class="card__actions">
-                    <a class="btn btn--primary btn--sm" href="<?= e(url('/alquiler/ambiente/' . (string) $instalacion['id'])) ?>">
+                    <a class="btn btn--primary btn--sm" href="<?= e(url('/alquiler/reservar?instalacion_id=' . (string) $instalacion['id'])) ?>">
+                        Reservar
+                    </a>
+                    <a class="btn btn--ghost btn--sm" href="<?= e(url('/alquiler/ambiente/' . (string) $instalacion['id'])) ?>">
                         Ver y verificar fecha
                     </a>
                 </p>

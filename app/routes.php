@@ -63,6 +63,9 @@ $router->get('/alquiler/solicitud', [PortalAlquilerController::class, 'formulari
 $router->post('/alquiler/solicitud', [PortalAlquilerController::class, 'registrar']);
 $router->get('/alquiler/solicitud/recibida/{codigo}', [PortalAlquilerController::class, 'recibida']);
 $router->get('/alquiler/ambiente/{id}', [PortalAlquilerController::class, 'ambiente']);
+$router->get('/alquiler/reservar', [PortalAlquilerController::class, 'reservar']);
+$router->post('/alquiler/reservar', [PortalAlquilerController::class, 'crearReserva']);
+$router->get('/alquiler/reserva-confirmada', [PortalAlquilerController::class, 'reservaConfirmada']);
 
 $router->get('/torneos', [PortalTorneosController::class, 'index']);
 $router->get('/torneos/{id}', [PortalTorneosController::class, 'ver']);

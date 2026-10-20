@@ -329,15 +329,30 @@ $categoriasNegocio = [
                 <?php endif; ?>
 
                 <?php if ($tarifas !== []): ?>
+                    <?php
+                    $montos = array_map(static fn (array $tarifa): float => (float) $tarifa['monto'], $tarifas);
+                    $minimo = min($montos);
+                    $maximo = max($montos);
+                    ?>
                     <p class="card__value">
-                        <?= e(dinero((string) $tarifas[0]['monto'])) ?>
-                        <span class="card__unit">/ <?= e((string) ($tarifas[0]['tipo_evento_nombre'] ?? 'uso general')) ?></span>
+                        <?= e(dinero((string) $minimo)) ?>
+                        <?php if ($maximo > $minimo): ?>
+                            <span class="card__unit">hasta <?= e(dinero((string) $maximo)) ?></span>
+                        <?php else: ?>
+                            <span class="card__unit">/ <?= e((string) ($tarifas[0]['tipo_evento_nombre'] ?? 'uso general')) ?></span>
+                        <?php endif; ?>
+                    </p>
+                    <p class="card__hint">
+                        <?= e((string) count($tarifas)) ?> tarifa<?= count($tarifas) === 1 ? '' : 's' ?> publicada<?= count($tarifas) === 1 ? '' : 's' ?>
                     </p>
                 <?php else: ?>
-                    <p class="muted">Tarifa a consultar con el club.</p>
+                    <p class="muted">El club todavía no publicó las tarifas de este ambiente.</p>
                 <?php endif; ?>
 
                 <p>
+                    <a class="btn btn--primary btn--sm" href="<?= e(url('/alquiler/reservar?instalacion_id=' . (string) $instalacion['id'])) ?>">
+                        Reservar
+                    </a>
                     <a class="btn btn--ghost btn--sm" href="<?= e(url('/alquiler/ambiente/' . (string) $instalacion['id'])) ?>">
                         Ver detalle y disponibilidad
                     </a>

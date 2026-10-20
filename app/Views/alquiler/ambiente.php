@@ -23,7 +23,10 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
         <p class="page-head__lead"><?= e((string) ($instalacion['descripcion'] ?? 'Ambiente del club')) ?></p>
     </div>
     <div class="page-head__actions">
-        <a class="btn btn--primary" href="<?= e(url('/alquiler/solicitud?instalacion_id=' . (string) $instalacion['id'] . '&fecha=' . urlencode($fecha))) ?>">
+        <a class="btn btn--primary" href="<?= e(url('/alquiler/reservar?instalacion_id=' . (string) $instalacion['id'] . '&fecha=' . urlencode($fecha))) ?>">
+            Reservar ahora
+        </a>
+        <a class="btn btn--ghost" href="<?= e(url('/alquiler/solicitud?instalacion_id=' . (string) $instalacion['id'] . '&fecha=' . urlencode($fecha))) ?>">
             Solicitar este ambiente
         </a>
     </div>
@@ -121,8 +124,11 @@ $hora = static fn (?string $valor): string => $valor === null || $valor === '' ?
     <?php endif; ?>
 
     <p class="card__actions">
-        <a class="btn btn--primary" href="<?= e(url('/alquiler/solicitud?instalacion_id=' . (string) $instalacion['id'] . '&fecha=' . urlencode($fecha))) ?>">
-            Solicitar para el <?= e(fecha_legible($fecha)) ?>
+        <a class="btn btn--primary" href="<?= e(url('/alquiler/reservar?instalacion_id=' . (string) $instalacion['id'] . '&fecha=' . urlencode($fecha))) ?>">
+            Reservar para el <?= e(fecha_legible($fecha)) ?>
+        </a>
+        <a class="btn btn--ghost" href="<?= e(url('/alquiler/solicitud?instalacion_id=' . (string) $instalacion['id'] . '&fecha=' . urlencode($fecha))) ?>">
+            Enviar una consulta
         </a>
     </p>
 </section>

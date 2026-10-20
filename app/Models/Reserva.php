@@ -346,7 +346,7 @@ final class Reserva extends Model
      * @return int Identificador del pago registrado.
      * @throws RuntimeException cuando el pago no es válido.
      */
-    public static function registrarPago(int $reservaId, array $datos, int $usuarioId): int
+    public static function registrarPago(int $reservaId, array $datos, ?int $usuarioId = null): int
     {
         return (int) Database::transaction(static function () use ($reservaId, $datos, $usuarioId): int {
             $sql = sprintf(
@@ -447,6 +447,30 @@ final class Reserva extends Model
     public static function contar(): int
     {
         return (int) self::scalar(sprintf('SELECT COUNT(*) FROM `%s`', self::table()));
+    }
+
+    /**
+     * Reservas futuras activas de un teléfono (protección ante el bloqueo
+     * abusivo de horarios desde el portal público).
+     */
+    public static function contarActivasPorTelefono(string $telefono): int
+    {
+        $telefono = trim($telefono);
+
+        if ($telefono === '') {
+            return 0;
+        }
+
+        return (int) self::scalar(
+            sprintf(
+                'SELECT COUNT(*) FROM `%s`
+                 WHERE `solicitante_telefono` = :telefono
+                   AND `estado` IN (\'pendiente\', \'confirmada\')
+                   AND `fecha_evento` >= CURDATE()',
+                self::table()
+            ),
+            ['telefono' => $telefono]
+        );
     }
 
     /**
