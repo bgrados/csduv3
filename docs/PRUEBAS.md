@@ -889,6 +889,7 @@ SELECT COUNT(*) FROM csduv3_jornadas;
 | Rediseño UV3 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos; CSS con 282/282 llaves; capturas headless de referencia a 390, 768 y 1440 px; sin pruebas en navegador real ni dispositivos |
 | Producción | Verificación HTTP | Correcto | Rediseño visible (tema `#063B22`, `logo.jpg`, CSS y SW v3). **La base de datos volvió a responder**: portada, `/alquiler`, `/ingresar` y `/panel` con 200 y sin aviso de mantenimiento |
 | Ambientes y torneos | `php -l` + verificación estática + R3-R7 | Correcto | 102 archivos de `app/` sin errores de sintaxis; 109 archivos PHP con 0 hallazgos; 16 rutas correctas; 11 vistas renderizadas; fixture correcto de 2 a 8 equipos; `tools/migrar.php` corregido |
+| Ambientes y torneos | Despliegue en producción (`f1de87d`) | Correcto | `/torneos` 200 con estado vacío «Todavía no hay torneos publicados»; `/torneos/1` 404; `/ambientes`, `/deportes` y `/deportes/torneos/nuevo` 302 a `/ingresar` (la ruta existe y exige sesión); `/`, `/alquiler` e `/ingresar` 200; service worker `csduv3-publica-v4`; menú público con «Torneos» |
 | Pendiente | Secciones 5 a 10 (incluye PS-01 a PS-35, AM-01 a AM-14 y TO-01 a TO-21) | — | Requiere **MariaDB** y una sesión de administrador; las pruebas de escritura requieren una base de datos de pruebas |
 | Pendiente | Rotación de la contraseña de la base de datos | — | Sigue expuesta en el historial público de Git: rotar en cPanel y actualizar `.env` |
 

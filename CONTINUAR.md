@@ -15,6 +15,11 @@ los módulos **Ambientes y tarifas** (`/ambientes`) y **Deportes y torneos**
 > credenciales de acceso al panel. Por eso los módulos nuevos **no se dan por
 > terminados** hasta ejecutar [docs/PRUEBAS.md](docs/PRUEBAS.md) en el servidor.
 >
+> El commit **`f1de87d`** (ambientes, tarifas y torneos) ya está en `main` y el
+> cron del hosting lo desplegó: `/torneos` responde 200 con el estado vacío,
+> `/ambientes` y `/deportes` redirigen a `/ingresar` (las rutas existen y
+> exigen sesión) y `/torneos/1` responde 404.
+>
 > **Pendiente que bloquea el uso real:**
 > 1. Crear la cuenta de administrador en el hosting (`php tools/crear_admin.php`
 >    desde el Terminal de cPanel; FileZilla no ejecuta PHP).
