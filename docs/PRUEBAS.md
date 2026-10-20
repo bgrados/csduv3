@@ -1004,6 +1004,11 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | RS-10 | Convertir una solicitud en reserva | Al abrir «Convertir en reserva» la solicitud pasa a «en revisión»; al guardar, la solicitud queda «atendida» con la nota del código de reserva y el alquiler aparece en caja como ingreso |
 | RS-18 | Convertir una solicitud con un horario ya ocupado | Se avisa del conflicto y se vuelve al formulario de conversión con la solicitud enlazada (no se pierde el vínculo) |
 | RS-19 | Revisar la ficha de una solicitud convertida | Muestra el código de la reserva generada con enlace a `/reservas?q=…` |
+| RS-20 | Editar una reserva y cambiar su estado a «Confirmada» | El estado se guarda, el alquiler entra como ingreso en caja y se avisa por correo |
+| RS-21 | Editar una reserva confirmada y volverla a «Pendiente» | Caja registra la reversa y el alquiler deja de sumar |
+| RS-22 | Editar una reserva confirmada y pasarla a «Finalizada» | El estado se guarda y el ingreso en caja se mantiene (el evento ocurrió) |
+| RS-23 | Guardar una reserva con un horario ya ocupado por otra | Se avisa «Ese horario ya está reservado…» y no se guarda nada |
+| RS-24 | Correr `php8.3 tools/diagnostico_reservas.php` | Informa del estado de las solicitudes y reservas, prueba la conversión y el cambio de estado, y borra los datos de prueba |
 | RS-11 | Editar una reserva cancelada o finalizada | Se rechaza con «Una reserva cancelada o finalizada no se puede editar.» |
 | RS-12 | Reservar de 19:00 a 03:00 (cruce de medianoche) | Se acepta: la reserva termina al día siguiente; en la disponibilidad se muestra «+1 día»; el horario queda bloqueado y la entrada en caja es la del precio acordado |
 | RS-13 | Reservar de 19:00 a 03:00 cuando otra reserva ocupa ese tramo | Se rechaza con «Ese horario ya está reservado…» |

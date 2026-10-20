@@ -434,6 +434,45 @@ foreach ($modelo in Get-ChildItem -Path (Join-Path $raiz 'app') -Filter '*.php' 
 }
 
 # ---------------------------------------------------------------------------
+#  9. Clausulas añadidas despues de FOR UPDATE
+# ---------------------------------------------------------------------------
+#  «FOR UPDATE» tiene que ser lo ultimo de la consulta. Si despues se anade
+#  otra clausula (por ejemplo «AND id <> ?») la sentencia es invalida y la
+#  base devuelve un error de sintaxis.
+
+foreach ($modelo in Get-ChildItem -Path (Join-Path $raiz 'app') -Filter '*.php' -File -Recurse) {
+    $lineas = [System.IO.File]::ReadAllLines($modelo.FullName)
+    $relativo = $modelo.FullName.Substring($raiz.Length + 1)
+
+    $bloqueo = -1
+
+    for ($i = 0; $i -lt $lineas.Length; $i++) {
+        $linea = $lineas[$i]
+        $limpia = $linea.Trim()
+
+        # Cada metodo se revisa por separado.
+        if ($limpia -match '^(public|private|protected|static|\s)*function\s+\w+\s*\(') {
+            $bloqueo = -1
+            continue
+        }
+
+        # Los comentarios no cuentan.
+        if ($limpia -eq '' -or $limpia.StartsWith('*') -or $limpia.StartsWith('//') -or $limpia.StartsWith('#')) {
+            continue
+        }
+
+        if ($linea -match 'FOR UPDATE') {
+            $bloqueo = $i
+            continue
+        }
+
+        if ($bloqueo -ge 0 -and $linea -match '\$sql\s*\.=') {
+            $hallazgos.Add("$relativo : se anade una clausula despues de «FOR UPDATE» (linea $($i + 1)); el bloqueo debe ir al final de la consulta")
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
 #  9. Funciones auxiliares esperadas
 # ---------------------------------------------------------------------------
 

@@ -112,6 +112,10 @@ los módulos **Ambientes y tarifas** (`/ambientes`) y **Deportes y torneos**
 | Archivo | Función |
 | --- | --- |
 | `crear_admin.php` | **Solo consola.** Crea el primer administrador. Se elimina tras usarlo |
+| `diagnostico_reservas.php` | **Solo consola.** Revisa solicitudes y reservas, prueba la conversión y el cambio de estado, y borra lo que prueba |
+| `migrar.php` | Aplica las migraciones pendientes (`database/migrations/`) |
+| `verificar_migraciones.php` | Indica qué migraciones faltan por aplicar |
+| `instalar_demo_fotos.php` | Carga o quita las fotos de ejemplo |
 | `generar_iconos.ps1` | Regenera los iconos PNG |
 | `verificar_estatico.ps1` | Verificación estática (no sustituye a `php -l`) |
 | `.htaccess` | Niega todo acceso por web a la carpeta |

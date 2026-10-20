@@ -104,7 +104,7 @@ final class SolicitudesController
             'Solicitud ' . $solicitud['codigo'] . ' marcada como atendida'
         );
 
-        Session::flash('exito', 'La solicitud quedó marcada como atendida. Recuerde que esto no crea una reserva: el registro de la reserva se realiza en el módulo de alquileres.');
+        Session::flash('exito', 'La solicitud quedó marcada como atendida. Si no hay una reserva creada, use «Convertir en reserva» para registrarla con su tarifa y su horario.');
         Response::redirect(url('/solicitudes/' . $solicitud['id']));
     }
 

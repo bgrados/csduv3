@@ -329,6 +329,10 @@ final class Reserva extends Model
     /**
      * Actualiza los datos de una reserva, comprobando el solapamiento.
      *
+     * Si se indica un estado distinto del actual, tambien se cambia (y se
+     * ajustan los movimientos de caja: al confirmar entra el ingreso del
+     * alquiler).
+     *
      * @param array<string, mixed> $datos
      * @throws RuntimeException cuando el horario ya está reservado.
      */
@@ -381,7 +385,40 @@ final class Reserva extends Model
                     'id'                    => $id,
                 ]
             );
+
+            // El estado se cambia solo si es editable y es distinto del actual.
+            $estado = trim((string) ($datos['estado'] ?? ''));
+
+            if ($estado === '' || !isset(self::ESTADOS_EDITABLES[$estado])) {
+                return;
+            }
+
+            $actual = self::estadoActual($id);
+
+            if ($actual === $estado) {
+                return;
+            }
+
+            self::cambiarEstado(
+                $id,
+                $estado,
+                self::enteroANulo($datos['registrado_por'] ?? null)
+            );
         });
+    }
+
+    /**
+     * Estado actual de una reserva.
+     */
+    private static function estadoActual(int $id): string
+    {
+        $statement = self::db()->prepare(
+            sprintf('SELECT `estado` FROM `%s` WHERE `id` = :id LIMIT 1', self::table())
+        );
+        $statement->execute(['id' => $id]);
+        $fila = $statement->fetch();
+
+        return is_array($fila) ? (string) ($fila['estado'] ?? '') : '';
     }
 
     public static function cambiarEstado(
@@ -414,6 +451,8 @@ final class Reserva extends Model
             return;
         }
 
+        $actual = self::estadoActual($id);
+
         self::run(
             sprintf('UPDATE `%s` SET `estado` = :estado WHERE `id` = :id', self::table()),
             ['estado' => $estado, 'id' => $id]
@@ -421,6 +460,10 @@ final class Reserva extends Model
 
         if ($estado === 'confirmada') {
             self::registrarIngresoEnCaja($id, $usuarioId);
+        } elseif ($actual === 'confirmada' && $estado === 'pendiente') {
+            // Volvió a «pendiente»: el alquiler deja de sumar en caja.
+            // («finalizada» no se toca: el evento ocurrió y el dinero entró.)
+            self::revertirIngresoEnCaja($id, $usuarioId);
         }
     }
 
@@ -733,6 +776,8 @@ final class Reserva extends Model
         $inicio = self::instanteInicio($fecha, $horaInicio);
         $fin = self::instanteFin($fecha, $horaInicio, $horaFin);
 
+        // El bloqueo (FOR UPDATE) va siempre al final de la consulta: las
+        // condiciones se añaden antes.
         $sql = sprintf(
             'SELECT `id` FROM `%s`
              WHERE `instalacion_id` = :instalacion_id
@@ -742,8 +787,7 @@ final class Reserva extends Model
                    WHEN `hora_fin` <= `hora_inicio`
                        THEN TIMESTAMP(DATE_ADD(`fecha_evento`, INTERVAL 1 DAY), `hora_fin`)
                    ELSE TIMESTAMP(`fecha_evento`, `hora_fin`)
-               END > :inicio
-             FOR UPDATE',
+               END > :inicio',
             self::table()
         );
 
@@ -757,6 +801,8 @@ final class Reserva extends Model
             $sql .= ' AND `id` <> :excepto';
             $params['excepto'] = $exceptoId;
         }
+
+        $sql .= ' FOR UPDATE';
 
         $statement = self::db()->prepare($sql);
         $statement->execute($params);

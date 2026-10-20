@@ -269,6 +269,8 @@ final class ReservasController
                 'monto_adelanto'        => (float) $limpio['monto_adelanto'],
                 'condiciones'           => (string) ($limpio['condiciones'] ?? ''),
                 'observaciones'         => (string) ($limpio['observaciones'] ?? ''),
+                'estado'                => (string) $limpio['estado'],
+                'registrado_por'        => (int) Auth::id(),
             ]);
         } catch (RuntimeException $exception) {
             remember_old_input($datos);
@@ -285,6 +287,24 @@ final class ReservasController
         }
 
         Audit::log(Auth::id(), 'editar_reserva', 'reserva', $reservaId, 'Reserva actualizada: ' . (string) $reserva['codigo']);
+
+        // Si al editar se pasa a «confirmada», se avisa por correo como en el
+        // cambio de estado desde la ficha.
+        $estadoNuevo = (string) $limpio['estado'];
+
+        if ($estadoNuevo !== (string) $reserva['estado']) {
+            Audit::log(
+                Auth::id(),
+                'cambiar_estado_reserva',
+                'reserva',
+                $reservaId,
+                'Reserva ' . (string) $reserva['codigo'] . ' pasó a ' . Reserva::ESTADOS[$estadoNuevo]
+            );
+
+            if ($estadoNuevo === 'confirmada') {
+                $this->notificarReserva($reservaId);
+            }
+        }
 
         Session::flash('exito', 'La reserva se actualizó.');
         Response::redirect(url('/reservas/' . $reservaId));
