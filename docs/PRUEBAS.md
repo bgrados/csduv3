@@ -571,7 +571,7 @@ WHERE descripcion LIKE '%99999901%'
 | Fase 2 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 80 archivos PHP, 0 hallazgos |
 | Fase 2 | E1 a E4 | Correcto | Cruce de métodos, tablas y búsqueda de credenciales |
 | Corte 1 de Socios | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos (excluye `tools/migrar.php`); no sustituye a `php -l` |
-| Rediseño UV3 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos; CSS con 281/281 llaves; capturas headless de referencia a 390, 768 y 1440 px; sin pruebas en navegador real ni dispositivos |
+| Rediseño UV3 | Verificación estática (`verificar_estatico.ps1`) | Correcto | 86 archivos PHP, 0 hallazgos; CSS con 282/282 llaves; capturas headless de referencia a 390, 768 y 1440 px; sin pruebas en navegador real ni dispositivos |
 | Pendiente | Secciones 5 a 8 (incluye PS-01 a PS-35) | — | Requiere PHP 8.3 y MariaDB; las pruebas de socios requieren una base de datos de pruebas |
 
 ---

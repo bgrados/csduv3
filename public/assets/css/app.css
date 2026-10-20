@@ -1418,6 +1418,7 @@ code {
 
 .install-banner p { margin: .15rem 0 0; font-size: .82rem; color: var(--color-text-soft); }
 .install-banner__actions { display: flex; gap: .4rem; }
+.install-banner[hidden] { display: none; }
 
 /* --- Adaptación del portal público -------------------------------------- */
 

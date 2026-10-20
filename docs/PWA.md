@@ -93,7 +93,7 @@ Cuando cambie algún archivo estático o la forma de trabajar del service worker
 
 1. Suba los archivos nuevos.
 2. **Aumente la versión de la caché** en `public/sw.js`:
-   `var CACHE = 'csduv3-publica-v2';`
+   `var CACHE = 'csduv3-publica-v3';`
 3. Al abrir el portal, el service worker nuevo se instala, borra las cachés
    antiguas (las que empiezan por `csduv3-`) y toma el control.
 

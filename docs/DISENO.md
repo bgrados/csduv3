@@ -185,7 +185,7 @@ el contenido, el pie y el aviso de instalación.
 La hoja de estilos y las vistas se revisaron de forma estática. La verificación
 `tools/verificar_estatico.ps1` reportó **86 archivos PHP con 0 hallazgos** al
 excluir `tools/migrar.php` (script de servidor con hallazgos preexistentes y fuera
-del alcance de la aplicación); el CSS tiene **281/281 llaves balanceadas**.
+del alcance de la aplicación); el CSS tiene **282/282 llaves balanceadas**.
 
 También se hicieron **capturas con Edge headless sobre una vista estática de
 referencia** que usa la hoja de estilos real:

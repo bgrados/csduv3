@@ -74,7 +74,7 @@ El código fuente no necesita respaldo manual: está en GitHub. **Nunca** incluy
    archivo es para instalaciones nuevas o para crear tablas faltantes.
 5. Si cambió archivos estáticos (`app.css`, `app.js`, iconos, manifiesto),
    **aumente la versión de la caché** en `public/sw.js`
-   (`var CACHE = 'csduv3-publica-v2';`). Así los navegadores que instalaron la
+   (`var CACHE = 'csduv3-publica-v3';`). Así los navegadores que instalaron la
    aplicación reciben los cambios. El HTML nunca se guarda en caché, por lo que
    las páginas se actualizan solas.
 
