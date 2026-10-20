@@ -56,20 +56,33 @@ fi
 echo "Updating code..." >> "$LOG_FILE"
 git pull origin main >> "$LOG_FILE" 2>&1
 
+# Se busca un PHP 8 en consola: el binario `php` puede apuntar a una versión
+# anterior a la que usa la web (por ejemplo 7.4) y las migraciones fallarían.
+PHP_BIN=""
+for CANDIDATE in php8.3 php83 php8 php; do
+    if command -v "$CANDIDATE" >/dev/null 2>&1; then
+        MAJOR="$("$CANDIDATE" -r 'echo PHP_MAJOR_VERSION;' 2>/dev/null)"
+        if [ -n "$MAJOR" ] && [ "$MAJOR" -ge 8 ] 2>/dev/null; then
+            PHP_BIN="$CANDIDATE"
+            break
+        fi
+    fi
+done
+
+if [ -z "$PHP_BIN" ]; then
+    PHP_BIN="php"
+fi
+
+echo "Using PHP binary: $PHP_BIN ($("$PHP_BIN" -r 'echo PHP_VERSION;' 2>/dev/null))" >> "$LOG_FILE"
+
 echo "Running migrations..." >> "$LOG_FILE"
-php tools/migrar.php >> "$LOG_FILE" 2>&1
+"$PHP_BIN" tools/migrar.php >> "$LOG_FILE" 2>&1
 MIGRATION_STATUS=$?
 echo "Migration exit code: $MIGRATION_STATUS" >> "$LOG_FILE"
 
-# Comprobación de que las tablas de los módulos nuevos existen. Si faltan, la
-# aplicación los muestra como no disponibles hasta aplicar la migración.
-for TABLE in fotos negocios; do
-    TABLE_COUNT="$(MYSQL_PWD="$DB_PASS" mysql -N -B -u "$DB_USER" "$DB_NAME" \
-        -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'csduv3_${TABLE}';" 2>>"$LOG_FILE")"
-    echo "Table csduv3_${TABLE}: ${TABLE_COUNT:-0}" >> "$LOG_FILE"
-    if [ "${TABLE_COUNT:-0}" = "0" ]; then
-        echo "WARNING: falta la tabla csduv3_${TABLE}. Ejecute: php tools/migrar.php" >> "$LOG_FILE"
-    fi
-done
+# Comprobación de que las tablas de los módulos nuevos existen. El propio
+# aplicador de migraciones las verifica y deja el resultado en el log.
+echo "Migration summary:" >> "$LOG_FILE"
+"$PHP_BIN" tools/migrar.php --verificar-tablas >> "$LOG_FILE" 2>&1
 
 echo "Deploy finished: $(date)" >> "$LOG_FILE"

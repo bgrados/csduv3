@@ -261,6 +261,32 @@ if ($mostrarEstado) {
     exit(0);
 }
 
+// Comprobacion de tablas: deja constancia de si el sistema tiene todo lo que
+// necesita. Es la misma verificacion que usa tools/verificar_migraciones.php.
+$tablasCriticas = ['fotos', 'negocios', 'usuarios', 'socios', 'instalaciones', 'reservas'];
+$faltantes = [];
+
+foreach ($tablasCriticas as $tabla) {
+    $existe = (int) $pdo->query(sprintf(
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = '%s%s'",
+        $prefijo,
+        $tabla
+    ))->fetchColumn();
+
+    if ($existe === 0) {
+        $faltantes[] = $prefijo . $tabla;
+    }
+}
+
+if ($faltantes !== []) {
+    Informar('ADVERTENCIA: siguen sin existir estas tablas: ' . implode(', ', $faltantes));
+    Informar('Revise el archivo .env y los permisos del usuario de base de datos.');
+} else {
+    Informar('Comprobacion de tablas: todo en orden.');
+}
+
+Informar();
+
 if ($aplicadas === 0) {
     informar('No hay migraciones pendientes. La base de datos está actualizada.');
     exit(0);
