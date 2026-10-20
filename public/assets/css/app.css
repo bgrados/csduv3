@@ -666,6 +666,13 @@ code {
     white-space: nowrap;
 }
 
+.revista__seccion-titulo--portada {
+    display: block;
+    margin-bottom: .7rem;
+    padding-bottom: .3rem;
+    border-bottom: 2px solid var(--color-primary);
+}
+
 /* --- Carrusel ------------------------------------------------------------- */
 
 .carrusel { position: relative; }

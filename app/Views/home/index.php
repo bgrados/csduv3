@@ -120,6 +120,8 @@ $categoriasNegocio = [
             }
             ?>
 
+            <h2 class="revista__seccion-titulo revista__seccion-titulo--portada">Noticias del club</h2>
+
             <?php if ($portada !== null || $imagenPortada !== ''): ?>
                 <article class="portada">
                     <a class="portada__imagen" href="<?= e(url('/galeria')) ?>">
