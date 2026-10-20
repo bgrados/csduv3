@@ -447,6 +447,8 @@ vigencia). El adelanto es el `porcentaje_adelanto` de la configuración
 | Notificaciones por correo | Correo que recibe los avisos de las reservas confirmadas, correo remitente y boton «Guardar y enviar un correo de prueba» |
 | Marca | Logotipo, favicon y foto de portada (subida y restauración de la original) |
 
+La cabecera de la portada usa como fondo la imagen `marca_cabecera` (por defecto, un fondo con el escudo UV3 al 50 % de transparencia) y se cambia desde la misma pantalla.
+
 Los valores se guardan en `csduv3_configuracion` y **sustituyen de inmediato** a
 los del archivo de configuración: el portal público y el panel muestran el
 nombre, las siglas, el logo y el favicon que el club defina. La marca se sirve
