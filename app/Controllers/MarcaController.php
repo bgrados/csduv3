@@ -21,7 +21,7 @@ final class MarcaController
 {
     public function mostrar(Request $request, string $tipo): void
     {
-        if (!in_array($tipo, ['logo', 'favicon', 'portada'], true)) {
+        if (!in_array($tipo, ['logo', 'favicon', 'portada', 'cabecera'], true)) {
             abort(404, 'La imagen solicitada no existe.');
         }
 
@@ -35,9 +35,10 @@ final class MarcaController
 
         if ($absoluta === null || !is_file($absoluta)) {
             $porDefecto = match ($tipo) {
-                'favicon' => 'assets/img/favicon.svg',
-                'logo'    => 'assets/img/logo.jpg',
-                default   => '',
+                'favicon'  => 'assets/img/favicon.svg',
+                'cabecera' => 'assets/img/cabecera-uv3.svg',
+                'logo'     => 'assets/img/logo.jpg',
+                default    => '',
             };
 
             if ($porDefecto !== '') {

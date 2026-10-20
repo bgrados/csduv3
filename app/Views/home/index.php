@@ -87,13 +87,12 @@ $categoriasNegocio = [
 ?>
 
 <section class="revista">
-    <header class="revista__cabecera">
+    <header
+        class="revista__cabecera"
+        style="--cabecera-imagen: url('<?= e(marca_url('cabecera', 'assets/img/cabecera-uv3.svg')) ?>');"
+    >
         <div class="revista__cabecera-fila">
             <span><?= e($fechaEdicion) ?></span>
-            <span class="revista__edicion">Edición de la Unidad Vecinal N.º 3</span>
-            <span class="revista__cabecera-enlace">
-                <a href="<?= e(url('/ingresar')) ?>">Ingresar</a>
-            </span>
         </div>
 
         <div class="revista__masthead">

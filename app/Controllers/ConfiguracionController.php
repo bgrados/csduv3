@@ -35,6 +35,7 @@ final class ConfiguracionController
         'logo'    => 'Logotipo',
         'favicon' => 'Icono del navegador (favicon)',
         'portada' => 'Foto de portada',
+        'cabecera' => 'Fondo de la cabecera de la portada',
     ];
 
     /** Parámetros de texto que se guardan, con su grupo y su tipo. */

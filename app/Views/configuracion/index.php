@@ -187,20 +187,22 @@ $marcaActual = static function (string $tipo) use ($configuracion): string {
 
         <div class="form-grid">
             <div class="field">
-                <label for="correo_notificaciones">Correo que recibe los avisos</label>
+                <label for="correo_notificaciones">Correo del club (recibe el aviso de cada reserva)</label>
                 <input type="email" id="correo_notificaciones" name="correo_notificaciones" maxlength="160" value="<?= e($valor('correo_notificaciones')) ?>" placeholder="reservas@club.org">
                 <p class="field__hint">
-                    Aquí llega el aviso de cada reserva confirmada. Si lo dejas vacío se
-                    usará el «correo institucional».
+                    Es el aviso interno para el club: código, ambiente, fecha, solicitante
+                    e importes. Si lo dejas vacío se usará el «correo institucional».
                 </p>
             </div>
 
             <div class="field">
-                <label for="correo_remitente">Correo remitente</label>
+                <label for="correo_remitente">Correo remitente de las confirmaciones</label>
                 <input type="email" id="correo_remitente" name="correo_remitente" maxlength="160" value="<?= e($valor('correo_remitente')) ?>" placeholder="club@club.org">
                 <p class="field__hint">
-                    Dirección desde la que salen los correos. Si se deja vacío se usa el
-                    remitente por defecto del hosting.
+                    Desde esta dirección sale la <strong>confirmación que recibe la
+                    persona que reservó</strong> (con el correo que dejó en el
+                    formulario). Si lo dejas vacío se usa el remitente por defecto
+                    del hosting.
                 </p>
             </div>
         </div>

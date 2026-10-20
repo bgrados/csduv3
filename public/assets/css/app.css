@@ -549,10 +549,14 @@ code {
     overflow: hidden;
 }
 
-/* Cabecera tipo revista: banda verde con el masthead. */
+/* Cabecera tipo revista: banda verde con el fondo de la marca al 50 %. */
 .revista__cabecera {
-    background:
-        linear-gradient(135deg, var(--brand-green-night) 0%, var(--brand-green-deep) 55%, #0a4d2c 100%);
+    background-color: var(--brand-green-deep);
+    background-image:
+        linear-gradient(rgba(6, 59, 34, .5), rgba(6, 59, 34, .5)),
+        var(--cabecera-imagen, none);
+    background-size: cover;
+    background-position: center right;
     color: #fff;
     padding: 1rem 1.3rem 1.2rem;
     margin-bottom: 1.3rem;
