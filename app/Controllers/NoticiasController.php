@@ -121,7 +121,9 @@ final class NoticiasController
         if (trim((string) ($limpio['video_url'] ?? '')) !== '' && !Foto::tieneColumnasVideo()) {
             Session::flash(
                 'error',
-                'La noticia se guardó, pero el video no: falta aplicar la migración 0006 '
+                'La noticia se guardó, pero el video no: la base de datos todavía no tiene las columnas del video.'
+                . ' Actualice la base de datos desde el panel (Administración > Actualizar la base de datos)'
+                . ' y vuelva a guardar la noticia.'
                 . '(php8.3 tools/migrar.php en el Terminal del hosting).'
             );
             Response::redirect(url('/noticias/' . (string) $id . '/editar'));
@@ -201,7 +203,9 @@ final class NoticiasController
         if (trim((string) ($limpio['video_url'] ?? '')) !== '' && !Foto::tieneColumnasVideo()) {
             Session::flash(
                 'error',
-                'La noticia se guardó, pero el video no: falta aplicar la migración 0006 '
+                'La noticia se guardó, pero el video no: la base de datos todavía no tiene las columnas del video.'
+                . ' Actualice la base de datos desde el panel (Administración > Actualizar la base de datos)'
+                . ' y vuelva a guardar la noticia.'
                 . '(php8.3 tools/migrar.php en el Terminal del hosting).'
             );
             Response::redirect(url('/noticias/' . (string) $fotoId . '/editar'));

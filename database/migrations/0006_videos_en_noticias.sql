@@ -9,9 +9,12 @@
 --  (o en lugar de) su foto. Con el video, la portada y la galería pueden
 --  mostrar el reproductor del club.
 --
+--  La sentencia usa «ADD COLUMN IF NOT EXISTS», que MariaDB admite desde la
+--  versión 10.0: así el archivo se puede aplicar más de una vez sin fallar.
+--
 --  ¿Cuándo ejecutarla?
 --  -------------------
---    * Aplíquela una vez. Si las columnas ya existen, el script no hace nada.
+--    * Aplíquela una vez. Si las columnas ya existen, no hace nada.
 --
 --  Seguridad
 --  ---------
@@ -21,22 +24,8 @@
 
 SET NAMES utf8mb4;
 
-SET @sql = (
-    SELECT IF(
-        EXISTS (
-            SELECT 1
-            FROM information_schema.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE()
-              AND TABLE_NAME = 'csduv3_fotos'
-              AND COLUMN_NAME = 'video_url'
-        ),
-        'DO 0',
-        'ALTER TABLE `csduv3_fotos`
-             ADD COLUMN `video_url` VARCHAR(255) NULL COMMENT ''Enlace al video (YouTube o Facebook)'' AFTER `destacado`,
-             ADD COLUMN `video_tipo` VARCHAR(20) NULL COMMENT ''youtube o facebook'' AFTER `video_url`'
-    )
-);
+ALTER TABLE `csduv3_fotos`
+    ADD COLUMN IF NOT EXISTS `video_url` VARCHAR(255) NULL COMMENT 'Enlace al video (YouTube o Facebook)';
 
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+ALTER TABLE `csduv3_fotos`
+    ADD COLUMN IF NOT EXISTS `video_tipo` VARCHAR(20) NULL COMMENT 'youtube o facebook';
