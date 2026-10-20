@@ -210,60 +210,6 @@ $categoriasNegocio = [
                 </section>
             <?php endif; ?>
 
-            <section class="revista__seccion">
-                <div class="revista__seccion-cabecera">
-                    <h2 class="revista__seccion-titulo">Negocios de la unidad</h2>
-                    <a class="revista__seccion-enlace" href="<?= e(url('/negocios')) ?>">Directorio completo &rarr;</a>
-                </div>
-
-                <?php if ($negociosCarrusel === []): ?>
-                    <div class="card">
-                        <p class="muted">
-                            El club está preparando el directorio de comercios y servicios de la
-                            unidad vecinal.
-                        </p>
-                    </div>
-                <?php else: ?>
-                    <div class="carrusel" data-carrusel>
-                        <div class="carrusel__pista" data-carrusel-pista>
-                            <?php foreach ($negociosCarrusel as $negocio): ?>
-                                <article class="carrusel__tarjeta carrusel__tarjeta--negocio">
-                                    <?php if (!empty($negocio['archivo'])): ?>
-                                        <span class="carrusel__imagen">
-                                            <img src="<?= e($imagenNegocio($negocio)) ?>" alt="<?= e((string) $negocio['nombre']) ?>" loading="lazy">
-                                        </span>
-                                    <?php endif; ?>
-                                    <p class="carrusel__kicker">
-                                        <?= e($categoriasNegocio[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?>
-                                    </p>
-                                    <h3 class="carrusel__titulo"><?= e((string) $negocio['nombre']) ?></h3>
-                                    <?php if (!empty($negocio['descripcion'])): ?>
-                                        <p class="carrusel__resumen"><?= e((string) $negocio['descripcion']) ?></p>
-                                    <?php endif; ?>
-                                    <ul class="carrusel__datos">
-                                        <?php if (!empty($negocio['telefono'])): ?>
-                                            <li><?= e((string) $negocio['telefono']) ?></li>
-                                        <?php endif; ?>
-                                        <?php if (!empty($negocio['horario'])): ?>
-                                            <li><?= e((string) $negocio['horario']) ?></li>
-                                        <?php endif; ?>
-                                    </ul>
-                                    <?php if (!empty($negocio['web'])): ?>
-                                        <a class="btn btn--ghost btn--sm" href="<?= e((string) $negocio['web']) ?>" target="_blank" rel="noopener nofollow">
-                                            Visitar
-                                        </a>
-                                    <?php endif; ?>
-                                </article>
-                            <?php endforeach; ?>
-                        </div>
-
-                        <div class="carrusel__controles">
-                            <button type="button" class="carrusel__boton" data-carrusel-prev aria-label="Anterior">&larr;</button>
-                            <button type="button" class="carrusel__boton" data-carrusel-next aria-label="Siguiente">&rarr;</button>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </section>
         </div>
 
         <aside class="revista__columna">
@@ -349,6 +295,63 @@ $categoriasNegocio = [
                 </p>
             </section>
         </aside>
+    </div>
+
+    <div class="revista__ancho">
+            <section class="revista__seccion">
+                <div class="revista__seccion-cabecera">
+                    <h2 class="revista__seccion-titulo">Negocios de la unidad</h2>
+                    <a class="revista__seccion-enlace" href="<?= e(url('/negocios')) ?>">Directorio completo &rarr;</a>
+                </div>
+
+                <?php if ($negociosCarrusel === []): ?>
+                    <div class="card">
+                        <p class="muted">
+                            El club está preparando el directorio de comercios y servicios de la
+                            unidad vecinal.
+                        </p>
+                    </div>
+                <?php else: ?>
+                    <div class="carrusel" data-carrusel>
+                        <div class="carrusel__pista" data-carrusel-pista>
+                            <?php foreach ($negociosCarrusel as $negocio): ?>
+                                <article class="carrusel__tarjeta carrusel__tarjeta--negocio">
+                                    <?php if (!empty($negocio['archivo'])): ?>
+                                        <span class="carrusel__imagen">
+                                            <img src="<?= e($imagenNegocio($negocio)) ?>" alt="<?= e((string) $negocio['nombre']) ?>" loading="lazy">
+                                        </span>
+                                    <?php endif; ?>
+                                    <p class="carrusel__kicker">
+                                        <?= e($categoriasNegocio[(string) $negocio['categoria']] ?? (string) $negocio['categoria']) ?>
+                                    </p>
+                                    <h3 class="carrusel__titulo"><?= e((string) $negocio['nombre']) ?></h3>
+                                    <?php if (!empty($negocio['descripcion'])): ?>
+                                        <p class="carrusel__resumen"><?= e((string) $negocio['descripcion']) ?></p>
+                                    <?php endif; ?>
+                                    <ul class="carrusel__datos">
+                                        <?php if (!empty($negocio['telefono'])): ?>
+                                            <li><?= e((string) $negocio['telefono']) ?></li>
+                                        <?php endif; ?>
+                                        <?php if (!empty($negocio['horario'])): ?>
+                                            <li><?= e((string) $negocio['horario']) ?></li>
+                                        <?php endif; ?>
+                                    </ul>
+                                    <?php if (!empty($negocio['web'])): ?>
+                                        <a class="btn btn--ghost btn--sm" href="<?= e((string) $negocio['web']) ?>" target="_blank" rel="noopener nofollow">
+                                            Visitar
+                                        </a>
+                                    <?php endif; ?>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <div class="carrusel__controles">
+                            <button type="button" class="carrusel__boton" data-carrusel-prev aria-label="Anterior">&larr;</button>
+                            <button type="button" class="carrusel__boton" data-carrusel-next aria-label="Siguiente">&rarr;</button>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </section>
     </div>
 </section>
 

@@ -625,9 +625,20 @@ code {
     grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
     gap: 1.6rem;
     align-items: start;
+    padding: 0 1.3rem;
 }
 
 .revista__principal { min-width: 0; }
+
+/* Bloque a todo el ancho (vitrina de negocios), por debajo de las columnas. */
+.revista__ancho {
+    padding: 0 1.3rem 1.4rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.revista__ancho .revista__seccion { margin-top: 1.2rem; }
+.revista__ancho .carrusel__pista > * { flex-basis: 210px; }
 
 .portada { display: flex; flex-direction: column; gap: .7rem; }
 
@@ -849,9 +860,10 @@ code {
 .recuadro__pie { margin: .8rem 0 0; }
 
 @media (max-width: 900px) {
-    .revista__cuerpo { grid-template-columns: 1fr; }
-    .revista { padding: 1rem .9rem 1.3rem; }
+    .revista__cuerpo { grid-template-columns: 1fr; padding: 0 .9rem; }
+    .revista__ancho { padding: 0 .9rem 1.1rem; }
     .carrusel__pista > * { flex-basis: 74%; }
+    .revista__ancho .carrusel__pista > * { flex-basis: 74%; }
 }
 
 /* --- Formato periódico (portada) ------------------------------------------ */
