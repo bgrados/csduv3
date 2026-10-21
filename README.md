@@ -19,19 +19,26 @@ y sin dependencias instaladas en el servidor.
 | Fase | Contenido | Estado |
 | --- | --- | --- |
 | 1 | Estructura, configuración, PDO, enrutamiento, plantilla base, esquema SQL | **Completada y revisada** |
-| 2 | Diseño compartido, autenticación, sesiones, roles y permisos, portal público de alquileres y PWA | **Implementada — pendiente de pruebas en servidor** |
-| 3 | Socios y junta directiva | Pendiente |
-| 4 | Instalaciones, reservas, calendario y pagos | Pendiente |
-| 5 | Caja, ingresos, egresos e informes | Pendiente |
-| 6 | Deportes, torneos, fixture y clasificación | Pendiente |
-| 7 | Documentos, auditoría y reportes | Pendiente |
-| 8 | Pruebas integrales, documentación y despliegue | Pendiente |
+| 2 | Diseño compartido, autenticación, sesiones, roles y permisos, portal público y PWA | **Completada** |
+| 3 | Socios y junta directiva | **Completada** |
+| 4 | Instalaciones, reservas, solicitudes, calendario y pagos | **Completada** |
+| 5 | Caja, ingresos, egresos e informes | **Completada** |
+| 6 | Deportes, torneos, fixture y clasificación | **Completada** |
+| 7 | Documentos, noticias con video, negocios, auditoría y elections | **Completada** |
+| 8 | Pruebas integrales, documentación y despliegue | **En curso**: la aplicación está desplegada; faltan las pruebas manuales del servidor (ver [docs/PRUEBAS.md](docs/PRUEBAS.md)) |
 
-> **Importante sobre el estado de la Fase 2.** El código de la Fase 2 está escrito y
-> revisado de forma estática, pero **no se ha ejecutado**: en el equipo de desarrollo
-> no hay PHP ni MariaDB instalados. Antes de dar la fase por terminada deben
-> ejecutarse las pruebas manuales de [docs/PRUEBAS.md](docs/PRUEBAS.md) en un
-> servidor con PHP 8.3 y MariaDB.
+> La aplicación está **desplegada y en uso**: <https://csduv3.benweb.soy.pe>.
+> Lo que queda pendiente son las **pruebas manuales en el servidor** y tres
+> tareas de seguridad (crear el administrador, rotar la contraseña de la base
+> de datos y poner `APP_DEBUG=false`). Está todo detallado en
+> [COMO-REGRESAR.md](COMO-REGRESAR.md).
+
+> **Importante sobre las pruebas.** El código se verifica en cada cambio con
+> `php -l`, la verificación estática (`tools/verificar_estatico.ps1`) y pruebas
+> de render y de enrutamiento. Aun así, **falta la prueba manual en el
+> servidor** con PHP 8.3 y MariaDB: los casos están en
+> [docs/PRUEBAS.md](docs/PRUEBAS.md) y el estado de cada uno en
+> [COMO-REGRESAR.md](COMO-REGRESAR.md).
 
 ---
 
@@ -109,8 +116,13 @@ Detalle completo en [docs/INSTALACION.md](docs/INSTALACION.md) y
 
 ## Documentación
 
+> 👉 **Si estás volviendo al proyecto, empieza por [COMO-REGRESAR.md](COMO-REGRESAR.md)**:
+> resume la aplicación, el despliegue, las herramientas, las reglas y las tareas
+> pendientes.
+
 | Documento | Contenido |
 | --- | --- |
+| [COMO-REGRESAR.md](COMO-REGRESAR.md) | **Guía general y recordatorio para la próxima visita** |
 | [docs/INSTALACION.md](docs/INSTALACION.md) | Instalación local, importación y creación del primer administrador |
 | [docs/DESPLIEGUE_BANAHOSTING.md](docs/DESPLIEGUE_BANAHOSTING.md) | Publicación por cPanel, FTP o Administrador de archivos |
 | [docs/BASE_DE_DATOS.md](docs/BASE_DE_DATOS.md) | Creación, importación y evolución del esquema |
@@ -140,9 +152,9 @@ Detalle completo en [docs/INSTALACION.md](docs/INSTALACION.md) y
   verde `#009F39`. La paleta, los componentes y las reglas responsive están en
   [docs/DISENO.md](docs/DISENO.md). Conviene que el club entregue el logotipo
   oficial en alta resolución para impresión y formatos grandes.
-- La Fase 2 está **implementada pero no probada en un servidor** con PHP 8.3 y
-  MariaDB. Hasta ejecutar [docs/PRUEBAS.md](docs/PRUEBAS.md) no debe darse por
-  terminada.
+- La aplicación está **desplegada y funcionando**, pero **faltan las pruebas
+  manuales en el servidor** con PHP 8.3 y MariaDB. Hasta ejecutar
+  [docs/PRUEBAS.md](docs/PRUEBAS.md) no debe darse por terminada.
 - Los comprobantes que genere el sistema son **documentos internos**; no son
   comprobantes electrónicos autorizados por SUNAT.
 - El registro de resultados electorales es **administrativo**; no es un sistema de

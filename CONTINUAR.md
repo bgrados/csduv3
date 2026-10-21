@@ -1,5 +1,10 @@
 # CONTINUAR — Estado del proyecto CSDUV3
 
+> 👉 **Antes de leer este documento, abre [COMO-REGRESAR.md](COMO-REGRESAR.md)**:
+> es la guía general (qué es la app, dónde está, cómo se despliega, qué falta
+> por hacer y los errores ya resueltos). Este archivo es la bitácora detallada
+> del desarrollo, módulo por módulo.
+
 Última actualización: **base de datos de producción recuperada y módulos de
 ambientes y torneos implementados**. El portal vuelve a responder en
 <https://csduv3.benweb.soy.pe> (portada, `/alquiler`, `/ingresar` y `/panel`
