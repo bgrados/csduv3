@@ -344,6 +344,26 @@ $categoriasNegocio = [
                     <a class="btn btn--ghost btn--sm" href="<?= e(url('/alquiler/solicitud')) ?>">Solicitar</a>
                 </p>
             </section>
+
+            <?php $telefonosEmergencia = emergencias(); ?>
+            <?php if ($telefonosEmergencia !== []): ?>
+                <section class="recuadro recuadro--emergencia">
+                    <h2 class="recuadro__titulo">Teléfonos de emergencia</h2>
+                    <ul class="emergencias-lista">
+                        <?php foreach ($telefonosEmergencia as $emergencia): ?>
+                            <li class="emergencias-lista__item">
+                                <a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $emergencia['telefono'])) ?>">
+                                    <span class="emergencias-lista__etiqueta"><?= e($emergencia['etiqueta']) ?></span>
+                                    <span class="emergencias-lista__telefono"><?= e($emergencia['telefono']) ?></span>
+                                </a>
+                                <?php if ($emergencia['nota'] !== ''): ?>
+                                    <span class="emergencias-lista__nota"><?= e($emergencia['nota']) ?></span>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </section>
+            <?php endif; ?>
         </aside>
     </div>
 

@@ -1104,7 +1104,11 @@ SELECT COUNT(*) FROM csduv3_periodos;                 -- esperado: 0
 | MB-01 | Entrar al panel con una migración pendiente | Aparece un aviso en todas las páginas del panel con un enlace a «Actualizar la base de datos» |
 | MB-02 | Aplicar las actualizaciones desde `/migraciones` | Se aplican, se registra el historial y el aviso desaparece |
 | MB-03 | Publicar una noticia con video después de actualizar la base | El video se guarda y aparece en la portada |
-| MB-04 | Correr `php8.3 tools/migrar.php` en el Terminal | Aplica lo pendiente y muestra un resumen (misma lógica que el panel) | Se envía el aviso al club con el código, ambiente, fecha, horario, solicitante, precio, adelanto y pagado; si el solicitante dejó su correo, también recibe la confirmación |
+| MB-04 | Correr `php8.3 tools/migrar.php` en el Terminal | Aplica lo pendiente y muestra un resumen (misma lógica que el panel) |
+| CF-14 | Agregar y quitar teléfonos de emergencia en `/configuracion` | Se guardan las filas; las vacías se descartan; si a una fila le falta el nombre o el número se avisa |
+| CF-15 | Guardar un teléfono de emergencia sin nombre o sin número | Se avisa y no se guarda el cambio |
+| RV-9 | Publicar la portada con teléfonos de emergencia configurados | En la columna de la derecha, debajo de «Alquiler de ambientes», aparece el módulo con los teléfonos (enlazables para llamar) |
+| RV-10 | Publicar la portada sin teléfonos de emergencia | El módulo no aparece | Se envía el aviso al club con el código, ambiente, fecha, horario, solicitante, precio, adelanto y pagado; si el solicitante dejó su correo, también recibe la confirmación |
 
 ### 13.5 Noticias y portada
 

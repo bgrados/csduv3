@@ -828,6 +828,95 @@ code {
 
 .recuadro__lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .7rem; }
 
+/* --------------------------------------------------------------------------
+   Teléfonos de emergencia (portada y configuración).
+   -------------------------------------------------------------------------- */
+
+.recuadro--emergencia {
+    border-color: var(--color-danger, #b3261e);
+}
+
+.emergencias-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+
+.emergencias-lista__item {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    padding-bottom: .55rem;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.emergencias-lista__item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.emergencias-lista__item a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .6rem;
+    color: var(--color-text, #33463a);
+    text-decoration: none;
+}
+
+.emergencias-lista__item a:hover .emergencias-lista__telefono {
+    color: var(--color-danger, #b3261e);
+}
+
+.emergencias-lista__etiqueta {
+    font-weight: 600;
+    font-size: .92rem;
+}
+
+.emergencias-lista__telefono {
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--color-danger, #b3261e);
+    white-space: nowrap;
+}
+
+.emergencias-lista__nota {
+    font-size: .76rem;
+    color: var(--color-muted);
+}
+
+/* Filas del formulario de configuración. */
+.emergencias {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    margin-bottom: .8rem;
+}
+
+.emergencias__fila {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1.1fr auto;
+    gap: .6rem;
+    align-items: end;
+    padding: .6rem;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: #fbfdfb;
+}
+
+.emergencias__fila .field label { font-size: .72rem; }
+
+@media (max-width: 760px) {
+    .emergencias__fila {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+}
+
 .recuadro__evento {
     display: flex;
     gap: .7rem;

@@ -284,6 +284,54 @@ if (!function_exists('club')) {
     }
 }
 
+if (!function_exists('emergencias')) {
+    /**
+     * Teléfonos de emergencia del club.
+     *
+     * Se guardan en la configuración del club como una lista con la etiqueta,
+     * el teléfono y una nota. Las filas incompletas se descartan.
+     *
+     * @return array<int, array{etiqueta: string, telefono: string, nota: string}>
+     */
+    function emergencias(): array
+    {
+        $crudo = club('telefonos_emergencia', '');
+
+        if ($crudo === '') {
+            return [];
+        }
+
+        $datos = json_decode($crudo, true);
+
+        if (!is_array($datos)) {
+            return [];
+        }
+
+        $lista = [];
+
+        foreach ($datos as $fila) {
+            if (!is_array($fila)) {
+                continue;
+            }
+
+            $etiqueta = trim((string) ($fila['etiqueta'] ?? ''));
+            $telefono = trim((string) ($fila['telefono'] ?? ''));
+
+            if ($etiqueta === '' || $telefono === '') {
+                continue;
+            }
+
+            $lista[] = [
+                'etiqueta' => $etiqueta,
+                'telefono' => $telefono,
+                'nota'     => trim((string) ($fila['nota'] ?? '')),
+            ];
+        }
+
+        return $lista;
+    }
+}
+
 if (!function_exists('redes_club')) {
     /**
      * Redes sociales configuradas por el club.

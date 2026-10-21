@@ -58,6 +58,7 @@ final class ConfiguracionController
         'correo_remitente'   => ['notificaciones', 'texto'],
         'portada_titulo'     => ['portada', 'texto'],
         'portada_resumen'    => ['portada', 'texto'],
+        'telefonos_emergencia' => ['emergencia', 'texto'],
         'porcentaje_adelanto' => ['alquileres', 'numero'],
         'dias_anticipacion'  => ['alquileres', 'numero'],
         'fotos_ejemplo'      => ['portada', 'booleano'],
@@ -164,8 +165,30 @@ final class ConfiguracionController
             }
         }
 
+        // Teléfonos de emergencia: llegan como filas editables.
+        $emergencias = $this->leerEmergencias($request);
+
+        foreach ($emergencias as $emergencia) {
+            if ($emergencia['etiqueta'] === '') {
+                $errores[] = 'Indique el nombre del teléfono de emergencia.';
+                break;
+            }
+
+            if ($emergencia['telefono'] === '') {
+                $errores[] = 'Indique el número del teléfono «' . $emergencia['etiqueta'] . '».';
+                break;
+            }
+        }
+
+        $limpio['telefonos_emergencia'] = (string) json_encode(
+            $emergencias,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        );
+
         if ($errores !== []) {
-            remember_old_input($datos);
+            remember_old_input(array_merge($datos, [
+                'emergencia_telefonos' => $request->input('emergencia_telefonos', []),
+            ]));
             Session::flash('errores', $errores);
             Response::redirect(url('/configuracion'));
         }
@@ -201,6 +224,47 @@ final class ConfiguracionController
         }
 
         Response::redirect(url('/configuracion'));
+    }
+
+    /**
+     * Lee las filas de teléfonos de emergencia del formulario.
+     *
+     * Cada fila trae la etiqueta, el teléfono y una nota opcional. Las filas
+     * completamente vacías se descartan.
+     *
+     * @return array<int, array{etiqueta: string, telefono: string, nota: string}>
+     */
+    private function leerEmergencias(Request $request): array
+    {
+        $filas = $request->input('emergencia_telefonos', []);
+
+        if (!is_array($filas)) {
+            return [];
+        }
+
+        $lista = [];
+
+        foreach ($filas as $fila) {
+            if (!is_array($fila)) {
+                continue;
+            }
+
+            $etiqueta = trim((string) ($fila['etiqueta'] ?? ''));
+            $telefono = trim((string) ($fila['telefono'] ?? ''));
+            $nota = trim((string) ($fila['nota'] ?? ''));
+
+            if ($etiqueta === '' && $telefono === '' && $nota === '') {
+                continue;
+            }
+
+            $lista[] = [
+                'etiqueta' => mb_substr($etiqueta, 0, 60),
+                'telefono' => mb_substr($telefono, 0, 40),
+                'nota'     => mb_substr($nota, 0, 80),
+            ];
+        }
+
+        return $lista;
     }
 
     /**

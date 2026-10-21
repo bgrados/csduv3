@@ -155,6 +155,77 @@ $marcaActual = static function (string $tipo) use ($configuracion): string {
     </fieldset>
 
     <fieldset class="form__group">
+        <legend>Teléfonos de emergencia</legend>
+
+        <p class="field__hint">
+            Aparecen en la portada del portal, en la columna de la derecha.
+            Escriba el nombre de la-central (Bomberos, Comisaría, Ambulancia…)
+            y su teléfono. Puede agregar o quitar filas cuantas veces quiera.
+        </p>
+
+        <?php
+        $filasEmergencia = old('emergencia_telefonos', null);
+
+        if (!is_array($filasEmergencia)) {
+            $filasEmergencia = [];
+
+            foreach (emergencias() as $emergencia) {
+                $filasEmergencia[] = $emergencia;
+            }
+        }
+
+        // Siempre hay una fila vacía para poder escribir sin usar el boton.
+        $filasEmergencia[] = ['etiqueta' => '', 'telefono' => '', 'nota' => ''];
+        ?>
+
+        <div class="emergencias" data-emergencias>
+            <?php foreach (array_values($filasEmergencia) as $indice => $fila): ?>
+                <div class="emergencias__fila" data-emergencia-fila>
+                    <div class="field">
+                        <label for="emergencia_<?= e((string) $indice) ?>_etiqueta">Central</label>
+                        <input
+                            type="text"
+                            id="emergencia_<?= e((string) $indice) ?>_etiqueta"
+                            name="emergencia_telefonos[<?= e((string) $indice) ?>][etiqueta]"
+                            maxlength="60"
+                            value="<?= e((string) ($fila['etiqueta'] ?? '')) ?>"
+                            placeholder="Bomberos"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label for="emergencia_<?= e((string) $indice) ?>_telefono">Teléfono</label>
+                        <input
+                            type="text"
+                            id="emergencia_<?= e((string) $indice) ?>_telefono"
+                            name="emergencia_telefonos[<?= e((string) $indice) ?>][telefono]"
+                            maxlength="40"
+                            value="<?= e((string) ($fila['telefono'] ?? '')) ?>"
+                            placeholder="116"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label for="emergencia_<?= e((string) $indice) ?>_nota">Nota</label>
+                        <input
+                            type="text"
+                            id="emergencia_<?= e((string) $indice) ?>_nota"
+                            name="emergencia_telefonos[<?= e((string) $indice) ?>][nota]"
+                            maxlength="80"
+                            value="<?= e((string) ($fila['nota'] ?? '')) ?>"
+                            placeholder="Estación central"
+                        >
+                    </div>
+
+                    <button type="button" class="btn btn--ghost btn--sm" data-emergencia-quitar>Quitar</button>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <button type="button" class="btn btn--ghost btn--sm" data-emergencia-agregar>Agregar otro teléfono</button>
+    </fieldset>
+
+    <fieldset class="form__group">
         <legend>Portada del portal</legend>
 
         <div class="form-grid">

@@ -134,10 +134,93 @@
     }
 
     /**
-     * Progressive Web App: registro del service worker y del aviso de instalación.
+     * Filas de telefonos de emergencia en la configuracion.
      *
-     * El service worker solo sirve desde caché archivos estáticos públicos.
-     * El panel administrativo y las páginas HTML nunca se guardan en caché.
+     * Permite agregar y quitar filas. Los indices se renumeran para que el
+     * formulario se envie siempre como una lista ordenada.
+     */
+    function inicializarEmergencias() {
+        var lista = document.querySelector('[data-emergencias]');
+
+        if (!lista) {
+            return;
+        }
+
+        var botonAgregar = document.querySelector('[data-emergencia-agregar]');
+
+        function renumerar() {
+            var filas = lista.querySelectorAll('[data-emergencia-fila]');
+
+            filas.forEach(function (fila, indice) {
+                fila.querySelectorAll('input, label').forEach(function (campo) {
+                    var nombre = campo.getAttribute('name');
+
+                    if (nombre) {
+                        campo.setAttribute('name', nombre.replace(/\[\d+\]/, '[' + indice + ']'));
+                    }
+
+                    var id = campo.getAttribute('id');
+
+                    if (id) {
+                        campo.setAttribute('id', id.replace(/_\d+_/, '_' + indice + '_'));
+                    }
+                });
+            });
+        }
+
+        if (botonAgregar) {
+            botonAgregar.addEventListener('click', function () {
+                var filas = lista.querySelectorAll('[data-emergencia-fila]');
+
+                if (!filas.length) {
+                    return;
+                }
+
+                var ultima = filas[filas.length - 1];
+                var nueva = ultima.cloneNode(true);
+
+                nueva.querySelectorAll('input').forEach(function (campo) {
+                    campo.value = '';
+                });
+
+                ultima.parentNode.insertBefore(nueva, ultima.nextSibling);
+                renumerar();
+            });
+        }
+
+        lista.addEventListener('click', function (evento) {
+            var boton = evento.target.closest('[data-emergencia-quitar]');
+
+            if (!boton) {
+                return;
+            }
+
+            var fila = boton.closest('[data-emergencia-fila]');
+
+            if (!fila) {
+                return;
+            }
+
+            var filas = lista.querySelectorAll('[data-emergencia-fila]');
+
+            // Siempre queda al menos una fila para poder escribir.
+            if (filas.length > 1) {
+                fila.remove();
+                renumerar();
+                return;
+            }
+
+            fila.querySelectorAll('input').forEach(function (campo) {
+                campo.value = '';
+            });
+        });
+    }
+
+    /**
+     * Progressive Web App: registro del service worker y del aviso de instalacion.
+     *
+     * El service worker solo sirve desde cache archivos estaticos publicos.
+     * El panel administrativo y las paginas HTML nunca se guardan en cache.
      */
     var avisoInstalacion = null;
 
@@ -389,6 +472,7 @@
         inicializarConfirmaciones();
         inicializarBusquedaEnTablas();
         inicializarAlertasCerrables();
+        inicializarEmergencias();
         inicializarCarruseles();
         inicializarAvisoInstalacion();
         inicializarPosicionDesplazamiento();
