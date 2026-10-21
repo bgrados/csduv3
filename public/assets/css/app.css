@@ -832,9 +832,8 @@ code {
    Teléfonos de emergencia (portada y configuración).
    -------------------------------------------------------------------------- */
 
-.recuadro--emergencia {
-    border-color: var(--color-danger, #b3261e);
-}
+/* El módulo usa el mismo estilo que los demás recuadros de la columna:
+   misma franja verde arriba, mismo fondo y mismo título. */
 
 .emergencias-lista {
     list-style: none;
@@ -868,7 +867,7 @@ code {
 }
 
 .emergencias-lista__item a:hover .emergencias-lista__telefono {
-    color: var(--color-danger, #b3261e);
+    color: var(--brand-green);
 }
 
 .emergencias-lista__etiqueta {
@@ -880,7 +879,7 @@ code {
     font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
     font-size: .95rem;
     font-weight: 700;
-    color: var(--color-danger, #b3261e);
+    color: var(--color-primary-dark);
     white-space: nowrap;
 }
 

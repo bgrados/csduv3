@@ -347,7 +347,7 @@ $categoriasNegocio = [
 
             <?php $telefonosEmergencia = emergencias(); ?>
             <?php if ($telefonosEmergencia !== []): ?>
-                <section class="recuadro recuadro--emergencia">
+                <section class="recuadro">
                     <h2 class="recuadro__titulo">Teléfonos de emergencia</h2>
                     <ul class="emergencias-lista">
                         <?php foreach ($telefonosEmergencia as $emergencia): ?>
